@@ -1,8 +1,35 @@
 import axios from "axios";
 import { getStoredAccessToken, setStoredAccessToken } from "@/lib/session-store";
 
+const normalizeApiBaseUrl = (url) => (url || "").replace(/\/$/, "");
+
+export const getApiBaseUrl = () => {
+  const apiBaseUrl = normalizeApiBaseUrl(process.env.NEXT_PUBLIC_API_URL);
+
+  if (!apiBaseUrl) {
+    console.warn("[api] Missing NEXT_PUBLIC_API_URL. Define it in your environment configuration.");
+    throw new Error("Missing NEXT_PUBLIC_API_URL environment variable.");
+  }
+
+  return apiBaseUrl;
+};
+
+export const toAbsoluteApiUrl = (path = "") => {
+  if (!path) {
+    return null;
+  }
+
+  if (/^https?:\/\//i.test(path)) {
+    return path;
+  }
+
+  const sanitizedPath = path.startsWith("/") ? path : `/${path}`;
+  const apiOrigin = new URL(getApiBaseUrl()).origin;
+  return `${apiOrigin}${sanitizedPath}`;
+};
+
 const api = axios.create({
-  baseURL: process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:5000/api/v1",
+  baseURL: getApiBaseUrl(),
   withCredentials: true,
   headers: {
     "Content-Type": "application/json"

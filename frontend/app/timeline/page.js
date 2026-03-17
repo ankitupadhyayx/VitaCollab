@@ -9,6 +9,7 @@ import { RecordCard } from "@/components/records/record-card";
 import { EmptyState } from "@/components/ui/empty-state";
 import { Loader } from "@/components/ui/loader";
 import { useToast } from "@/hooks/use-toast";
+import { toAbsoluteApiUrl } from "@/services/api";
 import { decideRecord, fetchMyTimeline } from "@/services/record.service";
 
 export default function TimelinePage() {
@@ -56,7 +57,7 @@ export default function TimelinePage() {
         hospital: item.hospitalName,
         description: item.description,
         fileName: (item.fileUrl || item.filePath || "medical-file").split("/").pop(),
-        fileLink: item.fileUrl || (item.filePath ? `http://localhost:5000/${item.filePath}` : null),
+        fileLink: item.fileUrl || toAbsoluteApiUrl(item.filePath),
         category: item.fileMimeType || "record",
         status: item.status,
         reason: item.rejectionReason

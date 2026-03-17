@@ -14,7 +14,7 @@ Create backend env file from the template:
 
 Create frontend env file from the template:
 - Copy frontend/.env.local.example to frontend/.env.local
-- Set NEXT_PUBLIC_API_BASE_URL (for local: http://localhost:5000/api/v1)
+- Set NEXT_PUBLIC_API_URL (for local: http://localhost:5000/api/v1)
 
 ## 3. Local Production Build Validation
 Backend:
