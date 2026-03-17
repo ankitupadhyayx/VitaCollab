@@ -1,0 +1,19 @@
+:root {
+  --background: 190 43% 97%;
+  --foreground: 203 35% 17%;
+  --card: 0 0% 100%;
+  --card-foreground: 203 35% 17%;
+  --muted: 193 31% 93%;
+  --muted-foreground: 203 22% 37%;
+  --border: 196 27% 85%;
+  --primary: 212 84% 47%;
+  --primary-foreground: 210 40% 98%;
+  --accent: 40 96% 51%;
+  --accent-foreground: 203 35% 17%;
+  --success: 154 61% 40%;
+  --success-foreground: 158 100% 97%;
+  --warning: 31 95% 52%;
+  --warning-foreground: 28 73% 17%;
+  --danger: 0 75% 52%;
+  --danger-foreground: 0 100% 98%;
+}
