@@ -13,12 +13,24 @@ const { notFoundHandler, errorHandler } = require("./middleware/error.middleware
 const env = require("./utils/env");
 
 const app = express();
+const allowedOrigins = new Set([
+  "https://vitacollab.in",
+  "https://www.vitacollab.in",
+  "http://localhost:3000"
+]);
 
 app.disable("x-powered-by");
 app.use(helmet());
 app.use(
   cors({
-    origin: env.clientUrl,
+    origin: (origin, callback) => {
+      if (!origin || allowedOrigins.has(origin)) {
+        callback(null, true);
+        return;
+      }
+
+      callback(new Error("CORS origin not allowed"));
+    },
     credentials: true
   })
 );
