@@ -3,9 +3,12 @@ import { Instagram, ShieldCheck } from "lucide-react";
 
 const navLinks = [
   { href: "/", label: "Home" },
+  { href: "/about", label: "About" },
+  { href: "/features", label: "Features" },
+  { href: "/blog", label: "Blog" },
+  { href: "/contact", label: "Contact" },
   { href: "/signup", label: "Signup" },
-  { href: "/login", label: "Login" },
-  { href: "/dashboard", label: "Dashboard" }
+  { href: "/login", label: "Login" }
 ];
 
 const socialLinks = [

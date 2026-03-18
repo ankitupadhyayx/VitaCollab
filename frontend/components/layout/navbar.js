@@ -21,6 +21,13 @@ export function Navbar() {
     setMobileOpen(false);
   };
 
+  const marketingLinks = [
+    { href: "/about", label: "About" },
+    { href: "/features", label: "Features" },
+    { href: "/blog", label: "Blog" },
+    { href: "/contact", label: "Contact" }
+  ];
+
   const links = [
     { href: "/dashboard", label: "Dashboard" },
     { href: "/timeline", label: "Timeline" },
@@ -49,6 +56,11 @@ export function Navbar() {
         </Link>
 
         <nav className="hidden items-center gap-1 md:flex">
+          {marketingLinks.map((link) => (
+            <Link key={link.href} href={link.href} className="rounded-lg px-3 py-2 text-sm text-muted-foreground hover:bg-muted hover:text-foreground">
+              {link.label}
+            </Link>
+          ))}
           {visibleLinks.map((link) => (
             <Link key={link.href} href={link.href} className="rounded-lg px-3 py-2 text-sm text-muted-foreground hover:bg-muted hover:text-foreground">
               {link.label}
@@ -77,6 +89,16 @@ export function Navbar() {
       {mobileOpen ? (
         <div className="border-t border-border/70 bg-background p-3 md:hidden">
           <nav className="space-y-1">
+            {marketingLinks.map((link) => (
+              <Link
+                key={link.href}
+                href={link.href}
+                className="block rounded-lg px-3 py-2 text-sm text-muted-foreground hover:bg-muted hover:text-foreground"
+                onClick={() => setMobileOpen(false)}
+              >
+                {link.label}
+              </Link>
+            ))}
             {visibleLinks.map((link) => (
               <Link
                 key={link.href}

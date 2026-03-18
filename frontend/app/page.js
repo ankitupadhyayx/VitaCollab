@@ -54,6 +54,12 @@ export default function LandingPage() {
                   <ArrowRight className="ml-2 h-4 w-4" />
                 </Button>
               </Link>
+              <Link href="/features">
+                <Button variant="secondary" size="lg">Explore Features</Button>
+              </Link>
+              <Link href="/blog">
+                <Button variant="ghost" size="lg">Read Blog</Button>
+              </Link>
               <Link href="/dashboard">
                 <Button variant="secondary" size="lg">View Product</Button>
               </Link>
