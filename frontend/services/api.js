@@ -1,7 +1,21 @@
 import axios from "axios";
 import { getStoredAccessToken, setStoredAccessToken } from "@/lib/session-store";
 
-const normalizeApiBaseUrl = (url) => (url || "").replace(/\/$/, "");
+const API_VERSION_PREFIX = "/api/v1";
+
+const normalizeApiBaseUrl = (url) => (url || "").trim().replace(/\/+$/, "");
+
+const ensureVersionedApiBaseUrl = (url) => {
+  if (url.endsWith(API_VERSION_PREFIX)) {
+    return url;
+  }
+
+  const withVersion = `${url}${API_VERSION_PREFIX}`;
+  console.warn(`[api] NEXT_PUBLIC_API_URL should include ${API_VERSION_PREFIX}. Using ${withVersion} instead.`);
+  return withVersion;
+};
+
+console.log("API BASE URL:", process.env.NEXT_PUBLIC_API_URL);
 
 export const getApiBaseUrl = () => {
   const apiBaseUrl = normalizeApiBaseUrl(process.env.NEXT_PUBLIC_API_URL);
@@ -11,7 +25,7 @@ export const getApiBaseUrl = () => {
     throw new Error("Missing NEXT_PUBLIC_API_URL environment variable.");
   }
 
-  return apiBaseUrl;
+  return ensureVersionedApiBaseUrl(apiBaseUrl);
 };
 
 export const toAbsoluteApiUrl = (path = "") => {
