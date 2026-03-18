@@ -54,6 +54,7 @@ export function Footer() {
           <h3 className="text-sm font-semibold uppercase tracking-wide text-foreground">Contact</h3>
           <div className="space-y-2 text-sm text-muted-foreground">
             <p>Email: ankitupadhyayx@gmail.com</p>
+            <p>Email: kumarpukar735@gmail.com</p>
             <p>Phone: 8938076782</p>
             <p>Hospital Verification: Contact us for onboarding</p>
           </div>
