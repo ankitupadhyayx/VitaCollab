@@ -1,0 +1,11 @@
+<svg width="512" height="512" viewBox="0 0 80 80" xmlns="http://www.w3.org/2000/svg">
+  <!-- VitaCollab favicon — Final launch version -->
+  <!-- Navy background -->
+  <rect width="80" height="80" fill="#0D2137"/>
+  <!-- Emerald quarter-arc (top-right origin) -->
+  <path d="M80 0 A80 80 0 0 0 0 80 L80 80 Z" fill="#00C08B"/>
+  <!-- Cream V negative space -->
+  <polygon points="10,71 40,27 70,71" fill="#F7F5F0"/>
+  <!-- Emerald apex dot -->
+  <circle cx="40" cy="27" r="7" fill="#00C08B"/>
+</svg>
