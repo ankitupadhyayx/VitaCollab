@@ -1,6 +1,14 @@
 import Link from "next/link";
 import { ArrowRight, CheckCircle2, HeartPulse, LockKeyhole, Orbit } from "lucide-react";
 import { Navbar } from "@/components/layout/navbar";
+import { Footer } from "@/components/layout/footer";
+import {
+  FinalCtaSection,
+  HospitalsSection,
+  PatientsSection,
+  TestimonialsSection,
+  TrustSecuritySection
+} from "@/components/landing/sections";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 
@@ -33,17 +41,19 @@ export default function LandingPage() {
             <p className="inline-flex rounded-full border border-primary/35 bg-primary/10 px-3 py-1 text-xs font-semibold uppercase tracking-[0.16em] text-primary">
               Patient-owned digital health records
             </p>
-            <h1 className="text-4xl font-bold leading-tight tracking-tight sm:text-5xl" style={{ fontFamily: "var(--font-heading)" }}>
+            <h1 className="heading-font text-4xl font-bold leading-tight tracking-tight sm:text-5xl">
               Secure healthcare collaboration without losing patient trust
             </h1>
-            <p className="max-w-xl text-base leading-relaxed text-muted-foreground" style={{ fontFamily: "var(--font-body)" }}>
+            <p className="body-font max-w-xl text-base leading-relaxed text-muted-foreground">
               VitaCollab unifies hospitals, clinicians, and patients around a verified, consent-driven medical timeline built for privacy-first care delivery.
             </p>
             <div className="flex flex-wrap items-center gap-3">
-              <Button size="lg" className="animate-pulseGlow">
-                Start Free Pilot
-                <ArrowRight className="ml-2 h-4 w-4" />
-              </Button>
+              <Link href="/signup">
+                <Button size="lg" className="animate-pulseGlow">
+                  Start Free Pilot
+                  <ArrowRight className="ml-2 h-4 w-4" />
+                </Button>
+              </Link>
               <Link href="/dashboard">
                 <Button variant="secondary" size="lg">View Product</Button>
               </Link>
@@ -74,7 +84,7 @@ export default function LandingPage() {
           {features.map((feature) => {
             const Icon = feature.icon;
             return (
-              <Card key={feature.title} className="animate-rise">
+              <Card key={feature.title} className="animate-rise transition-transform duration-300 hover:-translate-y-1">
                 <CardHeader>
                   <span className="grid h-10 w-10 place-items-center rounded-xl bg-primary/10 text-primary">
                     <Icon className="h-5 w-5" />
@@ -88,7 +98,15 @@ export default function LandingPage() {
             );
           })}
         </section>
+
+        <TrustSecuritySection />
+        <HospitalsSection />
+        <PatientsSection />
+        <TestimonialsSection />
+        <FinalCtaSection />
       </main>
+
+      <Footer />
     </div>
   );
 }
