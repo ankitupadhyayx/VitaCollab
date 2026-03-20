@@ -81,11 +81,20 @@ export function Footer() {
               Owner: <a href="mailto:ankitupadhyay@vitacollab.in?subject=Direct Contact - VitaCollab" className="font-medium text-foreground transition-colors hover:text-primary">ankitupadhyay@vitacollab.in</a>
             </p>
             <p>
-              Phone: <a href="tel:+918938076782" className="font-medium text-foreground transition-colors hover:text-primary">+91 8938076782</a>
-            </p>
-            <p>
-              Phone: <a href="tel:+919334134617" className="font-medium text-foreground transition-colors hover:text-primary">+91 9334134617</a>
-            </p>
+  WhatsApp:{" "}
+  <a
+    href="https://wa.me/918938076782"
+    target="_blank" className="font-medium text-foreground transition-colors hover:text-primary"> Chat on WhatsApp
+  </a>
+</p>
+<p>
+  WhatsApp:{" "}
+  <a
+    href="https://wa.me/919334134617"
+    target="_blank" className="font-medium text-foreground transition-colors hover:text-primary"> Chat on WhatsApp
+  </a>
+</p>
+            
             <p className="pt-1 text-xs text-muted-foreground">We typically respond within 24 hours.</p>
             <p className="text-xs text-muted-foreground">Hospital verification and onboarding support available.</p>
           </div>
@@ -103,8 +112,13 @@ export function Footer() {
                 Owner: <a href="mailto:ankitupadhyay@vitacollab.in?subject=Direct Contact - VitaCollab" className="font-medium text-foreground transition-colors hover:text-primary">ankitupadhyay@vitacollab.in</a>
               </p>
               <p>
-                Phone: <a href="tel:+918938076782" className="font-medium text-foreground transition-colors hover:text-primary">+91 8938076782</a>
-              </p>
+  WhatsApp:{" "}
+  <a
+    href="https://wa.me/918938076782"
+    target="_blank" className="font-medium text-foreground transition-colors hover:text-primary"> Chat on WhatsApp
+  </a>
+</p>
+<p></p>
             </div>
           </details>
 

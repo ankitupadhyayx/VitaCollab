@@ -35,11 +35,11 @@ export default function ContactPage() {
           <CardHeader>
             <CardTitle>Send a message</CardTitle>
             <CardDescription>
-              You can also email us directly at <Link className="font-semibold text-primary" href="mailto:ankitupadhyayx@gmail.com">ankitupadhyayx@gmail.com</Link>
+              You can also email us directly at <Link className="font-semibold text-primary" href="mailto:ankitupadhyay@vitacollab.in">ankitupadhyay@vitacollab.in</Link>
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <form action="mailto:ankitupadhyayx@gmail.com" method="post" encType="text/plain" className="space-y-4">
+            <form action="mailto:ankitupadhyay@vitacollab.in" method="post" encType="text/plain" className="space-y-4">
               <Input name="name" placeholder="Your name" required />
               <Input type="email" name="email" placeholder="Your email" required />
               <Textarea name="message" placeholder="Write your message" rows={6} required />

@@ -104,17 +104,12 @@ export function HospitalsSection() {
               </div>
             </div>
           </div>
-          <div className="space-y-2">
-            <Button asChild size="lg" className="w-full md:w-auto">
-              <a href="mailto:support@vitacollab.in?subject=Hospital%20Verification%20Request">
-                Request Hospital Verification
-                <ArrowRight className="ml-2 h-4 w-4" />
-              </a>
+          <Link href="mailto:ankitupadhyay@vitacollab.in?subject=Hospital%20Verification%20Request">
+            <Button size="lg" className="w-full md:w-auto">
+              Request Hospital Verification
+              <ArrowRight className="ml-2 h-4 w-4" />
             </Button>
-            <p className="text-xs text-muted-foreground md:text-right">
-              Need urgent onboarding? <a href="mailto:support@vitacollab.in" className="font-medium text-foreground hover:text-primary">support@vitacollab.in</a>
-            </p>
-          </div>
+          </Link>
         </CardContent>
       </Card>
     </SectionShell>
@@ -159,19 +154,19 @@ export function TestimonialsSection() {
   const testimonials = [
     {
       name: "Dr. Aditi Sharma",
-      role: "Consultant Physician, Delhi",
+      role: "Consultant Physician, Jaitpur kalan",
       feedback: "The approval workflow has reduced callback delays and gives our team high confidence in record authenticity.",
       icon: Stethoscope
     },
     {
       name: "Rohit Verma",
-      role: "Patient, Lucknow",
+      role: "Patient, Ghaziabad",
       feedback: "I can see every update and approve sharing instantly. It finally feels like my records belong to me.",
       icon: UserRound
     },
     {
       name: "Dr. Neha Iyer",
-      role: "Cardiology Specialist, Bengaluru",
+      role: "Cardiology Specialist, Noida",
       feedback: "Cross-hospital collaboration is faster and much cleaner, especially when urgent treatment history is needed.",
       icon: Stethoscope
     }
