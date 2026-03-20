@@ -1,14 +1,24 @@
-const logger = require("./logger");
+const { Resend } = require("resend");
 
 const sendEmail = async ({ to, subject, html }) => {
-  // Placeholder for SMTP or provider integration (SES/SendGrid/Postmark).
-  // This keeps auth flows production-structured while remaining environment-agnostic.
-  logger.info("Email dispatch requested", {
-    to,
+  const apiKey = process.env.RESEND_API_KEY;
+
+  if (!apiKey) {
+    throw new Error("Missing RESEND_API_KEY environment variable");
+  }
+
+  const resend = new Resend(apiKey);
+
+  const { error } = await resend.emails.send({
+    from: "VitaCollab <contact@vitacollab.in>",
+    to: [to],
     subject,
-    previewOnly: true,
-    htmlLength: html?.length || 0
+    html
   });
+
+  if (error) {
+    throw new Error(error.message || "Unable to send email with Resend");
+  }
 
   return { queued: true };
 };

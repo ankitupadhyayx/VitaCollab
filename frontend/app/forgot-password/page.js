@@ -6,7 +6,6 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
-import { forgotPassword } from "@/services/auth.service";
 
 export default function ForgotPasswordPage() {
   const [email, setEmail] = useState("");
@@ -17,15 +16,27 @@ export default function ForgotPasswordPage() {
     event.preventDefault();
     try {
       setSubmitting(true);
-      const response = await forgotPassword(email);
-      const tokenPreview = response?.data?.resetPreviewToken;
-      toast.success(
-        tokenPreview
-          ? `Reset token (dev): ${tokenPreview.slice(0, 12)}...`
-          : "If the email exists, reset instructions were sent."
-      );
+      const response = await fetch("/api/auth/forgot-password", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({ email: email.trim() })
+      });
+
+      const data = await response.json().catch(() => ({}));
+
+      if (!response.ok) {
+        throw new Error(data?.message || "Unable to process request");
+      }
+
+      toast.success(data?.message || "Password reset link sent");
     } catch (error) {
-      toast.error(error?.response?.data?.message || "Unable to process request");
+      if (error?.message?.toLowerCase().includes("user not found")) {
+        toast.error("User not found");
+      } else {
+        toast.error(error?.message || "Unable to process request");
+      }
     } finally {
       setSubmitting(false);
     }

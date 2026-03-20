@@ -11,6 +11,54 @@ const apiLimiter = rateLimit({
   }
 });
 
+const loginLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 15,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: {
+    success: false,
+    message: "Too many login attempts. Please try again later."
+  }
+});
+
+const forgotPasswordLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 8,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: {
+    success: false,
+    message: "Too many reset requests. Please try again later."
+  }
+});
+
+const resendVerificationLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 8,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: {
+    success: false,
+    message: "Too many verification requests. Please try again later."
+  }
+});
+
+const resetPasswordLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 12,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: {
+    success: false,
+    message: "Too many password reset attempts. Please try again later."
+  }
+});
+
 module.exports = {
-  apiLimiter
+  apiLimiter,
+  loginLimiter,
+  forgotPasswordLimiter,
+  resendVerificationLimiter,
+  resetPasswordLimiter
 };

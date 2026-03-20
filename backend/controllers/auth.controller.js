@@ -17,8 +17,56 @@ const { uploadBufferToCloudinary, cloudinaryEnabled } = require("../utils/cloudi
 const env = require("../utils/env");
 const { getRefreshCookieOptions, getClearRefreshCookieOptions } = require("../utils/authCookies");
 
-const verificationTokenTtlMs = 24 * 60 * 60 * 1000;
-const resetTokenTtlMs = 30 * 60 * 1000;
+const verificationTokenTtlMs = 60 * 60 * 1000;
+const resetTokenTtlMs = 15 * 60 * 1000;
+const resendVerificationCooldownMs = Number(process.env.RESEND_VERIFICATION_COOLDOWN_MS) || 60 * 1000;
+
+const buildEmailShell = ({ heading, intro, buttonLabel, actionUrl, expiryNote }) => `
+  <div style="margin:0;padding:0;background-color:#f4f6fb;font-family:Arial,sans-serif;color:#1f2937;">
+    <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="background-color:#f4f6fb;padding:24px 12px;">
+      <tr>
+        <td align="center">
+          <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="max-width:560px;background:#ffffff;border-radius:14px;overflow:hidden;border:1px solid #e5e7eb;">
+            <tr>
+              <td style="padding:28px 22px 14px 22px;">
+                <h1 style="margin:0 0 12px 0;font-size:24px;line-height:1.3;color:#0f172a;">${heading}</h1>
+                <p style="margin:0 0 18px 0;font-size:15px;line-height:1.6;color:#374151;">${intro}</p>
+                <table role="presentation" cellspacing="0" cellpadding="0" style="margin:0 0 14px 0;">
+                  <tr>
+                    <td style="border-radius:10px;background:#0f766e;">
+                      <a href="${actionUrl}" style="display:inline-block;padding:12px 18px;font-size:15px;font-weight:700;color:#ffffff;text-decoration:none;">${buttonLabel}</a>
+                    </td>
+                  </tr>
+                </table>
+                <p style="margin:0 0 10px 0;font-size:14px;color:#6b7280;">If the button does not work, copy and paste this URL into your browser:</p>
+                <p style="margin:0 0 10px 0;word-break:break-all;"><a href="${actionUrl}" style="font-size:13px;color:#0f766e;text-decoration:underline;">${actionUrl}</a></p>
+                <p style="margin:0;font-size:13px;line-height:1.6;color:#6b7280;">${expiryNote}</p>
+              </td>
+            </tr>
+          </table>
+        </td>
+      </tr>
+    </table>
+  </div>
+`;
+
+const buildVerificationEmailHtml = (verifyUrl) =>
+  buildEmailShell({
+    heading: "Verify your VitaCollab account",
+    intro: "Please confirm your email address to activate your account and continue securely.",
+    buttonLabel: "Verify Email",
+    actionUrl: verifyUrl,
+    expiryNote: "This verification link expires in 1 hour."
+  });
+
+const buildResetPasswordEmailHtml = (resetUrl) =>
+  buildEmailShell({
+    heading: "Reset your password",
+    intro: "We received a request to reset your password. Use the secure link below to continue.",
+    buttonLabel: "Reset Password",
+    actionUrl: resetUrl,
+    expiryNote: "This reset link expires in 15 minutes."
+  });
 
 const sanitizeUser = (user) => ({
   id: user._id,
@@ -29,6 +77,7 @@ const sanitizeUser = (user) => ({
   patientProfile: user.patientProfile,
   hospitalProfile: user.hospitalProfile,
   verified: user.verified,
+  isVerified: user.isVerified,
   createdAt: user.createdAt
 });
 
@@ -148,16 +197,18 @@ const register = async (req, res, next) => {
       role: role || "patient",
       profileImageUrl: profileImage.url,
       verified: false,
-      verificationTokenHash: tokenHash,
+      isVerified: false,
+      verificationToken: tokenHash,
       verificationTokenExpiry: new Date(Date.now() + verificationTokenTtlMs),
+      lastVerificationEmailSentAt: new Date(),
       ...profilePatch
     });
 
-    const verifyUrl = `${env.appUrl}/verify-email?token=${token}`;
+    const verifyUrl = `${env.appUrl}/verify?token=${encodeURIComponent(token)}`;
     await sendEmail({
       to: user.email,
       subject: "Verify your VitaCollab account",
-      html: `<p>Click this link to verify your account:</p><p>${verifyUrl}</p>`
+      html: buildVerificationEmailHtml(verifyUrl)
     });
 
     return res.status(StatusCodes.CREATED).json(
@@ -187,9 +238,9 @@ const verifyEmail = async (req, res, next) => {
     const tokenHash = hashToken(token);
 
     const user = await User.findOne({
-      verificationTokenHash: tokenHash,
+      verificationToken: tokenHash,
       verificationTokenExpiry: { $gt: new Date() }
-    }).select("+verificationTokenHash +verificationTokenExpiry");
+    }).select("+verificationToken +verificationTokenExpiry");
 
     if (!user) {
       return res
@@ -198,13 +249,68 @@ const verifyEmail = async (req, res, next) => {
     }
 
     user.verified = true;
-    user.verificationTokenHash = null;
+    user.isVerified = true;
+    user.verificationToken = null;
     user.verificationTokenExpiry = null;
     await user.save();
 
     return res.status(StatusCodes.OK).json(
       successResponse({
         message: "Email verified successfully"
+      })
+    );
+  } catch (error) {
+    return next(error);
+  }
+};
+
+const resendVerification = async (req, res, next) => {
+  try {
+    const { email } = req.body;
+
+    const user = await User.findOne({ email }).select("+verificationToken +verificationTokenExpiry +lastVerificationEmailSentAt");
+    if (!user) {
+      return res.status(StatusCodes.OK).json(
+        successResponse({
+          message: "If that email exists, a verification link has been sent"
+        })
+      );
+    }
+
+    if (user.isVerified === true || user.verified === true) {
+      return res.status(StatusCodes.OK).json(
+        successResponse({
+          message: "Account already verified"
+        })
+      );
+    }
+
+    if (user.lastVerificationEmailSentAt) {
+      const elapsedMs = Date.now() - new Date(user.lastVerificationEmailSentAt).getTime();
+      if (elapsedMs < resendVerificationCooldownMs) {
+        const retryAfterSeconds = Math.ceil((resendVerificationCooldownMs - elapsedMs) / 1000);
+        return res
+          .status(StatusCodes.TOO_MANY_REQUESTS)
+          .json(errorResponse({ message: `Please wait ${retryAfterSeconds}s before requesting another verification email` }));
+      }
+    }
+
+    const { token, tokenHash } = createTokenWithHash();
+    user.verificationToken = tokenHash;
+    user.verificationTokenExpiry = new Date(Date.now() + verificationTokenTtlMs);
+    user.lastVerificationEmailSentAt = new Date();
+    await user.save();
+
+    const verifyUrl = `${env.appUrl}/verify?token=${encodeURIComponent(token)}`;
+    await sendEmail({
+      to: user.email,
+      subject: "Verify your VitaCollab account",
+      html: buildVerificationEmailHtml(verifyUrl)
+    });
+
+    return res.status(StatusCodes.OK).json(
+      successResponse({
+        message: "Verification email sent"
       })
     );
   } catch (error) {
@@ -230,10 +336,12 @@ const login = async (req, res, next) => {
         .json(errorResponse({ message: "Invalid email or password" }));
     }
 
-    if (!user.verified) {
+    const userVerified = user.isVerified === true || user.verified === true;
+
+    if (!userVerified) {
       return res
         .status(StatusCodes.FORBIDDEN)
-        .json(errorResponse({ message: "Please verify your email before login" }));
+        .json(errorResponse({ message: "Please verify your email" }));
     }
 
     const { accessToken, refreshToken, user: safeUser } = buildAuthPayload(user);
@@ -343,7 +451,7 @@ const forgotPassword = async (req, res, next) => {
   try {
     const { email } = req.body;
 
-    const user = await User.findOne({ email }).select("+resetPasswordTokenHash +resetPasswordTokenExpiry");
+    const user = await User.findOne({ email }).select("+resetToken +resetTokenExpiry");
     if (!user) {
       return res.status(StatusCodes.OK).json(
         successResponse({
@@ -353,23 +461,20 @@ const forgotPassword = async (req, res, next) => {
     }
 
     const { token, tokenHash } = createTokenWithHash();
-    user.resetPasswordTokenHash = tokenHash;
-    user.resetPasswordTokenExpiry = new Date(Date.now() + resetTokenTtlMs);
+    user.resetToken = tokenHash;
+    user.resetTokenExpiry = new Date(Date.now() + resetTokenTtlMs);
     await user.save();
 
-    const resetUrl = `${env.appUrl}/reset-password?token=${token}`;
+    const resetUrl = `${env.appUrl}/reset-password?token=${encodeURIComponent(token)}`;
     await sendEmail({
       to: user.email,
-      subject: "Reset your VitaCollab password",
-      html: `<p>Use this link to reset your password:</p><p>${resetUrl}</p>`
+      subject: "Reset your password",
+      html: buildResetPasswordEmailHtml(resetUrl)
     });
 
     return res.status(StatusCodes.OK).json(
       successResponse({
-        message: "If that email exists, a reset link has been sent",
-        data: {
-          resetPreviewToken: env.nodeEnv === "development" ? token : undefined
-        }
+        message: "Password reset link sent"
       })
     );
   } catch (error) {
@@ -383,9 +488,9 @@ const resetPassword = async (req, res, next) => {
     const tokenHash = hashToken(token);
 
     const user = await User.findOne({
-      resetPasswordTokenHash: tokenHash,
-      resetPasswordTokenExpiry: { $gt: new Date() }
-    }).select("+resetPasswordTokenHash +resetPasswordTokenExpiry +password +refreshTokenHash");
+      resetToken: tokenHash,
+      resetTokenExpiry: { $gt: new Date() }
+    }).select("+resetToken +resetTokenExpiry +password +refreshTokenHash");
 
     if (!user) {
       return res
@@ -394,8 +499,8 @@ const resetPassword = async (req, res, next) => {
     }
 
     user.password = await hashPassword(newPassword);
-    user.resetPasswordTokenHash = null;
-    user.resetPasswordTokenExpiry = null;
+    user.resetToken = null;
+    user.resetTokenExpiry = null;
     user.refreshTokenHash = null;
     await user.save();
 
@@ -440,5 +545,6 @@ module.exports = {
   forgotPassword,
   resetPassword,
   verifyEmail,
+  resendVerification,
   getCurrentUser
 };

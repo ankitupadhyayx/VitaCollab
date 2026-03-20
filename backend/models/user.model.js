@@ -62,6 +62,10 @@ const userSchema = new mongoose.Schema(
       type: Boolean,
       default: false
     },
+    isVerified: {
+      type: Boolean,
+      default: false
+    },
     patientProfile: {
       type: patientProfileSchema,
       default: undefined
@@ -70,12 +74,27 @@ const userSchema = new mongoose.Schema(
       type: hospitalProfileSchema,
       default: undefined
     },
-    verificationTokenHash: {
+    verificationToken: {
       type: String,
       default: null,
       select: false
     },
     verificationTokenExpiry: {
+      type: Date,
+      default: null,
+      select: false
+    },
+    lastVerificationEmailSentAt: {
+      type: Date,
+      default: null,
+      select: false
+    },
+    resetToken: {
+      type: String,
+      default: null,
+      select: false
+    },
+    resetTokenExpiry: {
       type: Date,
       default: null,
       select: false

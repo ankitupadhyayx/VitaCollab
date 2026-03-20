@@ -6,7 +6,6 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
-import { resetPassword } from "@/services/auth.service";
 
 export default function ResetPasswordPage() {
   const [token, setToken] = useState("");
@@ -23,13 +22,41 @@ export default function ResetPasswordPage() {
   const onSubmit = async (event) => {
     event.preventDefault();
 
+    if (!token.trim()) {
+      toast.error("Reset token is required");
+      return;
+    }
+
+    if (newPassword.length < 8) {
+      toast.error("Password must be at least 8 characters");
+      return;
+    }
+
     try {
       setSubmitting(true);
-      await resetPassword({ token, newPassword });
+      const response = await fetch("/api/auth/reset-password", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({ token: token.trim(), newPassword })
+      });
+
+      const data = await response.json().catch(() => ({}));
+
+      if (!response.ok) {
+        throw new Error(data?.message || "Unable to reset password");
+      }
+
       toast.success("Password reset successful. You can now sign in.");
       setNewPassword("");
     } catch (error) {
-      toast.error(error?.response?.data?.message || "Unable to reset password");
+      const message = error?.message || "Unable to reset password";
+      if (message.toLowerCase().includes("expired") || message.toLowerCase().includes("invalid")) {
+        toast.error("Token expired");
+      } else {
+        toast.error(message);
+      }
     } finally {
       setSubmitting(false);
     }
