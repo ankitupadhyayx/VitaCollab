@@ -25,8 +25,7 @@ const buttonVariants = cva(
   }
 );
 
-const Button = React.forwardRef(({ className, variant, size, ...props }, ref) => (
-  {
+const Button = React.forwardRef(({ className, variant, size, ...props }, ref) => {
     const [ripples, setRipples] = React.useState([]);
 
     const createRipple = (event) => {
@@ -61,8 +60,7 @@ const Button = React.forwardRef(({ className, variant, size, ...props }, ref) =>
         </span>
       </button>
     );
-  }
-);
+});
 
 Button.displayName = "Button";
 
