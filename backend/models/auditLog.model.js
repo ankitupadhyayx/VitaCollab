@@ -1,4 +1,5 @@
 const mongoose = require("mongoose");
+const { ACTION_TYPES, TARGET_TYPES } = require("../constants/admin-rbac");
 
 const auditLogSchema = new mongoose.Schema(
   {
@@ -8,11 +9,34 @@ const auditLogSchema = new mongoose.Schema(
       required: true,
       index: true
     },
+    performedBy: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+      index: true,
+      default: null
+    },
     action: {
       type: String,
       required: true,
       trim: true,
       maxlength: 300
+    },
+    actionType: {
+      type: String,
+      enum: ACTION_TYPES,
+      default: null,
+      index: true
+    },
+    targetType: {
+      type: String,
+      enum: TARGET_TYPES,
+      default: null,
+      index: true
+    },
+    targetId: {
+      type: String,
+      default: null,
+      trim: true
     },
     metadata: {
       type: mongoose.Schema.Types.Mixed,
@@ -30,6 +54,8 @@ const auditLogSchema = new mongoose.Schema(
 );
 
 auditLogSchema.index({ timestamp: -1 });
+auditLogSchema.index({ actionType: 1, timestamp: -1 });
+auditLogSchema.index({ targetType: 1, targetId: 1, timestamp: -1 });
 
 const AuditLog = mongoose.model("AuditLog", auditLogSchema);
 

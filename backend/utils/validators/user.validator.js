@@ -1,4 +1,5 @@
 const { z } = require("zod");
+const { ADMIN_ROLES } = require("../../constants/admin-rbac");
 
 const qrResolveSchema = z.object({
   token: z.string().min(20)
@@ -49,11 +50,40 @@ const adminBroadcastSchema = z.object({
   message: z.string().min(10).max(600)
 });
 
+const adminCreateSchema = z.object({
+  name: z.string().min(2).max(120),
+  email: z.string().email(),
+  password: z.string().min(8).max(72),
+  adminRole: z.enum(ADMIN_ROLES)
+});
+
+const adminUpdateSchema = z.object({
+  name: z.string().min(2).max(120).optional(),
+  adminRole: z.enum(ADMIN_ROLES).optional(),
+  accountStatus: z.enum(["active", "suspended", "blocked"]).optional()
+});
+
+const adminBulkUserActionSchema = z.object({
+  action: z.enum(["SUSPEND", "ACTIVATE", "BLOCK"]),
+  ids: z.array(z.string().regex(objectIdRegex)).min(1).max(500),
+  reason: z.string().max(300).optional()
+});
+
+const adminExportQuerySchema = z.object({
+  type: z.enum(["users", "records", "activity", "audit"]),
+  mode: z.enum(["current", "filtered", "full"]).default("filtered"),
+  filters: z.string().optional()
+});
+
 module.exports = {
   qrResolveSchema,
   updateProfileSchema,
   adminAuditQuerySchema,
   adminUserQuerySchema,
   adminUpdateUserStatusSchema,
-  adminBroadcastSchema
+  adminBroadcastSchema,
+  adminCreateSchema,
+  adminUpdateSchema,
+  adminBulkUserActionSchema,
+  adminExportQuerySchema
 };

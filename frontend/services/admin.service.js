@@ -30,6 +30,11 @@ export const updateAdminUserStatus = async (id, payload) => {
   return response.data;
 };
 
+export const bulkAdminUsersAction = async (payload) => {
+  const response = await api.post("/users/admin/users/bulk-action", payload);
+  return response.data;
+};
+
 export const fetchPendingHospitals = async () => {
   const response = await api.get("/users/admin/hospitals/pending");
   return response.data;
@@ -50,6 +55,11 @@ export const forceRecordAction = async (id, payload) => {
   return response.data;
 };
 
+export const bulkRecordAction = async (payload) => {
+  const response = await api.post("/records/admin/bulk-action", payload);
+  return response.data;
+};
+
 export const fetchActiveSessions = async () => {
   const response = await api.get("/users/admin/sessions");
   return response.data;
@@ -62,5 +72,33 @@ export const forceLogoutUser = async (id) => {
 
 export const sendAdminBroadcast = async (message) => {
   const response = await api.post("/users/admin/broadcast", { message });
+  return response.data;
+};
+
+export const exportAdminDataset = async (params = {}) => {
+  const response = await api.get("/users/admin/export", {
+    params,
+    responseType: "blob"
+  });
+  return response.data;
+};
+
+export const createAdmin = async (payload) => {
+  const response = await api.post("/users/admin/admins", payload);
+  return response.data;
+};
+
+export const updateAdmin = async (id, payload) => {
+  const response = await api.patch(`/users/admin/admins/${id}`, payload);
+  return response.data;
+};
+
+export const deleteAdmin = async (id) => {
+  const response = await api.delete(`/users/admin/admins/${id}`);
+  return response.data;
+};
+
+export const sendAuditClientLog = async (payload) => {
+  const response = await api.post("/users/admin/activity", payload);
   return response.data;
 };

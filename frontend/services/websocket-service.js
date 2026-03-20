@@ -1,4 +1,5 @@
 import { validateRealtimeEventPayload } from "@/lib/realtime-event-schema";
+import { getStoredAccessToken } from "@/lib/session-store";
 
 const toWebsocketUrl = (apiBaseUrl) => {
   if (!apiBaseUrl) {
@@ -7,9 +8,13 @@ const toWebsocketUrl = (apiBaseUrl) => {
 
   try {
     const parsed = new URL(apiBaseUrl);
+    const token = getStoredAccessToken();
     parsed.protocol = parsed.protocol === "https:" ? "wss:" : "ws:";
     parsed.pathname = "/ws";
     parsed.search = "";
+    if (token) {
+      parsed.searchParams.set("token", token);
+    }
     return parsed.toString();
   } catch {
     return null;

@@ -74,6 +74,7 @@ const sanitizeUser = (user) => ({
   name: user.name,
   email: user.email,
   role: user.role,
+  adminRole: user.adminRole || null,
   profileImageUrl: user.profileImageUrl,
   patientProfile: user.patientProfile,
   hospitalProfile: user.hospitalProfile,
@@ -82,6 +83,7 @@ const sanitizeUser = (user) => ({
   accountStatus: user.accountStatus,
   suspendedUntil: user.suspendedUntil,
   statusReason: user.statusReason,
+  riskMetadata: user.riskMetadata || null,
   createdAt: user.createdAt
 });
 
@@ -335,6 +337,12 @@ const login = async (req, res, next) => {
 
     const isMatch = await comparePassword(password, user.password);
     if (!isMatch) {
+      user.riskMetadata = {
+        ...(user.riskMetadata || {}),
+        failedLoginCount: Number(user.riskMetadata?.failedLoginCount || 0) + 1,
+        lastEvaluatedAt: new Date()
+      };
+      await user.save();
       return res
         .status(StatusCodes.UNAUTHORIZED)
         .json(errorResponse({ message: "Invalid email or password" }));
@@ -370,6 +378,11 @@ const login = async (req, res, next) => {
     const { accessToken, refreshToken, user: safeUser } = buildAuthPayload(user);
     user.refreshTokenHash = hashToken(refreshToken);
     user.lastLoginAt = new Date();
+    user.riskMetadata = {
+      ...(user.riskMetadata || {}),
+      failedLoginCount: 0,
+      lastEvaluatedAt: new Date()
+    };
     await user.save();
 
     await AuditLog.create({

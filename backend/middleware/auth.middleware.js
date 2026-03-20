@@ -61,6 +61,7 @@ const authenticate = async (req, res, next) => {
     req.user = {
       id: user._id.toString(),
       role: user.role,
+      adminRole: user.adminRole || null,
       email: user.email,
       verified: user.verified
     };

@@ -5,6 +5,8 @@ const { User, Notification, AuditLog } = require("../models");
 const { successResponse, errorResponse } = require("../utils/apiResponse");
 const { uploadBufferToCloudinary } = require("../utils/cloudinary");
 const { encryptText, decryptText } = require("../utils/encryption");
+const { logAdminAudit } = require("../services/audit.service");
+const { ADMIN_EVENTS, realtimeBroker } = require("../services/realtime.service");
 
 const isValidObjectId = (value) => mongoose.Types.ObjectId.isValid(value);
 
@@ -451,14 +453,31 @@ const adminForceRecordAction = async (req, res, next) => {
 
     await record.save();
 
-    await AuditLog.create({
-      userId: req.user.id,
+    logAdminAudit({
       action: `admin.record.${action}`,
+      actionType: action === "approved" ? "RECORD_APPROVED" : action === "rejected" ? "RECORD_REJECTED" : "RECORD_FLAGGED",
+      performedBy: req.user.id,
+      targetType: "RECORD",
+      targetId: record._id,
       metadata: {
         recordId: record._id,
         patientId: record.patientId,
         hospitalId: record.hospitalId
       }
+    });
+
+    realtimeBroker.publish(ADMIN_EVENTS.RECORD_UPDATED, {
+      id: record._id.toString(),
+      status: record.status,
+      flaggedSuspicious: record.flaggedSuspicious,
+      updatedAt: new Date().toISOString()
+    });
+
+    realtimeBroker.publish(ADMIN_EVENTS.AUDIT_NEW, {
+      actionType: action === "approved" ? "RECORD_APPROVED" : action === "rejected" ? "RECORD_REJECTED" : "RECORD_FLAGGED",
+      targetType: "RECORD",
+      targetId: record._id.toString(),
+      timestamp: new Date().toISOString()
     });
 
     return res.status(StatusCodes.OK).json(
@@ -474,6 +493,95 @@ const adminForceRecordAction = async (req, res, next) => {
   }
 };
 
+const adminBulkRecordAction = async (req, res, next) => {
+  try {
+    const { action, ids, rejectionReason, flagReason } = req.body;
+    const uniqueIds = [...new Set(ids)];
+
+    const records = await Record.find({ _id: { $in: uniqueIds } }).select("status approvedAt rejectedAt encryptedRejectionReason flaggedSuspicious suspiciousFlagReason suspiciousFlaggedAt suspiciousFlaggedBy patientId hospitalId");
+    const recordMap = new Map(records.map((record) => [record._id.toString(), record]));
+
+    const result = {
+      succeeded: [],
+      failed: []
+    };
+
+    for (const id of uniqueIds) {
+      const record = recordMap.get(id);
+      if (!record) {
+        result.failed.push({ id, reason: "Record not found" });
+        continue;
+      }
+
+      if (action === "APPROVE") {
+        record.status = "approved";
+        record.approvedAt = new Date();
+        record.rejectedAt = null;
+        record.encryptedRejectionReason = null;
+      }
+
+      if (action === "REJECT") {
+        record.status = "rejected";
+        record.rejectedAt = new Date();
+        record.approvedAt = null;
+        record.encryptedRejectionReason = encryptText(rejectionReason);
+      }
+
+      if (action === "FLAG") {
+        record.flaggedSuspicious = true;
+        record.suspiciousFlagReason = flagReason;
+        record.suspiciousFlaggedAt = new Date();
+        record.suspiciousFlaggedBy = req.user.id;
+      }
+
+      await record.save();
+
+      result.succeeded.push({ id, status: record.status, flaggedSuspicious: record.flaggedSuspicious });
+
+      realtimeBroker.publish(ADMIN_EVENTS.RECORD_UPDATED, {
+        id,
+        status: record.status,
+        flaggedSuspicious: record.flaggedSuspicious,
+        updatedAt: new Date().toISOString()
+      });
+    }
+
+    logAdminAudit({
+      action: "admin.record.bulk_action",
+      actionType: "BULK_RECORDS_ACTION",
+      performedBy: req.user.id,
+      targetType: "RECORD",
+      targetId: null,
+      metadata: {
+        action,
+        total: uniqueIds.length,
+        successCount: result.succeeded.length,
+        failureCount: result.failed.length
+      }
+    });
+
+    realtimeBroker.publish(ADMIN_EVENTS.AUDIT_NEW, {
+      actionType: "BULK_RECORDS_ACTION",
+      targetType: "RECORD",
+      targetId: null,
+      timestamp: new Date().toISOString()
+    });
+
+    return res.status(StatusCodes.OK).json(
+      successResponse({
+        message: "Bulk record action executed",
+        data: {
+          action,
+          total: uniqueIds.length,
+          ...result
+        }
+      })
+    );
+  } catch (error) {
+    return next(error);
+  }
+};
+
 module.exports = {
   uploadRecord,
   listRecords,
@@ -481,5 +589,6 @@ module.exports = {
   decideRecord,
   deleteRecord,
   getMyTimeline,
-  adminForceRecordAction
+  adminForceRecordAction,
+  adminBulkRecordAction
 };

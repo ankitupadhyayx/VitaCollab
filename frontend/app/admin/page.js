@@ -38,8 +38,20 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Input } from "@/components/ui/input";
 import { Loader } from "@/components/ui/loader";
 import { Modal } from "@/components/ui/modal";
+import { toActivityExportRow, toAuditExportRow } from "@/features/admin/audit";
+import { toRecordExportRow } from "@/features/admin/records";
+import { toUserExportRow } from "@/features/admin/users";
+import { useAuditLogger } from "@/hooks/use-audit-logger";
+import { useBulkAction } from "@/hooks/use-bulk-action";
+import { useRealtimeEvents } from "@/hooks/use-realtime-events";
+import { useRoleGuard } from "@/hooks/use-role-guard";
 import { useToast } from "@/hooks/use-toast";
 import {
+  bulkAdminUsersAction,
+  bulkRecordAction,
+  createAdmin,
+  deleteAdmin,
+  exportAdminDataset,
   fetchActiveSessions,
   fetchActivityFeed,
   fetchAdminRecords,
@@ -51,6 +63,7 @@ import {
   forceLogoutUser,
   forceRecordAction,
   sendAdminBroadcast,
+  updateAdmin,
   updateAdminUserStatus,
   verifyHospital
 } from "@/services/admin.service";
@@ -100,7 +113,21 @@ const downloadCsv = (fileName, headers, rows) => {
   URL.revokeObjectURL(url);
 };
 
+const downloadBlob = (fileName, blob) => {
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement("a");
+  link.href = url;
+  link.download = fileName;
+  link.click();
+  URL.revokeObjectURL(url);
+};
+
 export default function AdminPage() {
+  const roleGuard = useRoleGuard();
+  const usersBulk = useBulkAction();
+  const recordsBulk = useBulkAction();
+  const { logAction } = useAuditLogger();
+
   const [activeSection, setActiveSection] = useState("overview");
   const [stats, setStats] = useState(null);
   const [charts, setCharts] = useState({ dailyActivity: [], growthTrend: [] });
@@ -120,6 +147,7 @@ export default function AdminPage() {
   const [auditFilter, setAuditFilter] = useState({ user: "", action: "", startDate: "", endDate: "" });
 
   const [broadcastMessage, setBroadcastMessage] = useState("");
+  const [adminForm, setAdminForm] = useState({ name: "", email: "", password: "", adminRole: "ADMIN" });
   const [confirm, setConfirm] = useState(emptyConfirm);
   const [confirmReason, setConfirmReason] = useState("");
 
@@ -265,6 +293,42 @@ export default function AdminPage() {
     loadAll();
   }, []);
 
+  const realtimeConfigs = useMemo(
+    () => [
+      {
+        eventName: "admin:user:updated",
+        onEvent: () => {
+          loadUsers();
+          loadSessions();
+        }
+      },
+      {
+        eventName: "admin:record:updated",
+        onEvent: () => {
+          loadRecords();
+        }
+      },
+      {
+        eventName: "admin:audit:new",
+        onEvent: () => {
+          loadAudit();
+          loadActivity();
+        }
+      }
+    ],
+    [usersFilter, recordsFilter, activityFilter, auditFilter, recordsPage, recordsPageSize]
+  );
+
+  useRealtimeEvents(realtimeConfigs);
+
+  useEffect(() => {
+    usersBulk.clear();
+  }, [users]);
+
+  useEffect(() => {
+    recordsBulk.clear();
+  }, [records]);
+
   const usersTotalPages = Math.max(1, Math.ceil(users.length / usersPageSize));
   const activityTotalPages = Math.max(1, Math.ceil(activity.length / activityPageSize));
   const auditTotalPages = Math.max(1, Math.ceil(logs.length / auditPageSize));
@@ -396,9 +460,61 @@ export default function AdminPage() {
         toast.success("Broadcast sent system-wide");
         await Promise.all([loadAudit(), loadActivity()]);
       }
+
+      if (confirm.type === "bulk-users") {
+        usersBulk.setInProgress(true);
+        const response = await bulkAdminUsersAction({
+          action: confirm.payload.action,
+          ids: confirm.payload.ids,
+          reason: confirmReason || undefined
+        });
+        const succeeded = response?.data?.succeeded?.length || 0;
+        const failed = response?.data?.failed?.length || 0;
+        toast.success(`Bulk users action completed: ${succeeded} succeeded, ${failed} failed`);
+        usersBulk.clear();
+        await Promise.all([loadUsers(), loadStats(), loadAudit(), loadActivity()]);
+      }
+
+      if (confirm.type === "bulk-records") {
+        recordsBulk.setInProgress(true);
+        const response = await bulkRecordAction({
+          action: confirm.payload.action,
+          ids: confirm.payload.ids,
+          ...(confirm.payload.action === "REJECT" ? { rejectionReason: confirmReason || "Bulk rejected by admin" } : {}),
+          ...(confirm.payload.action === "FLAG" ? { flagReason: confirmReason || "Bulk flagged by admin" } : {})
+        });
+        const succeeded = response?.data?.succeeded?.length || 0;
+        const failed = response?.data?.failed?.length || 0;
+        toast.success(`Bulk records action completed: ${succeeded} succeeded, ${failed} failed`);
+        recordsBulk.clear();
+        await Promise.all([loadRecords(), loadStats(), loadAudit(), loadActivity(), loadSessions()]);
+      }
+
+      if (confirm.type === "admin-create") {
+        await createAdmin(confirm.payload);
+        setAdminForm({ name: "", email: "", password: "", adminRole: "ADMIN" });
+        toast.success("Admin created");
+        await Promise.all([loadUsers(), loadAudit(), loadActivity()]);
+      }
+
+      if (confirm.type === "admin-update") {
+        await updateAdmin(confirm.payload.id, confirm.payload.data);
+        toast.success("Admin updated");
+        await Promise.all([loadUsers(), loadAudit(), loadActivity()]);
+      }
+
+      if (confirm.type === "admin-delete") {
+        await deleteAdmin(confirm.payload.id);
+        toast.success("Admin deleted");
+        await Promise.all([loadUsers(), loadAudit(), loadActivity()]);
+      }
+
+      await logAction({ type: confirm.type, payload: confirm.payload, at: new Date().toISOString() });
     } catch (error) {
       toast.error(error?.response?.data?.message || "Action failed");
     } finally {
+      usersBulk.setInProgress(false);
+      recordsBulk.setInProgress(false);
       setActionLoading("");
       setConfirm(emptyConfirm);
       setConfirmReason("");
@@ -595,6 +711,36 @@ export default function AdminPage() {
                   <CardDescription>Search, filter, inspect, suspend, and block users.</CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4">
+                  <div className="rounded-2xl border border-border/70 bg-background/60 p-3">
+                    <p className="text-sm font-semibold">Admin Management</p>
+                    <p className="mb-3 text-xs text-muted-foreground">Only SUPER_ADMIN can create, update, or delete admins.</p>
+                    <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-5">
+                      <Input placeholder="Admin name" value={adminForm.name} onChange={(event) => setAdminForm((prev) => ({ ...prev, name: event.target.value }))} />
+                      <Input placeholder="Admin email" value={adminForm.email} onChange={(event) => setAdminForm((prev) => ({ ...prev, email: event.target.value }))} />
+                      <Input type="password" placeholder="Temporary password" value={adminForm.password} onChange={(event) => setAdminForm((prev) => ({ ...prev, password: event.target.value }))} />
+                      <select className="h-10 rounded-xl border border-border bg-background px-3 text-sm" value={adminForm.adminRole} onChange={(event) => setAdminForm((prev) => ({ ...prev, adminRole: event.target.value }))}>
+                        <option value="ADMIN">ADMIN</option>
+                        <option value="MODERATOR">MODERATOR</option>
+                      </select>
+                      <Button
+                        title={!roleGuard.can("MANAGE_ADMINS") ? "Insufficient permissions" : "Create admin"}
+                        disabled={!roleGuard.can("MANAGE_ADMINS") || !adminForm.name || !adminForm.email || adminForm.password.length < 8}
+                        onClick={() =>
+                          openConfirm({
+                            type: "admin-create",
+                            payload: adminForm,
+                            title: "Create admin",
+                            description: `Create ${adminForm.adminRole} admin ${adminForm.email}?`,
+                            confirmLabel: "Create",
+                            danger: false
+                          })
+                        }
+                      >
+                        Create Admin
+                      </Button>
+                    </div>
+                  </div>
+
                   <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-5">
                     <div className="relative lg:col-span-2">
                       <Input
@@ -651,27 +797,127 @@ export default function AdminPage() {
                         ))}
                       </select>
                     </div>
+                    <div className="flex flex-wrap items-center gap-2">
+                      <Button
+                        variant="secondary"
+                        size="sm"
+                        title={!roleGuard.can("EXPORT") ? "Insufficient permissions" : "Export current page"}
+                        disabled={!roleGuard.can("EXPORT")}
+                        onClick={() =>
+                          downloadCsv(
+                            "admin-users-current.csv",
+                            [
+                              { key: "name", label: "Name" },
+                              { key: "email", label: "Email" },
+                              { key: "role", label: "Role" },
+                              { key: "accountStatus", label: "Status" },
+                              { key: "lastLoginAt", label: "Last Login" }
+                            ],
+                            pagedUsers.map(toUserExportRow)
+                          )
+                        }
+                      >
+                        Export Current
+                      </Button>
+                      <Button
+                        variant="secondary"
+                        size="sm"
+                        title={!roleGuard.can("EXPORT") ? "Insufficient permissions" : "Export filtered dataset"}
+                        disabled={!roleGuard.can("EXPORT")}
+                        onClick={() =>
+                          downloadCsv(
+                            "admin-users-filtered.csv",
+                            [
+                              { key: "name", label: "Name" },
+                              { key: "email", label: "Email" },
+                              { key: "role", label: "Role" },
+                              { key: "accountStatus", label: "Status" },
+                              { key: "lastLoginAt", label: "Last Login" }
+                            ],
+                            users.map(toUserExportRow)
+                          )
+                        }
+                      >
+                        Export Filtered
+                      </Button>
+                      <Button
+                        variant="secondary"
+                        size="sm"
+                        title={!roleGuard.can("EXPORT") ? "Insufficient permissions" : "Export full dataset from server"}
+                        disabled={!roleGuard.can("EXPORT")}
+                        onClick={async () => {
+                          const blob = await exportAdminDataset({ type: "users", mode: "full" });
+                          downloadBlob("admin-users-full.csv", blob);
+                        }}
+                      >
+                        Export Full
+                      </Button>
+                    </div>
+                  </div>
+
+                  <div className="flex flex-wrap items-center gap-2 rounded-xl border border-border/70 bg-background/60 p-2">
+                    <label className="inline-flex items-center gap-2 text-sm">
+                      <input
+                        type="checkbox"
+                        checked={pagedUsers.length > 0 && pagedUsers.every((user) => usersBulk.selectedIds.includes(user.id))}
+                        onChange={() => usersBulk.togglePage(pagedUsers.map((user) => user.id))}
+                      />
+                      Select page
+                    </label>
+                    <Button size="sm" variant="secondary" onClick={() => usersBulk.selectAllAcrossPages(users.map((user) => user.id))}>Select all filtered</Button>
+                    <span className="text-xs text-muted-foreground">Selected: {usersBulk.selectedCount}</span>
                     <Button
-                      variant="secondary"
                       size="sm"
+                      variant="secondary"
+                      title={!roleGuard.can("BULK_USERS") ? "Insufficient permissions" : "Bulk suspend selected users"}
+                      disabled={!roleGuard.can("BULK_USERS") || !usersBulk.selectedCount || usersBulk.inProgress}
                       onClick={() =>
-                        downloadCsv(
-                          "admin-users.csv",
-                          [
-                            { key: "name", label: "Name" },
-                            { key: "email", label: "Email" },
-                            { key: "role", label: "Role" },
-                            { key: "accountStatus", label: "Status" },
-                            { key: "lastLoginAt", label: "Last Login" }
-                          ],
-                          users.map((user) => ({
-                            ...user,
-                            lastLoginAt: user.lastLoginAt ? new Date(user.lastLoginAt).toISOString() : ""
-                          }))
-                        )
+                        openConfirm({
+                          type: "bulk-users",
+                          payload: { action: "SUSPEND", ids: usersBulk.selectedIds },
+                          title: "Bulk suspend users",
+                          description: `You are about to affect ${usersBulk.selectedCount} items`,
+                          confirmLabel: "Suspend selected",
+                          needsReason: true
+                        })
                       }
                     >
-                      Export CSV
+                      Bulk Suspend
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="danger"
+                      title={!roleGuard.can("BULK_USERS") ? "Insufficient permissions" : "Bulk block selected users"}
+                      disabled={!roleGuard.can("BULK_USERS") || !usersBulk.selectedCount || usersBulk.inProgress}
+                      onClick={() =>
+                        openConfirm({
+                          type: "bulk-users",
+                          payload: { action: "BLOCK", ids: usersBulk.selectedIds },
+                          title: "Bulk block users",
+                          description: `You are about to affect ${usersBulk.selectedCount} items`,
+                          confirmLabel: "Block selected",
+                          needsReason: true
+                        })
+                      }
+                    >
+                      Bulk Block
+                    </Button>
+                    <Button
+                      size="sm"
+                      title={!roleGuard.can("BULK_USERS") ? "Insufficient permissions" : "Bulk activate selected users"}
+                      disabled={!roleGuard.can("BULK_USERS") || !usersBulk.selectedCount || usersBulk.inProgress}
+                      onClick={() =>
+                        openConfirm({
+                          type: "bulk-users",
+                          payload: { action: "ACTIVATE", ids: usersBulk.selectedIds },
+                          title: "Bulk activate users",
+                          description: `You are about to affect ${usersBulk.selectedCount} items`,
+                          confirmLabel: "Activate selected",
+                          danger: false
+                        })
+                      }
+                    >
+                      Bulk Activate
                     </Button>
                   </div>
 
@@ -680,7 +926,12 @@ export default function AdminPage() {
                   {!tableLoading.users ? (
                     <div className="space-y-2">
                       {pagedUsers.map((user) => (
-                        <div key={user.id} className="grid gap-3 rounded-2xl border border-border/80 bg-background/60 p-3 lg:grid-cols-[1.2fr_0.8fr_0.8fr_1.2fr] lg:items-center">
+                        <div key={user.id} className="grid gap-3 rounded-2xl border border-border/80 bg-background/60 p-3 lg:grid-cols-[auto_1.2fr_0.8fr_0.8fr_1.2fr] lg:items-center">
+                          <input
+                            type="checkbox"
+                            checked={usersBulk.selectedIds.includes(user.id)}
+                            onChange={() => usersBulk.toggleOne(user.id)}
+                          />
                           <div>
                             <p className="font-semibold text-foreground">{user.name}</p>
                             <p className="text-xs text-muted-foreground">{user.email}</p>
@@ -696,10 +947,51 @@ export default function AdminPage() {
                           </p>
                           <div className="flex flex-wrap gap-2">
                             <Button size="sm" variant="secondary" onClick={() => viewUserProfile(user.id)}>View</Button>
+                            {user.role === "admin" ? (
+                              <>
+                                <Button
+                                  size="sm"
+                                  variant="secondary"
+                                  title={!roleGuard.can("MANAGE_ADMINS") ? "Insufficient permissions" : "Demote to moderator"}
+                                  disabled={!roleGuard.can("MANAGE_ADMINS") || user.adminRole === "MODERATOR"}
+                                  onClick={() =>
+                                    openConfirm({
+                                      type: "admin-update",
+                                      payload: { id: user.id, data: { adminRole: "MODERATOR" } },
+                                      title: "Update admin role",
+                                      description: `Change ${user.email} role to MODERATOR?`,
+                                      confirmLabel: "Update",
+                                      danger: false
+                                    })
+                                  }
+                                >
+                                  Set Moderator
+                                </Button>
+                                <Button
+                                  size="sm"
+                                  variant="danger"
+                                  title={!roleGuard.can("MANAGE_ADMINS") ? "Insufficient permissions" : "Delete admin"}
+                                  disabled={!roleGuard.can("MANAGE_ADMINS")}
+                                  onClick={() =>
+                                    openConfirm({
+                                      type: "admin-delete",
+                                      payload: { id: user.id },
+                                      title: "Delete admin",
+                                      description: `Delete admin account ${user.email}?`,
+                                      confirmLabel: "Delete"
+                                    })
+                                  }
+                                >
+                                  Delete Admin
+                                </Button>
+                              </>
+                            ) : null}
                             {user.accountStatus !== "suspended" && user.role !== "admin" ? (
                               <Button
                                 size="sm"
                                 variant="secondary"
+                                title={!roleGuard.can("MANAGE_USERS") ? "Insufficient permissions" : "Suspend user"}
+                                disabled={!roleGuard.can("MANAGE_USERS")}
                                 onClick={() =>
                                   openConfirm({
                                     type: "user-status",
@@ -718,6 +1010,8 @@ export default function AdminPage() {
                               <Button
                                 size="sm"
                                 variant="danger"
+                                title={!roleGuard.can("MANAGE_USERS") ? "Insufficient permissions" : "Block user"}
+                                disabled={!roleGuard.can("MANAGE_USERS")}
                                 onClick={() =>
                                   openConfirm({
                                     type: "user-status",
@@ -735,6 +1029,8 @@ export default function AdminPage() {
                             {user.accountStatus !== "active" ? (
                               <Button
                                 size="sm"
+                                title={!roleGuard.can("MANAGE_USERS") ? "Insufficient permissions" : "Reactivate user"}
+                                disabled={!roleGuard.can("MANAGE_USERS")}
                                 onClick={() =>
                                   openConfirm({
                                     type: "user-status",
@@ -853,28 +1149,123 @@ export default function AdminPage() {
                         ))}
                       </select>
                     </div>
+                    <div className="flex flex-wrap items-center gap-2">
+                      <Button
+                        variant="secondary"
+                        size="sm"
+                        title={!roleGuard.can("EXPORT") ? "Insufficient permissions" : "Export current page"}
+                        disabled={!roleGuard.can("EXPORT")}
+                        onClick={() =>
+                          downloadCsv(
+                            "admin-records-current.csv",
+                            [
+                              { key: "id", label: "Record ID" },
+                              { key: "type", label: "Type" },
+                              { key: "hospitalName", label: "Hospital" },
+                              { key: "patientId", label: "Patient ID" },
+                              { key: "status", label: "Status" },
+                              { key: "createdAt", label: "Created At" }
+                            ],
+                            records.map(toRecordExportRow)
+                          )
+                        }
+                      >
+                        Export Current
+                      </Button>
+                      <Button
+                        variant="secondary"
+                        size="sm"
+                        title={!roleGuard.can("EXPORT") ? "Insufficient permissions" : "Export filtered dataset"}
+                        disabled={!roleGuard.can("EXPORT")}
+                        onClick={async () => {
+                          const filters = {
+                            ...(recordsFilter.status !== "all" ? { status: recordsFilter.status } : {}),
+                            ...(recordsFilter.search ? { search: recordsFilter.search } : {})
+                          };
+                          const blob = await exportAdminDataset({ type: "records", mode: "filtered", filters: JSON.stringify(filters) });
+                          downloadBlob("admin-records-filtered.csv", blob);
+                        }}
+                      >
+                        Export Filtered
+                      </Button>
+                      <Button
+                        variant="secondary"
+                        size="sm"
+                        title={!roleGuard.can("EXPORT") ? "Insufficient permissions" : "Export full dataset from server"}
+                        disabled={!roleGuard.can("EXPORT")}
+                        onClick={async () => {
+                          const blob = await exportAdminDataset({ type: "records", mode: "full" });
+                          downloadBlob("admin-records-full.csv", blob);
+                        }}
+                      >
+                        Export Full
+                      </Button>
+                    </div>
+                  </div>
+
+                  <div className="flex flex-wrap items-center gap-2 rounded-xl border border-border/70 bg-background/60 p-2">
+                    <label className="inline-flex items-center gap-2 text-sm">
+                      <input
+                        type="checkbox"
+                        checked={records.length > 0 && records.every((record) => recordsBulk.selectedIds.includes(record.id))}
+                        onChange={() => recordsBulk.togglePage(records.map((record) => record.id))}
+                      />
+                      Select page
+                    </label>
+                    <Button size="sm" variant="secondary" onClick={() => recordsBulk.selectAllAcrossPages(records.map((record) => record.id))}>Select all loaded</Button>
+                    <span className="text-xs text-muted-foreground">Selected: {recordsBulk.selectedCount}</span>
                     <Button
-                      variant="secondary"
                       size="sm"
+                      title={!roleGuard.can("BULK_RECORDS") ? "Insufficient permissions" : "Bulk approve selected records"}
+                      disabled={!roleGuard.can("BULK_RECORDS") || !recordsBulk.selectedCount || recordsBulk.inProgress}
                       onClick={() =>
-                        downloadCsv(
-                          "admin-records.csv",
-                          [
-                            { key: "id", label: "Record ID" },
-                            { key: "type", label: "Type" },
-                            { key: "hospitalName", label: "Hospital" },
-                            { key: "patientId", label: "Patient ID" },
-                            { key: "status", label: "Status" },
-                            { key: "createdAt", label: "Created At" }
-                          ],
-                          records.map((record) => ({
-                            ...record,
-                            createdAt: record.createdAt ? new Date(record.createdAt).toISOString() : ""
-                          }))
-                        )
+                        openConfirm({
+                          type: "bulk-records",
+                          payload: { action: "APPROVE", ids: recordsBulk.selectedIds },
+                          title: "Bulk approve records",
+                          description: `You are about to affect ${recordsBulk.selectedCount} items`,
+                          confirmLabel: "Approve selected",
+                          danger: false
+                        })
                       }
                     >
-                      Export CSV
+                      Bulk Approve
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="danger"
+                      title={!roleGuard.can("BULK_RECORDS") ? "Insufficient permissions" : "Bulk reject selected records"}
+                      disabled={!roleGuard.can("BULK_RECORDS") || !recordsBulk.selectedCount || recordsBulk.inProgress}
+                      onClick={() =>
+                        openConfirm({
+                          type: "bulk-records",
+                          payload: { action: "REJECT", ids: recordsBulk.selectedIds },
+                          title: "Bulk reject records",
+                          description: `You are about to affect ${recordsBulk.selectedCount} items`,
+                          confirmLabel: "Reject selected",
+                          needsReason: true
+                        })
+                      }
+                    >
+                      Bulk Reject
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="secondary"
+                      title={!roleGuard.can("BULK_RECORDS") ? "Insufficient permissions" : "Bulk flag selected records"}
+                      disabled={!roleGuard.can("BULK_RECORDS") || !recordsBulk.selectedCount || recordsBulk.inProgress}
+                      onClick={() =>
+                        openConfirm({
+                          type: "bulk-records",
+                          payload: { action: "FLAG", ids: recordsBulk.selectedIds },
+                          title: "Bulk flag records",
+                          description: `You are about to affect ${recordsBulk.selectedCount} items`,
+                          confirmLabel: "Flag selected",
+                          needsReason: true
+                        })
+                      }
+                    >
+                      Bulk Flag
                     </Button>
                   </div>
 
@@ -883,7 +1274,12 @@ export default function AdminPage() {
                   {!tableLoading.records ? (
                     <div className="space-y-2">
                       {records.map((record) => (
-                        <div key={record.id} className="grid gap-3 rounded-2xl border border-border/80 bg-background/60 p-3 lg:grid-cols-[1fr_0.9fr_1.4fr] lg:items-center">
+                        <div key={record.id} className="grid gap-3 rounded-2xl border border-border/80 bg-background/60 p-3 lg:grid-cols-[auto_1fr_0.9fr_1.4fr] lg:items-center">
+                          <input
+                            type="checkbox"
+                            checked={recordsBulk.selectedIds.includes(record.id)}
+                            onChange={() => recordsBulk.toggleOne(record.id)}
+                          />
                           <div>
                             <p className="font-semibold text-foreground capitalize">{record.type}</p>
                             <p className="text-xs text-muted-foreground">{record.hospitalName || "Hospital"} • Patient: {String(record.patientId || "-")}</p>
@@ -894,10 +1290,19 @@ export default function AdminPage() {
                             {record.flaggedSuspicious ? <p className="mt-1 text-xs text-danger">Suspicious flagged</p> : null}
                           </div>
                           <div className="flex flex-wrap gap-2">
-                            <Button size="sm" onClick={() => openConfirm({ type: "record-action", payload: { id: record.id, action: "approved" }, title: "Force approve record", description: "Force approve this record?", confirmLabel: "Approve", danger: false })}>Approve</Button>
+                            <Button
+                              size="sm"
+                              title={!roleGuard.can("MANAGE_RECORDS") ? "Insufficient permissions" : "Approve record"}
+                              disabled={!roleGuard.can("MANAGE_RECORDS")}
+                              onClick={() => openConfirm({ type: "record-action", payload: { id: record.id, action: "approved" }, title: "Force approve record", description: "Force approve this record?", confirmLabel: "Approve", danger: false })}
+                            >
+                              Approve
+                            </Button>
                             <Button
                               size="sm"
                               variant="danger"
+                              title={!roleGuard.can("MANAGE_RECORDS") ? "Insufficient permissions" : "Reject record"}
+                              disabled={!roleGuard.can("MANAGE_RECORDS")}
                               onClick={() =>
                                 openConfirm({
                                   type: "record-action",
@@ -914,6 +1319,8 @@ export default function AdminPage() {
                             <Button
                               size="sm"
                               variant="secondary"
+                              title={!roleGuard.can("MANAGE_RECORDS") ? "Insufficient permissions" : "Flag suspicious"}
+                              disabled={!roleGuard.can("MANAGE_RECORDS")}
                               onClick={() =>
                                 openConfirm({
                                   type: "record-action",
@@ -1046,26 +1453,52 @@ export default function AdminPage() {
                         ))}
                       </select>
                     </div>
-                    <Button
-                      variant="secondary"
-                      size="sm"
-                      onClick={() =>
-                        downloadCsv(
-                          "admin-activity.csv",
-                          [
-                            { key: "action", label: "Action" },
-                            { key: "userId", label: "User ID" },
-                            { key: "timestamp", label: "Timestamp" }
-                          ],
-                          activity.map((item) => ({
-                            ...item,
-                            timestamp: item.timestamp ? new Date(item.timestamp).toISOString() : ""
-                          }))
-                        )
-                      }
-                    >
-                      Export CSV
-                    </Button>
+                    <div className="flex flex-wrap items-center gap-2">
+                      <Button
+                        variant="secondary"
+                        size="sm"
+                        title={!roleGuard.can("EXPORT") ? "Insufficient permissions" : "Export current page"}
+                        disabled={!roleGuard.can("EXPORT")}
+                        onClick={() =>
+                          downloadCsv(
+                            "admin-activity-current.csv",
+                            [
+                              { key: "action", label: "Action" },
+                              { key: "userId", label: "User ID" },
+                              { key: "timestamp", label: "Timestamp" }
+                            ],
+                            pagedActivity.map(toActivityExportRow)
+                          )
+                        }
+                      >
+                        Export Current
+                      </Button>
+                      <Button
+                        variant="secondary"
+                        size="sm"
+                        title={!roleGuard.can("EXPORT") ? "Insufficient permissions" : "Export filtered dataset"}
+                        disabled={!roleGuard.can("EXPORT")}
+                        onClick={async () => {
+                          const filters = activityFilter === "all" ? {} : { action: activityFilter };
+                          const blob = await exportAdminDataset({ type: "activity", mode: "filtered", filters: JSON.stringify(filters) });
+                          downloadBlob("admin-activity-filtered.csv", blob);
+                        }}
+                      >
+                        Export Filtered
+                      </Button>
+                      <Button
+                        variant="secondary"
+                        size="sm"
+                        title={!roleGuard.can("EXPORT") ? "Insufficient permissions" : "Export full dataset"}
+                        disabled={!roleGuard.can("EXPORT")}
+                        onClick={async () => {
+                          const blob = await exportAdminDataset({ type: "activity", mode: "full" });
+                          downloadBlob("admin-activity-full.csv", blob);
+                        }}
+                      >
+                        Export Full
+                      </Button>
+                    </div>
                   </div>
 
                   {tableLoading.activity ? <Loader /> : null}
@@ -1156,28 +1589,56 @@ export default function AdminPage() {
                         ))}
                       </select>
                     </div>
-                    <Button
-                      variant="secondary"
-                      size="sm"
-                      onClick={() =>
-                        downloadCsv(
-                          "admin-audit-logs.csv",
-                          [
-                            { key: "action", label: "Action" },
-                            { key: "userId", label: "User ID" },
-                            { key: "timestamp", label: "Timestamp" },
-                            { key: "metadata", label: "Metadata" }
-                          ],
-                          logs.map((item) => ({
-                            ...item,
-                            timestamp: item.timestamp ? new Date(item.timestamp).toISOString() : "",
-                            metadata: item.metadata ? JSON.stringify(item.metadata) : ""
-                          }))
-                        )
-                      }
-                    >
-                      Export CSV
-                    </Button>
+                    <div className="flex flex-wrap items-center gap-2">
+                      <Button
+                        variant="secondary"
+                        size="sm"
+                        title={!roleGuard.can("EXPORT") ? "Insufficient permissions" : "Export current page"}
+                        disabled={!roleGuard.can("EXPORT")}
+                        onClick={() =>
+                          downloadCsv(
+                            "admin-audit-current.csv",
+                            [
+                              { key: "action", label: "Action" },
+                              { key: "userId", label: "User ID" },
+                              { key: "timestamp", label: "Timestamp" },
+                              { key: "metadata", label: "Metadata" }
+                            ],
+                            pagedLogs.map(toAuditExportRow)
+                          )
+                        }
+                      >
+                        Export Current
+                      </Button>
+                      <Button
+                        variant="secondary"
+                        size="sm"
+                        title={!roleGuard.can("EXPORT") ? "Insufficient permissions" : "Export filtered dataset"}
+                        disabled={!roleGuard.can("EXPORT")}
+                        onClick={async () => {
+                          const filters = {
+                            ...(auditFilter.user ? { userId: auditFilter.user } : {}),
+                            ...(auditFilter.action ? { action: auditFilter.action } : {})
+                          };
+                          const blob = await exportAdminDataset({ type: "audit", mode: "filtered", filters: JSON.stringify(filters) });
+                          downloadBlob("admin-audit-filtered.csv", blob);
+                        }}
+                      >
+                        Export Filtered
+                      </Button>
+                      <Button
+                        variant="secondary"
+                        size="sm"
+                        title={!roleGuard.can("EXPORT") ? "Insufficient permissions" : "Export full dataset"}
+                        disabled={!roleGuard.can("EXPORT")}
+                        onClick={async () => {
+                          const blob = await exportAdminDataset({ type: "audit", mode: "full" });
+                          downloadBlob("admin-audit-full.csv", blob);
+                        }}
+                      >
+                        Export Full
+                      </Button>
+                    </div>
                   </div>
 
                   {tableLoading.audit ? <Loader /> : null}
@@ -1261,11 +1722,16 @@ export default function AdminPage() {
                             <Badge status={Number(session.suspiciousScore || 0) >= 70 ? "rejected" : "approved"}>
                               Risk {session.suspiciousScore || 0}
                             </Badge>
+                            <p className="mt-1 text-xs text-muted-foreground">Level: {session.riskLevel || "LOW"}</p>
+                            {Number(session.riskMetadata?.rateLimitHits || 0) >= 3 ? <p className="text-xs text-danger">Rate limit threshold exceeded</p> : null}
+                            {Number(session.riskMetadata?.failedLoginCount || 0) >= 3 ? <p className="text-xs text-danger">Multiple failed logins detected</p> : null}
                           </div>
                           <div className="flex justify-start lg:justify-end">
                             <Button
                               size="sm"
                               variant="danger"
+                              title={!roleGuard.can("FORCE_LOGOUT") ? "Insufficient permissions" : "Force logout session"}
+                              disabled={!roleGuard.can("FORCE_LOGOUT")}
                               onClick={() =>
                                 openConfirm({
                                   type: "force-logout",
@@ -1303,6 +1769,8 @@ export default function AdminPage() {
                           </div>
                           <Button
                             size="sm"
+                            title={!roleGuard.can("VERIFY_HOSPITAL") ? "Insufficient permissions" : "Approve hospital"}
+                            disabled={!roleGuard.can("VERIFY_HOSPITAL")}
                             onClick={() =>
                               openConfirm({
                                 type: "verify-hospital",
@@ -1343,7 +1811,8 @@ export default function AdminPage() {
                     <Button variant="secondary" onClick={() => setBroadcastMessage("")}>Clear</Button>
                     <Button
                       variant="danger"
-                      disabled={broadcastMessage.trim().length < 10}
+                      title={!roleGuard.can("BROADCAST") ? "Insufficient permissions" : "Send system broadcast"}
+                      disabled={!roleGuard.can("BROADCAST") || broadcastMessage.trim().length < 10}
                       onClick={() =>
                         openConfirm({
                           type: "broadcast",

@@ -7,6 +7,11 @@ const { User, Record, AuditLog, Notification } = require("../models");
 const { successResponse } = require("../utils/apiResponse");
 const { uploadBufferToCloudinary, cloudinaryEnabled } = require("../utils/cloudinary");
 const { signQrToken, verifyQrToken } = require("../utils/authTokens");
+const { logAdminAudit } = require("../services/audit.service");
+const { evaluateRisk } = require("../services/risk.service");
+const { ADMIN_EVENTS, realtimeBroker } = require("../services/realtime.service");
+const adminUserService = require("../services/admin-user.service");
+const { ROLE_RANK } = require("../constants/admin-rbac");
 const env = require("../utils/env");
 
 const isValidObjectId = (value) => mongoose.Types.ObjectId.isValid(value);
@@ -16,6 +21,7 @@ const sanitizeUser = (user) => ({
   name: user.name,
   email: user.email,
   role: user.role,
+  adminRole: user.adminRole || null,
   profileImageUrl: user.profileImageUrl,
   patientProfile: user.patientProfile,
   hospitalProfile: user.hospitalProfile,
@@ -24,16 +30,26 @@ const sanitizeUser = (user) => ({
   accountStatus: user.accountStatus,
   suspendedUntil: user.suspendedUntil,
   statusReason: user.statusReason,
+  riskMetadata: user.riskMetadata || null,
   lastLoginAt: user.lastLoginAt,
   createdAt: user.createdAt
 });
 
 const createAuditLog = async (userId, action, metadata = null) => {
-  await AuditLog.create({
-    userId,
+  logAdminAudit({
     action,
+    actionType: null,
+    performedBy: userId,
+    targetType: "SYSTEM",
+    targetId: null,
     metadata
   });
+};
+
+const canMutateAdminTarget = (actorAdminRole, targetAdminRole) => {
+  const actorRank = ROLE_RANK[actorAdminRole] || 0;
+  const targetRank = ROLE_RANK[targetAdminRole] || 0;
+  return actorRank > targetRank;
 };
 
 const uploadProfileImageLocally = async (req, role) => {
@@ -385,7 +401,11 @@ const getAuditLogs = async (req, res, next) => {
           logs: logs.map((log) => ({
             id: log._id,
             userId: log.userId,
+            performedBy: log.performedBy,
             action: log.action,
+            actionType: log.actionType,
+            targetType: log.targetType,
+            targetId: log.targetId,
             timestamp: log.timestamp,
             metadata: log.metadata
           }))
@@ -424,7 +444,7 @@ const listUsersAdmin = async (req, res, next) => {
     const users = await User.find(filter)
       .sort({ createdAt: -1 })
       .limit(limit)
-      .select("name email role accountStatus suspendedUntil statusReason profileImageUrl patientProfile hospitalProfile verified isVerified createdAt lastLoginAt");
+      .select("name email role adminRole accountStatus suspendedUntil statusReason profileImageUrl patientProfile hospitalProfile verified isVerified createdAt lastLoginAt riskMetadata");
 
     return res.status(StatusCodes.OK).json(
       successResponse({
@@ -505,9 +525,23 @@ const updateUserStatusAdmin = async (req, res, next) => {
       });
     }
 
+    if (user.role === "admin" && user.adminRole && !canMutateAdminTarget(req.user.adminRole, user.adminRole)) {
+      return res.status(StatusCodes.FORBIDDEN).json({
+        success: false,
+        message: "You cannot modify an admin with equal or higher hierarchy"
+      });
+    }
+
     user.accountStatus = status;
     user.statusReason = typeof reason === "string" && reason.trim() ? reason.trim() : null;
     user.suspendedUntil = status === "suspended" && suspendedUntil ? new Date(suspendedUntil) : null;
+    user.riskMetadata = {
+      ...(user.riskMetadata || {}),
+      ...(status === "blocked" ? { score: 95, level: "HIGH" } : {}),
+      ...(status === "suspended" ? { score: 70, level: "HIGH" } : {}),
+      ...(status === "active" ? { score: 10, level: "LOW" } : {}),
+      lastEvaluatedAt: new Date()
+    };
 
     if (status !== "active") {
       user.refreshTokenHash = null;
@@ -515,11 +549,32 @@ const updateUserStatusAdmin = async (req, res, next) => {
 
     await user.save();
 
-    await createAuditLog(req.user.id, "admin.user.status_updated", {
-      targetUserId: user._id,
-      status,
-      reason: user.statusReason,
-      suspendedUntil: user.suspendedUntil
+    logAdminAudit({
+      action: "admin.user.status_updated",
+      actionType: status === "blocked" ? "USER_BLOCKED" : status === "suspended" ? "USER_SUSPENDED" : "USER_ACTIVATED",
+      performedBy: req.user.id,
+      targetType: "USER",
+      targetId: user._id,
+      metadata: {
+        targetUserId: user._id,
+        status,
+        reason: user.statusReason,
+        suspendedUntil: user.suspendedUntil
+      }
+    });
+
+    realtimeBroker.publish(ADMIN_EVENTS.USER_UPDATED, {
+      id: user._id.toString(),
+      accountStatus: user.accountStatus,
+      adminRole: user.adminRole || null,
+      updatedAt: new Date().toISOString()
+    });
+
+    realtimeBroker.publish(ADMIN_EVENTS.AUDIT_NEW, {
+      actionType: status === "blocked" ? "USER_BLOCKED" : status === "suspended" ? "USER_SUSPENDED" : "USER_ACTIVATED",
+      targetType: "USER",
+      targetId: user._id.toString(),
+      timestamp: new Date().toISOString()
     });
 
     return res.status(StatusCodes.OK).json(
@@ -574,19 +629,31 @@ const listActiveSessionsAdmin = async (req, res, next) => {
   try {
     const sessions = await User.find({ refreshTokenHash: { $ne: null } })
       .sort({ lastLoginAt: -1 })
-      .select("name email role lastLoginAt accountStatus");
+      .select("name email role adminRole lastLoginAt accountStatus riskMetadata");
 
     const suspicious = await Promise.all(
       sessions.map(async (user) => {
         const flaggedRecords = await Record.countDocuments({ suspiciousFlaggedBy: user._id });
+        const riskInput = {
+          failedLoginCount: Number(user.riskMetadata?.failedLoginCount || 0),
+          deleteActionCount: Number(user.riskMetadata?.deleteActionCount || 0),
+          rateLimitHits: Number(user.riskMetadata?.rateLimitHits || 0) + (flaggedRecords > 0 ? 3 : 0)
+        };
+        const risk = evaluateRisk(riskInput);
         return {
           id: user._id,
           name: user.name,
           email: user.email,
           role: user.role,
+          adminRole: user.adminRole || null,
           accountStatus: user.accountStatus,
           lastLoginAt: user.lastLoginAt,
-          suspiciousScore: flaggedRecords > 0 ? 80 : 10
+          suspiciousScore: risk.score,
+          riskLevel: risk.level,
+          riskMetadata: {
+            ...riskInput,
+            lastEvaluatedAt: new Date().toISOString()
+          }
         };
       })
     );
@@ -626,9 +693,22 @@ const forceLogoutUserAdmin = async (req, res, next) => {
     user.refreshTokenHash = null;
     await user.save();
 
-    await createAuditLog(req.user.id, "admin.session.force_logout", {
-      targetUserId: user._id,
-      targetEmail: user.email
+    logAdminAudit({
+      action: "admin.session.force_logout",
+      actionType: "USER_FORCE_LOGOUT",
+      performedBy: req.user.id,
+      targetType: "USER",
+      targetId: user._id,
+      metadata: {
+        targetUserId: user._id,
+        targetEmail: user.email
+      }
+    });
+
+    realtimeBroker.publish(ADMIN_EVENTS.USER_UPDATED, {
+      id: user._id.toString(),
+      forceLoggedOut: true,
+      updatedAt: new Date().toISOString()
     });
 
     return res.status(StatusCodes.OK).json(
@@ -662,9 +742,23 @@ const broadcastSystemAnnouncementAdmin = async (req, res, next) => {
       }))
     );
 
-    await createAuditLog(req.user.id, "admin.broadcast.sent", {
-      recipients: users.length,
-      messagePreview: message.slice(0, 80)
+    logAdminAudit({
+      action: "admin.broadcast.sent",
+      actionType: "BROADCAST_SENT",
+      performedBy: req.user.id,
+      targetType: "SYSTEM",
+      targetId: null,
+      metadata: {
+        recipients: users.length,
+        messagePreview: message.slice(0, 80)
+      }
+    });
+
+    realtimeBroker.publish(ADMIN_EVENTS.AUDIT_NEW, {
+      actionType: "BROADCAST_SENT",
+      targetType: "SYSTEM",
+      targetId: null,
+      timestamp: new Date().toISOString()
     });
 
     return res.status(StatusCodes.OK).json(
@@ -762,13 +856,22 @@ const verifyHospital = async (req, res, next) => {
     };
     await hospital.save();
 
-    await AuditLog.create({
-      userId: req.user.id,
+    logAdminAudit({
       action: "hospital.verified",
+      actionType: "HOSPITAL_VERIFIED",
+      performedBy: req.user.id,
+      targetType: "USER",
+      targetId: hospital._id,
       metadata: {
         hospitalId: hospital._id,
         hospitalEmail: hospital.email
       }
+    });
+
+    realtimeBroker.publish(ADMIN_EVENTS.USER_UPDATED, {
+      id: hospital._id.toString(),
+      hospitalVerified: true,
+      updatedAt: new Date().toISOString()
     });
 
     return res.status(StatusCodes.OK).json(
@@ -789,6 +892,349 @@ const verifyHospital = async (req, res, next) => {
   }
 };
 
+const bulkUsersActionAdmin = async (req, res, next) => {
+  try {
+    const { action, ids, reason } = req.body;
+
+    const status = action === "SUSPEND" ? "suspended" : action === "BLOCK" ? "blocked" : "active";
+    const uniqueIds = [...new Set(ids)];
+
+    const users = await User.find({ _id: { $in: uniqueIds } }).select("role adminRole accountStatus suspendedUntil statusReason riskMetadata");
+    const foundMap = new Map(users.map((item) => [item._id.toString(), item]));
+
+    const result = {
+      succeeded: [],
+      failed: []
+    };
+
+    for (const id of uniqueIds) {
+      const user = foundMap.get(id);
+      if (!user) {
+        result.failed.push({ id, reason: "User not found" });
+        continue;
+      }
+
+      if (user.role === "admin" && user.adminRole && !canMutateAdminTarget(req.user.adminRole, user.adminRole)) {
+        result.failed.push({ id, reason: "Cannot modify equal or higher admin hierarchy" });
+        continue;
+      }
+
+      if (user.role === "admin" && status !== "active") {
+        result.failed.push({ id, reason: "Admin users cannot be suspended or blocked" });
+        continue;
+      }
+
+      user.accountStatus = status;
+      user.statusReason = reason || null;
+      user.suspendedUntil = status === "suspended" ? new Date(Date.now() + 3 * 24 * 60 * 60 * 1000) : null;
+      user.riskMetadata = {
+        ...(user.riskMetadata || {}),
+        ...(status === "blocked" ? { score: 95, level: "HIGH" } : {}),
+        ...(status === "suspended" ? { score: 70, level: "HIGH" } : {}),
+        ...(status === "active" ? { score: 10, level: "LOW" } : {}),
+        lastEvaluatedAt: new Date()
+      };
+
+      await user.save();
+
+      result.succeeded.push({ id, status: user.accountStatus });
+
+      realtimeBroker.publish(ADMIN_EVENTS.USER_UPDATED, {
+        id,
+        accountStatus: user.accountStatus,
+        updatedAt: new Date().toISOString()
+      });
+    }
+
+    logAdminAudit({
+      action: "admin.user.bulk_action",
+      actionType: "BULK_USERS_ACTION",
+      performedBy: req.user.id,
+      targetType: "USER",
+      targetId: null,
+      metadata: {
+        action,
+        total: uniqueIds.length,
+        successCount: result.succeeded.length,
+        failureCount: result.failed.length
+      }
+    });
+
+    realtimeBroker.publish(ADMIN_EVENTS.AUDIT_NEW, {
+      actionType: "BULK_USERS_ACTION",
+      targetType: "USER",
+      targetId: null,
+      timestamp: new Date().toISOString()
+    });
+
+    return res.status(StatusCodes.OK).json(
+      successResponse({
+        message: "Bulk user action executed",
+        data: {
+          action,
+          total: uniqueIds.length,
+          ...result
+        }
+      })
+    );
+  } catch (error) {
+    return next(error);
+  }
+};
+
+const streamCsv = async (res, headers, cursor) => {
+  const escapeCsv = (value) => `"${String(value ?? "").replace(/"/g, '""')}"`;
+
+  res.setHeader("Content-Type", "text/csv; charset=utf-8");
+  res.write(`${headers.join(",")}\n`);
+
+  // Cursor-based streaming prevents memory spikes for full dataset exports.
+  for await (const row of cursor) {
+    const line = headers.map((header) => escapeCsv(row[header])).join(",");
+    res.write(`${line}\n`);
+  }
+
+  res.end();
+};
+
+const exportAdminData = async (req, res, next) => {
+  try {
+    const { type, mode, filters } = req.query;
+    const parsedFilters = (() => {
+      if (!filters) {
+        return {};
+      }
+      try {
+        return JSON.parse(filters);
+      } catch {
+        return {};
+      }
+    })();
+
+    if (type === "users") {
+      const query = mode === "full" ? {} : parsedFilters;
+      const usersCursor = User.find(query)
+        .sort({ createdAt: -1 })
+        .select("name email role adminRole accountStatus lastLoginAt createdAt")
+        .lean()
+        .cursor();
+      await streamCsv(res, ["name", "email", "role", "adminRole", "accountStatus", "lastLoginAt", "createdAt"], usersCursor);
+      return;
+    }
+
+    if (type === "records") {
+      const query = mode === "full" ? {} : parsedFilters;
+      const recordsCursor = Record.find(query)
+        .sort({ createdAt: -1 })
+        .select("type status hospitalName patientId createdAt")
+        .lean()
+        .cursor();
+      await streamCsv(res, ["type", "status", "hospitalName", "patientId", "createdAt"], recordsCursor);
+      return;
+    }
+
+    if (type === "activity") {
+      const query = mode === "full" ? {} : parsedFilters;
+      const activityCursor = AuditLog.find(query)
+        .sort({ timestamp: -1 })
+        .select("action actionType userId timestamp")
+        .lean()
+        .cursor();
+      await streamCsv(res, ["action", "actionType", "userId", "timestamp"], activityCursor);
+      return;
+    }
+
+    const query = mode === "full" ? {} : parsedFilters;
+    const logsCursor = AuditLog.find(query)
+      .sort({ timestamp: -1 })
+      .select("action actionType targetType targetId userId timestamp")
+      .lean()
+      .cursor();
+    await streamCsv(res, ["action", "actionType", "targetType", "targetId", "userId", "timestamp"], logsCursor);
+  } catch (error) {
+    return next(error);
+  }
+};
+
+const createAdminUser = async (req, res, next) => {
+  try {
+    const { name, email, password, adminRole } = req.body;
+
+    if (!canMutateAdminTarget(req.user.adminRole, adminRole)) {
+      return res.status(StatusCodes.FORBIDDEN).json({
+        success: false,
+        message: "You cannot create an admin with equal or higher hierarchy"
+      });
+    }
+
+    let user;
+    try {
+      user = await adminUserService.createAdminAccount({ name, email, password, adminRole });
+    } catch (error) {
+      if (error?.code === "EMAIL_EXISTS") {
+        return res.status(StatusCodes.CONFLICT).json({
+          success: false,
+          message: "Email already exists"
+        });
+      }
+      throw error;
+    }
+
+    if (!user) {
+      return res.status(StatusCodes.CONFLICT).json({
+        success: false,
+        message: "Unable to create admin"
+      });
+    }
+
+    logAdminAudit({
+      action: "admin.user.created",
+      actionType: "ADMIN_CREATED",
+      performedBy: req.user.id,
+      targetType: "ADMIN",
+      targetId: user._id,
+      metadata: {
+        email: user.email,
+        adminRole
+      }
+    });
+
+    realtimeBroker.publish(ADMIN_EVENTS.USER_UPDATED, {
+      id: user._id.toString(),
+      role: user.role,
+      adminRole: user.adminRole,
+      createdAt: user.createdAt
+    });
+
+    return res.status(StatusCodes.CREATED).json(
+      successResponse({
+        message: "Admin created",
+        data: {
+          user: sanitizeUser(user)
+        }
+      })
+    );
+  } catch (error) {
+    return next(error);
+  }
+};
+
+const updateAdminUser = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+    const target = await adminUserService.getAdminAccount(id);
+
+    if (!target || target.role !== "admin") {
+      return res.status(StatusCodes.NOT_FOUND).json({
+        success: false,
+        message: "Admin not found"
+      });
+    }
+
+    if (!canMutateAdminTarget(req.user.adminRole, target.adminRole)) {
+      return res.status(StatusCodes.FORBIDDEN).json({
+        success: false,
+        message: "You cannot update an admin with equal or higher hierarchy"
+      });
+    }
+
+    if (req.body.adminRole && !canMutateAdminTarget(req.user.adminRole, req.body.adminRole)) {
+      return res.status(StatusCodes.FORBIDDEN).json({
+        success: false,
+        message: "You cannot assign equal or higher hierarchy"
+      });
+    }
+
+    const updated = await adminUserService.updateAdminAccount(id, req.body);
+
+    logAdminAudit({
+      action: "admin.user.updated",
+      actionType: "ADMIN_UPDATED",
+      performedBy: req.user.id,
+      targetType: "ADMIN",
+      targetId: updated._id,
+      metadata: {
+        adminRole: updated.adminRole,
+        accountStatus: updated.accountStatus
+      }
+    });
+
+    realtimeBroker.publish(ADMIN_EVENTS.USER_UPDATED, {
+      id: updated._id.toString(),
+      adminRole: updated.adminRole,
+      accountStatus: updated.accountStatus,
+      updatedAt: new Date().toISOString()
+    });
+
+    return res.status(StatusCodes.OK).json(
+      successResponse({
+        message: "Admin updated",
+        data: {
+          user: sanitizeUser(updated)
+        }
+      })
+    );
+  } catch (error) {
+    return next(error);
+  }
+};
+
+const deleteAdminUser = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+
+    if (id === req.user.id) {
+      return res.status(StatusCodes.BAD_REQUEST).json({
+        success: false,
+        message: "You cannot delete your own admin account"
+      });
+    }
+
+    const target = await adminUserService.getAdminAccount(id);
+    if (!target || target.role !== "admin") {
+      return res.status(StatusCodes.NOT_FOUND).json({
+        success: false,
+        message: "Admin not found"
+      });
+    }
+
+    if (!canMutateAdminTarget(req.user.adminRole, target.adminRole)) {
+      return res.status(StatusCodes.FORBIDDEN).json({
+        success: false,
+        message: "You cannot delete an admin with equal or higher hierarchy"
+      });
+    }
+
+    await adminUserService.deleteAdminAccount(id);
+
+    logAdminAudit({
+      action: "admin.user.deleted",
+      actionType: "ADMIN_DELETED",
+      performedBy: req.user.id,
+      targetType: "ADMIN",
+      targetId: id,
+      metadata: {
+        deletedAdminId: id,
+        deletedAdminEmail: target.email
+      }
+    });
+
+    realtimeBroker.publish(ADMIN_EVENTS.USER_UPDATED, {
+      id,
+      deleted: true,
+      updatedAt: new Date().toISOString()
+    });
+
+    return res.status(StatusCodes.OK).json(
+      successResponse({
+        message: "Admin deleted"
+      })
+    );
+  } catch (error) {
+    return next(error);
+  }
+};
+
 module.exports = {
   getMyProfile,
   updateMyProfile,
@@ -801,6 +1247,11 @@ module.exports = {
   listUsersAdmin,
   getUserByIdAdmin,
   updateUserStatusAdmin,
+  bulkUsersActionAdmin,
+  exportAdminData,
+  createAdminUser,
+  updateAdminUser,
+  deleteAdminUser,
   listActivityFeedAdmin,
   listActiveSessionsAdmin,
   forceLogoutUserAdmin,

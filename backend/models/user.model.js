@@ -1,4 +1,5 @@
 const mongoose = require("mongoose");
+const { ADMIN_ROLES } = require("../constants/admin-rbac");
 
 const USER_ROLES = ["patient", "hospital", "admin"];
 const ACCOUNT_STATUSES = ["active", "suspended", "blocked"];
@@ -53,6 +54,12 @@ const userSchema = new mongoose.Schema(
       type: String,
       enum: USER_ROLES,
       default: "patient"
+    },
+    adminRole: {
+      type: String,
+      enum: ADMIN_ROLES,
+      default: null,
+      index: true
     },
     accountStatus: {
       type: String,
@@ -135,12 +142,32 @@ const userSchema = new mongoose.Schema(
       type: String,
       default: null,
       select: false
+    },
+    riskMetadata: {
+      score: { type: Number, default: 0, min: 0, max: 100 },
+      level: { type: String, enum: ["LOW", "MEDIUM", "HIGH"], default: "LOW" },
+      failedLoginCount: { type: Number, default: 0, min: 0 },
+      deleteActionCount: { type: Number, default: 0, min: 0 },
+      rateLimitHits: { type: Number, default: 0, min: 0 },
+      lastEvaluatedAt: { type: Date, default: null }
     }
   },
   {
     timestamps: { createdAt: "createdAt", updatedAt: "updatedAt" }
   }
 );
+
+userSchema.pre("save", function normalizeAdminRole(next) {
+  if (this.role === "admin" && !this.adminRole) {
+    this.adminRole = "ADMIN";
+  }
+
+  if (this.role !== "admin") {
+    this.adminRole = null;
+  }
+
+  next();
+});
 
 const User = mongoose.model("User", userSchema);
 
