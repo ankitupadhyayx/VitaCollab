@@ -204,7 +204,7 @@ const register = async (req, res, next) => {
       ...profilePatch
     });
 
-    const verifyUrl = `${env.appUrl}/verify?token=${encodeURIComponent(token)}`;
+    const verifyUrl = `${env.clientUrl}/verify?token=${encodeURIComponent(token)}`;
     await sendEmail({
       to: user.email,
       subject: "Verify your VitaCollab account",
@@ -301,7 +301,7 @@ const resendVerification = async (req, res, next) => {
     user.lastVerificationEmailSentAt = new Date();
     await user.save();
 
-    const verifyUrl = `${env.appUrl}/verify?token=${encodeURIComponent(token)}`;
+    const verifyUrl = `${env.clientUrl}/verify?token=${encodeURIComponent(token)}`;
     await sendEmail({
       to: user.email,
       subject: "Verify your VitaCollab account",
@@ -465,7 +465,7 @@ const forgotPassword = async (req, res, next) => {
     user.resetTokenExpiry = new Date(Date.now() + resetTokenTtlMs);
     await user.save();
 
-    const resetUrl = `${env.appUrl}/reset-password?token=${encodeURIComponent(token)}`;
+    const resetUrl = `${env.clientUrl}/reset-password?token=${encodeURIComponent(token)}`;
     await sendEmail({
       to: user.email,
       subject: "Reset your password",

@@ -2,6 +2,16 @@ const dotenv = require("dotenv");
 
 dotenv.config();
 
+const normalizeUrl = (value, fallback) => {
+  const raw = (value || fallback || "").trim();
+  if (!raw) {
+    return "";
+  }
+
+  const normalizedProtocol = raw.replace(/^(https?:)\/+/i, "$1//");
+  return normalizedProtocol.replace(/\/+$/, "");
+};
+
 const mongoUri = process.env.MONGO_URI || process.env.MONGODB_URI;
 const jwtBaseSecret = process.env.JWT_SECRET;
 const jwtAccessSecret = process.env.JWT_ACCESS_SECRET || jwtBaseSecret;
@@ -24,8 +34,14 @@ module.exports = {
   nodeEnv: process.env.NODE_ENV || "development",
   port: Number(process.env.PORT) || 5000,
   mongodbUri: mongoUri,
-  clientUrl: process.env.CLIENT_URL || "http://localhost:3000",
-  appUrl: process.env.APP_URL || "http://localhost:3000",
+  clientUrl: normalizeUrl(
+    process.env.CLIENT_URL || process.env.APP_URL,
+    process.env.NODE_ENV === "production" ? "https://vitacollab.in" : "http://localhost:3000"
+  ),
+  appUrl: normalizeUrl(
+    process.env.APP_URL || process.env.CLIENT_URL,
+    process.env.NODE_ENV === "production" ? "https://vitacollab.in" : "http://localhost:3000"
+  ),
   jwtAccessSecret,
   jwtRefreshSecret,
   jwtAccessExpiresIn: process.env.JWT_ACCESS_EXPIRES_IN || "15m",

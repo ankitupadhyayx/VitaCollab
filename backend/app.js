@@ -13,6 +13,8 @@ const { notFoundHandler, errorHandler } = require("./middleware/error.middleware
 const env = require("./utils/env");
 
 const app = express();
+app.set("trust proxy", 1);
+
 const allowedOrigins = new Set([
   "https://vitacollab.in",
   "https://www.vitacollab.in",
