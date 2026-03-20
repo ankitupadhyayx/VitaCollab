@@ -104,12 +104,17 @@ export function HospitalsSection() {
               </div>
             </div>
           </div>
-          <Link href="mailto:ankitupadhyayx@gmail.com?subject=Hospital%20Verification%20Request">
-            <Button size="lg" className="w-full md:w-auto">
-              Request Hospital Verification
-              <ArrowRight className="ml-2 h-4 w-4" />
+          <div className="space-y-2">
+            <Button asChild size="lg" className="w-full md:w-auto">
+              <a href="mailto:support@vitacollab.in?subject=Hospital%20Verification%20Request">
+                Request Hospital Verification
+                <ArrowRight className="ml-2 h-4 w-4" />
+              </a>
             </Button>
-          </Link>
+            <p className="text-xs text-muted-foreground md:text-right">
+              Need urgent onboarding? <a href="mailto:support@vitacollab.in" className="font-medium text-foreground hover:text-primary">support@vitacollab.in</a>
+            </p>
+          </div>
         </CardContent>
       </Card>
     </SectionShell>
