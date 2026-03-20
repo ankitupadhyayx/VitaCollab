@@ -1,12 +1,19 @@
 import { NextResponse } from "next/server";
 
-const getBackendBaseUrl = () => {
-  const base = process.env.NEXT_PUBLIC_API_URL || process.env.API_URL;
-  if (!base) {
+const API_VERSION_PREFIX = "/api/v1";
+
+const normalizeApiBaseUrl = (url) => (url || "").trim().replace(/\/+$/, "");
+
+const resolveApiBaseUrl = () => {
+  const raw =
+    normalizeApiBaseUrl(process.env.NEXT_PUBLIC_API_URL) ||
+    normalizeApiBaseUrl(process.env.API_URL);
+
+  if (!raw) {
     throw new Error("API URL is not configured");
   }
 
-  return base.replace(/\/$/, "");
+  return raw.endsWith(API_VERSION_PREFIX) ? raw : `${raw}${API_VERSION_PREFIX}`;
 };
 
 export async function POST(request) {
@@ -18,7 +25,7 @@ export async function POST(request) {
       return NextResponse.json({ message: "Email is required" }, { status: 400 });
     }
 
-    const response = await fetch(`${getBackendBaseUrl()}/api/v1/auth/forgot-password`, {
+    const response = await fetch(`${resolveApiBaseUrl()}/auth/forgot-password`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json"
