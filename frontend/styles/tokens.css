@@ -17,3 +17,23 @@
   --danger: 0 75% 52%;
   --danger-foreground: 0 100% 98%;
 }
+
+.dark {
+  --background: 222 35% 10%;
+  --foreground: 210 38% 96%;
+  --card: 223 29% 14%;
+  --card-foreground: 210 38% 96%;
+  --muted: 222 22% 21%;
+  --muted-foreground: 213 17% 72%;
+  --border: 222 20% 28%;
+  --primary: 217 91% 60%;
+  --primary-foreground: 210 40% 98%;
+  --accent: 258 90% 67%;
+  --accent-foreground: 210 40% 98%;
+  --success: 148 62% 43%;
+  --success-foreground: 146 79% 96%;
+  --warning: 36 94% 53%;
+  --warning-foreground: 30 85% 17%;
+  --danger: 0 73% 56%;
+  --danger-foreground: 0 100% 98%;
+}

@@ -2,7 +2,7 @@ const fs = require("fs/promises");
 const path = require("path");
 const { randomUUID } = require("crypto");
 const { StatusCodes } = require("http-status-codes");
-const { User } = require("../models");
+const { User, AuditLog } = require("../models");
 const { successResponse, errorResponse } = require("../utils/apiResponse");
 const { hashPassword, comparePassword } = require("../utils/password");
 const {
@@ -15,6 +15,7 @@ const { createTokenWithHash } = require("../utils/cryptoTokens");
 const { sendEmail } = require("../utils/mailer");
 const { uploadBufferToCloudinary, cloudinaryEnabled } = require("../utils/cloudinary");
 const env = require("../utils/env");
+const logger = require("../utils/logger");
 const { getRefreshCookieOptions, getClearRefreshCookieOptions } = require("../utils/authCookies");
 
 const verificationTokenTtlMs = 60 * 60 * 1000;
@@ -78,6 +79,9 @@ const sanitizeUser = (user) => ({
   hospitalProfile: user.hospitalProfile,
   verified: user.verified,
   isVerified: user.isVerified,
+  accountStatus: user.accountStatus,
+  suspendedUntil: user.suspendedUntil,
+  statusReason: user.statusReason,
   createdAt: user.createdAt
 });
 
@@ -344,9 +348,37 @@ const login = async (req, res, next) => {
         .json(errorResponse({ message: "Please verify your email" }));
     }
 
+    if (user.accountStatus === "blocked") {
+      return res
+        .status(StatusCodes.FORBIDDEN)
+        .json(errorResponse({ message: "Your account has been blocked by admin" }));
+    }
+
+    if (user.accountStatus === "suspended") {
+      const suspensionExpired = user.suspendedUntil && new Date(user.suspendedUntil).getTime() <= Date.now();
+      if (!suspensionExpired) {
+        return res
+          .status(StatusCodes.FORBIDDEN)
+          .json(errorResponse({ message: "Your account is currently suspended" }));
+      }
+
+      user.accountStatus = "active";
+      user.suspendedUntil = null;
+      user.statusReason = null;
+    }
+
     const { accessToken, refreshToken, user: safeUser } = buildAuthPayload(user);
     user.refreshTokenHash = hashToken(refreshToken);
+    user.lastLoginAt = new Date();
     await user.save();
+
+    await AuditLog.create({
+      userId: user._id,
+      action: "auth.login",
+      metadata: {
+        role: user.role
+      }
+    });
 
     setRefreshCookie(res, refreshToken);
 
@@ -392,6 +424,12 @@ const refresh = async (req, res, next) => {
     }
 
     if (user.refreshTokenHash !== hashToken(providedToken)) {
+      logger.warn("Refresh token mismatch detected", {
+        userId: user._id.toString(),
+        email: user.email
+      });
+      user.refreshTokenHash = null;
+      await user.save();
       return res
         .status(StatusCodes.UNAUTHORIZED)
         .json(errorResponse({ message: "Refresh token mismatch" }));
@@ -429,6 +467,14 @@ const logout = async (req, res, next) => {
         if (user) {
           user.refreshTokenHash = null;
           await user.save();
+
+          await AuditLog.create({
+            userId: user._id,
+            action: "auth.logout",
+            metadata: {
+              role: user.role
+            }
+          });
         }
       } catch (error) {
         // Intentionally swallow token errors on logout to avoid leaking token state.

@@ -1,5 +1,6 @@
 const { StatusCodes } = require("http-status-codes");
 const logger = require("../utils/logger");
+const { captureException } = require("../utils/monitoring");
 const { errorResponse } = require("../utils/apiResponse");
 
 const notFoundHandler = (req, res) => {
@@ -14,6 +15,10 @@ const errorHandler = (err, req, res, next) => {
   logger.error("Unhandled error", {
     message: err.message,
     stack: err.stack,
+    path: req.originalUrl,
+    method: req.method
+  });
+  captureException(err, {
     path: req.originalUrl,
     method: req.method
   });

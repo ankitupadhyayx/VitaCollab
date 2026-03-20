@@ -43,6 +43,10 @@ const sanitizeRecord = (record, includeReason = false) => {
     recordDate: record.recordDate,
     approvedAt: record.approvedAt,
     rejectedAt: record.rejectedAt,
+    flaggedSuspicious: record.flaggedSuspicious,
+    suspiciousFlagReason: record.suspiciousFlagReason,
+    suspiciousFlaggedAt: record.suspiciousFlaggedAt,
+    suspiciousFlaggedBy: record.suspiciousFlaggedBy,
     createdAt: record.createdAt,
     updatedAt: record.updatedAt
   };
@@ -406,11 +410,76 @@ const getMyTimeline = async (req, res, next) => {
   }
 };
 
+const adminForceRecordAction = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+    const { action, rejectionReason, flagReason } = req.body;
+
+    if (!isValidObjectId(id)) {
+      return res
+        .status(StatusCodes.BAD_REQUEST)
+        .json(errorResponse({ message: "Invalid record id" }));
+    }
+
+    const record = await Record.findById(id).select("+encryptedRejectionReason");
+    if (!record) {
+      return res
+        .status(StatusCodes.NOT_FOUND)
+        .json(errorResponse({ message: "Record not found" }));
+    }
+
+    if (action === "approved") {
+      record.status = "approved";
+      record.approvedAt = new Date();
+      record.rejectedAt = null;
+      record.encryptedRejectionReason = null;
+    }
+
+    if (action === "rejected") {
+      record.status = "rejected";
+      record.rejectedAt = new Date();
+      record.approvedAt = null;
+      record.encryptedRejectionReason = encryptText(rejectionReason);
+    }
+
+    if (action === "flag_suspicious") {
+      record.flaggedSuspicious = true;
+      record.suspiciousFlagReason = flagReason;
+      record.suspiciousFlaggedAt = new Date();
+      record.suspiciousFlaggedBy = req.user.id;
+    }
+
+    await record.save();
+
+    await AuditLog.create({
+      userId: req.user.id,
+      action: `admin.record.${action}`,
+      metadata: {
+        recordId: record._id,
+        patientId: record.patientId,
+        hospitalId: record.hospitalId
+      }
+    });
+
+    return res.status(StatusCodes.OK).json(
+      successResponse({
+        message: "Record action completed",
+        data: {
+          record: sanitizeRecord(record, true)
+        }
+      })
+    );
+  } catch (error) {
+    return next(error);
+  }
+};
+
 module.exports = {
   uploadRecord,
   listRecords,
   getRecordById,
   decideRecord,
   deleteRecord,
-  getMyTimeline
+  getMyTimeline,
+  adminForceRecordAction
 };

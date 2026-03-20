@@ -1,4 +1,5 @@
 import axios from "axios";
+import { logger } from "@/lib/logger";
 import { getStoredAccessToken, setStoredAccessToken } from "@/lib/session-store";
 
 const API_VERSION_PREFIX = "/api/v1";
@@ -77,7 +78,19 @@ api.interceptors.response.use(
     const status = error?.response?.status;
     const isAuthRoute = originalRequest?.url?.includes("/auth/");
 
+    if (!originalRequest?._networkRetry && (!status || status >= 500)) {
+      originalRequest._networkRetry = true;
+      await new Promise((resolve) => setTimeout(resolve, 350));
+      return api(originalRequest);
+    }
+
     if (status !== 401 || originalRequest?._retry || isAuthRoute) {
+      logger.error("API request failed", {
+        url: originalRequest?.url,
+        method: originalRequest?.method,
+        status: status || 0,
+        message: error?.message
+      });
       return Promise.reject(error);
     }
 
@@ -109,6 +122,13 @@ api.interceptors.response.use(
       return api(originalRequest);
     } catch (refreshError) {
       setStoredAccessToken(null);
+      logger.warn("Token refresh failed", {
+        message: refreshError?.message,
+        status: refreshError?.response?.status || 0
+      });
+      if (typeof window !== "undefined") {
+        window.dispatchEvent(new CustomEvent("vitacollab:session-expired"));
+      }
       return Promise.reject(refreshError);
     } finally {
       isRefreshing = false;

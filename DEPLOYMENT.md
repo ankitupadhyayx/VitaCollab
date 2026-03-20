@@ -49,3 +49,11 @@ Services:
 - Hospitals cannot upload records until admin verification is completed.
 - Admin can review pending hospital accounts from the Admin Control Panel.
 - Verification actions are written to audit logs.
+
+## 7. Production Readiness Checklist
+- Enable websocket gateway route in API runtime (`wss://<api-host>/ws`).
+- Bind a monitoring provider (Sentry-compatible) to backend global hook (`global.__SENTRY__`).
+- Keep refresh cookies `httpOnly` and `secure` in production.
+- Rotate `JWT_ACCESS_SECRET` and `JWT_REFRESH_SECRET` on a regular schedule.
+- Alert on repeated refresh-token mismatch events (possible token replay).
+- Ensure camera permissions policy allows QR scanning for hospital/admin roles.

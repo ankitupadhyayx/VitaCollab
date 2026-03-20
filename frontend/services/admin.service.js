@@ -5,8 +5,28 @@ export const fetchAdminStats = async () => {
   return response.data;
 };
 
-export const fetchAuditLogs = async () => {
-  const response = await api.get("/users/admin/audit-logs");
+export const fetchAuditLogs = async (params = {}) => {
+  const response = await api.get("/users/admin/audit-logs", { params });
+  return response.data;
+};
+
+export const fetchActivityFeed = async (params = {}) => {
+  const response = await api.get("/users/admin/activity", { params });
+  return response.data;
+};
+
+export const fetchAdminUsers = async (params = {}) => {
+  const response = await api.get("/users/admin/users", { params });
+  return response.data;
+};
+
+export const fetchAdminUserProfile = async (id) => {
+  const response = await api.get(`/users/admin/users/${id}`);
+  return response.data;
+};
+
+export const updateAdminUserStatus = async (id, payload) => {
+  const response = await api.patch(`/users/admin/users/${id}/status`, payload);
   return response.data;
 };
 
@@ -17,5 +37,30 @@ export const fetchPendingHospitals = async () => {
 
 export const verifyHospital = async (hospitalId) => {
   const response = await api.patch(`/users/admin/hospitals/${hospitalId}/verify`);
+  return response.data;
+};
+
+export const fetchAdminRecords = async (params = {}) => {
+  const response = await api.get("/records", { params });
+  return response.data;
+};
+
+export const forceRecordAction = async (id, payload) => {
+  const response = await api.patch(`/records/${id}/admin-action`, payload);
+  return response.data;
+};
+
+export const fetchActiveSessions = async () => {
+  const response = await api.get("/users/admin/sessions");
+  return response.data;
+};
+
+export const forceLogoutUser = async (id) => {
+  const response = await api.post(`/users/admin/users/${id}/force-logout`);
+  return response.data;
+};
+
+export const sendAdminBroadcast = async (message) => {
+  const response = await api.post("/users/admin/broadcast", { message });
   return response.data;
 };

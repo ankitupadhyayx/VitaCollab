@@ -37,6 +37,27 @@ const authenticate = async (req, res, next) => {
         .json(errorResponse({ message: "User does not exist" }));
     }
 
+    if (user.accountStatus === "blocked") {
+      return res
+        .status(StatusCodes.FORBIDDEN)
+        .json(errorResponse({ message: "Your account has been blocked by admin" }));
+    }
+
+    if (user.accountStatus === "suspended") {
+      const suspensionExpired = user.suspendedUntil && new Date(user.suspendedUntil).getTime() <= Date.now();
+
+      if (suspensionExpired) {
+        user.accountStatus = "active";
+        user.suspendedUntil = null;
+        user.statusReason = null;
+        await user.save();
+      } else {
+        return res
+          .status(StatusCodes.FORBIDDEN)
+          .json(errorResponse({ message: "Your account is currently suspended" }));
+      }
+    }
+
     req.user = {
       id: user._id.toString(),
       role: user.role,

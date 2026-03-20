@@ -1,7 +1,9 @@
-import { Space_Grotesk, IBM_Plex_Serif } from "next/font/google";
+import { Inter, Poppins } from "next/font/google";
 import Script from "next/script";
 import { Toaster } from "sonner";
+import { PageTransition } from "@/components/layout/page-transition";
 import { AuthProvider } from "@/components/providers/auth-provider";
+import { AppQueryProvider } from "@/components/providers/query-provider";
 import "./globals.css";
 
 const organizationSchema = {
@@ -13,12 +15,13 @@ const organizationSchema = {
   sameAs: []
 };
 
-const headingFont = Space_Grotesk({
+const headingFont = Poppins({
   subsets: ["latin"],
-  variable: "--font-heading"
+  variable: "--font-heading",
+  weight: ["500", "600", "700"]
 });
 
-const bodyFont = IBM_Plex_Serif({
+const bodyFont = Inter({
   subsets: ["latin"],
   variable: "--font-body",
   weight: ["400", "500", "600", "700"]
@@ -72,10 +75,12 @@ export default function RootLayout({ children }) {
         <Script id="organization-jsonld" type="application/ld+json" strategy="beforeInteractive">
           {JSON.stringify(organizationSchema)}
         </Script>
-        <AuthProvider>
-          {children}
-          <Toaster richColors position="top-right" />
-        </AuthProvider>
+        <AppQueryProvider>
+          <AuthProvider>
+            <PageTransition>{children}</PageTransition>
+            <Toaster richColors position="top-right" />
+          </AuthProvider>
+        </AppQueryProvider>
       </body>
     </html>
   );

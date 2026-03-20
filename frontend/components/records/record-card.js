@@ -3,7 +3,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 
-export function RecordCard({ record, onApprove, onReject, showActions = false }) {
+export function RecordCard({ record, onApprove, onReject, onPreview, onAudit, showActions = false, actionPending = false }) {
   return (
     <Card className="animate-rise overflow-hidden">
       <CardContent className="space-y-4 p-5">
@@ -43,6 +43,24 @@ export function RecordCard({ record, onApprove, onReject, showActions = false })
           </div>
         </div>
 
+        <div className="flex flex-wrap items-center justify-between gap-2 text-xs">
+          <span className="rounded-full bg-muted px-2 py-1 font-semibold text-muted-foreground">Updated report v{record.version || 1}</span>
+          <div className="flex items-center gap-3">
+            <button type="button" className="font-semibold text-primary" onClick={() => onAudit?.(record)}>
+              Audit Trail
+            </button>
+            <button type="button" className="font-semibold text-primary" onClick={() => onPreview?.(record)}>
+              Preview / Share
+            </button>
+          </div>
+        </div>
+
+        <div className="grid gap-2 rounded-2xl bg-background/60 p-3 text-xs text-muted-foreground sm:grid-cols-3">
+          <p>Uploaded by: <span className="font-semibold text-foreground">{record.uploadedBy || record.hospital}</span></p>
+          <p>Approved by: <span className="font-semibold text-foreground">{record.approvedBy || "-"}</span></p>
+          <p>Updated: <span className="font-semibold text-foreground">{new Date(record.updatedAt || record.createdAt || Date.now()).toLocaleString()}</span></p>
+        </div>
+
         {record.status === "rejected" && record.reason ? (
           <div className="rounded-xl border border-danger/25 bg-danger/10 p-3 text-xs text-danger">
             <div className="flex items-center gap-2 font-semibold">
@@ -56,10 +74,10 @@ export function RecordCard({ record, onApprove, onReject, showActions = false })
         {showActions && record.status === "pending" ? (
           <div className="flex gap-2">
             <Button className="flex-1" onClick={() => onApprove?.(record)}>
-              Approve
+              {actionPending ? "Approving..." : "Approve"}
             </Button>
-            <Button variant="danger" className="flex-1" onClick={() => onReject?.(record)}>
-              Reject
+            <Button variant="danger" className="flex-1" onClick={() => onReject?.(record)} disabled={actionPending}>
+              {actionPending ? "Updating..." : "Reject"}
             </Button>
           </div>
         ) : null}

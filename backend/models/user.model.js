@@ -1,6 +1,7 @@
 const mongoose = require("mongoose");
 
 const USER_ROLES = ["patient", "hospital", "admin"];
+const ACCOUNT_STATUSES = ["active", "suspended", "blocked"];
 const BLOOD_GROUPS = ["A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-"];
 
 const patientProfileSchema = new mongoose.Schema(
@@ -52,6 +53,27 @@ const userSchema = new mongoose.Schema(
       type: String,
       enum: USER_ROLES,
       default: "patient"
+    },
+    accountStatus: {
+      type: String,
+      enum: ACCOUNT_STATUSES,
+      default: "active",
+      index: true
+    },
+    statusReason: {
+      type: String,
+      default: null,
+      maxlength: 300,
+      trim: true
+    },
+    suspendedUntil: {
+      type: Date,
+      default: null
+    },
+    lastLoginAt: {
+      type: Date,
+      default: null,
+      index: true
     },
     profileImageUrl: {
       type: String,
@@ -125,5 +147,6 @@ const User = mongoose.model("User", userSchema);
 module.exports = {
   User,
   USER_ROLES,
+  ACCOUNT_STATUSES,
   BLOOD_GROUPS
 };

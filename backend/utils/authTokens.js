@@ -19,8 +19,14 @@ const signRefreshToken = (user) =>
     expiresIn: env.jwtRefreshExpiresIn
   });
 
+const signQrToken = (payload) =>
+  jwt.sign(payload, env.jwtAccessSecret, {
+    expiresIn: "5m"
+  });
+
 const verifyAccessToken = (token) => jwt.verify(token, env.jwtAccessSecret);
 const verifyRefreshToken = (token) => jwt.verify(token, env.jwtRefreshSecret);
+const verifyQrToken = (token) => jwt.verify(token, env.jwtAccessSecret);
 
 const hashToken = (token) =>
   crypto.createHash("sha256").update(token).digest("hex");
@@ -28,7 +34,9 @@ const hashToken = (token) =>
 module.exports = {
   signAccessToken,
   signRefreshToken,
+  signQrToken,
   verifyAccessToken,
   verifyRefreshToken,
+  verifyQrToken,
   hashToken
 };

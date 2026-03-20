@@ -5,7 +5,8 @@ const {
   getRecordById,
   decideRecord,
   deleteRecord,
-  getMyTimeline
+  getMyTimeline,
+  adminForceRecordAction
 } = require("../controllers/record.controller");
 const { authenticate } = require("../middleware/auth.middleware");
 const { authorize } = require("../middleware/role.middleware");
@@ -14,7 +15,8 @@ const { uploadSingleRecordFile } = require("../middleware/upload");
 const {
   createRecordSchema,
   listRecordQuerySchema,
-  decisionSchema
+  decisionSchema,
+  adminRecordActionSchema
 } = require("../utils/validators/record.validator");
 
 const router = express.Router();
@@ -37,6 +39,12 @@ router.patch(
   authorize("patient"),
   validate(decisionSchema),
   decideRecord
+);
+router.patch(
+  "/:id/admin-action",
+  authorize("admin"),
+  validate(adminRecordActionSchema),
+  adminForceRecordAction
 );
 router.delete("/:id", authorize("hospital", "admin"), deleteRecord);
 

@@ -5,10 +5,15 @@ import { ProtectedRoute } from "@/components/guards/protected-route";
 import { Navbar } from "@/components/layout/navbar";
 import { Sidebar } from "@/components/layout/sidebar";
 import { ApprovalModal } from "@/components/records/approval-modal";
+import { AuditLogModal } from "@/components/records/audit-log-modal";
+import { RecordPreviewModal } from "@/components/records/record-preview-modal";
 import { RecordCard } from "@/components/records/record-card";
 import { EmptyState } from "@/components/ui/empty-state";
 import { Loader } from "@/components/ui/loader";
+import { useOptimisticUpdate } from "@/hooks/use-optimistic-update";
+import { useRealtimeEvents } from "@/hooks/use-realtime-events";
 import { useToast } from "@/hooks/use-toast";
+import { useDebounce } from "@/hooks/use-debounce";
 import { toAbsoluteApiUrl } from "@/services/api";
 import { decideRecord, fetchMyTimeline } from "@/services/record.service";
 
@@ -17,8 +22,12 @@ export default function TimelinePage() {
   const [loading, setLoading] = useState(true);
   const [activeFilter, setActiveFilter] = useState("all");
   const [query, setQuery] = useState("");
+  const debouncedQuery = useDebounce(query, 250);
+  const [preview, setPreview] = useState({ open: false, record: null });
+  const [audit, setAudit] = useState({ open: false, record: null });
   const [modal, setModal] = useState({ open: false, mode: "approve", record: null });
   const toast = useToast();
+  const { runOptimistic, isPending } = useOptimisticUpdate(records, setRecords);
 
   const loadTimeline = async () => {
     try {
@@ -47,6 +56,46 @@ export default function TimelinePage() {
     loadTimeline();
   }, []);
 
+  const realtimeConfigs = useMemo(
+    () => [
+      {
+        eventName: "record:updated",
+        onEvent: (payload) => {
+          if (!payload?.id) {
+            return;
+          }
+          setRecords((prev) => prev.map((item) => (item.id === payload.id ? { ...item, ...payload } : item)));
+        }
+      },
+      {
+        eventName: "approval:changed",
+        onEvent: (payload) => {
+          if (!payload?.id) {
+            return;
+          }
+          setRecords((prev) => prev.map((item) => (item.id === payload.id ? { ...item, ...payload } : item)));
+        },
+        poller: async () => {
+          const [approvedRes, pendingRes, rejectedRes] = await Promise.all([
+            fetchMyTimeline("approved"),
+            fetchMyTimeline("pending"),
+            fetchMyTimeline("rejected")
+          ]);
+
+          return [
+            ...(approvedRes?.data?.timeline || []),
+            ...(pendingRes?.data?.timeline || []),
+            ...(rejectedRes?.data?.timeline || [])
+          ];
+        },
+        pollInterval: 20000
+      }
+    ],
+    []
+  );
+
+  useRealtimeEvents(realtimeConfigs);
+
   const openModal = (record, mode) => setModal({ open: true, mode, record });
 
   const mapped = useMemo(() => {
@@ -60,16 +109,25 @@ export default function TimelinePage() {
         fileLink: item.fileUrl || toAbsoluteApiUrl(item.filePath),
         category: item.fileMimeType || "record",
         status: item.status,
-        reason: item.rejectionReason
+        reason: item.rejectionReason,
+        version: item.version || 1,
+        uploadedBy: item.hospitalName,
+        approvedBy: item.status === "approved" ? "Patient" : null,
+        createdAt: item.createdAt,
+        updatedAt: item.updatedAt,
+        approvedAt: item.approvedAt,
+        rejectedAt: item.rejectedAt,
+        dateRaw: item.recordDate || item.createdAt,
+        optimistic: item.optimistic
       }));
 
     return transformed.filter((item) => {
       const byStatus = activeFilter === "all" ? true : item.status === activeFilter;
       const normalized = `${item.type} ${item.hospital} ${item.description}`.toLowerCase();
-      const byQuery = query ? normalized.includes(query.toLowerCase()) : true;
+      const byQuery = debouncedQuery ? normalized.includes(debouncedQuery.toLowerCase()) : true;
       return byStatus && byQuery;
     });
-  }, [records, activeFilter, query]);
+  }, [records, activeFilter, debouncedQuery]);
 
   const onDecision = async (reason) => {
     if (!modal.record) {
@@ -78,10 +136,56 @@ export default function TimelinePage() {
 
     try {
       const decision = modal.mode === "approve" ? "approved" : "rejected";
-      await decideRecord(modal.record.id, decision, reason);
-      toast.success(`Record ${decision}`);
+      const recordId = modal.record.id;
+      const previousStatus = modal.record.status;
+      const now = new Date().toISOString();
+
+      const result = await runOptimistic({
+        key: `record:${recordId}:decision`,
+        apply: (prev) =>
+          prev.map((item) =>
+            item.id === recordId
+              ? {
+                  ...item,
+                  status: decision,
+                  optimistic: true,
+                  updatedAt: now,
+                  approvedAt: decision === "approved" ? now : item.approvedAt,
+                  rejectedAt: decision === "rejected" ? now : item.rejectedAt,
+                  rejectionReason: decision === "rejected" ? reason : item.rejectionReason
+                }
+              : item
+          ),
+        request: async () => decideRecord(recordId, decision, reason),
+        finalize: (prev) => prev.map((item) => (item.id === recordId ? { ...item, optimistic: false } : item))
+      });
+
+      if (!result.ok) {
+        toast.error(result.error?.response?.data?.message || "Failed to update record decision");
+        return;
+      }
+
+      toast.success(`Record ${decision}`, {
+        action: {
+          label: "Undo",
+          onClick: () => {
+            setRecords((prev) =>
+              prev.map((item) =>
+                item.id === recordId
+                  ? {
+                      ...item,
+                      status: previousStatus,
+                      optimistic: false
+                    }
+                  : item
+              )
+            );
+            toast.info("Action reverted locally");
+          }
+        }
+      });
+
       setModal({ open: false, mode: "approve", record: null });
-      await loadTimeline();
     } catch (error) {
       toast.error(error?.response?.data?.message || "Failed to update record decision");
     }
@@ -138,8 +242,11 @@ export default function TimelinePage() {
                     key={record.id}
                     record={record}
                     showActions
+                    actionPending={isPending(`record:${record.id}:decision`) || Boolean(record.optimistic)}
                     onApprove={() => openModal(record, "approve")}
                     onReject={() => openModal(record, "reject")}
+                    onAudit={(selected) => setAudit({ open: true, record: selected })}
+                    onPreview={(selected) => setPreview({ open: true, record: selected })}
                   />
                 ))}
               </div>
@@ -147,8 +254,8 @@ export default function TimelinePage() {
 
             {!loading && !mapped.length ? (
               <EmptyState
-                title="No records yet"
-                description="Approved records will appear in your timeline once providers upload them."
+                variant="records"
+                onAction={() => window.location.assign("/upload-record")}
               />
             ) : null}
           </main>
@@ -159,6 +266,18 @@ export default function TimelinePage() {
           mode={modal.mode}
           onClose={() => setModal({ open: false, mode: "approve", record: null })}
           onSubmit={onDecision}
+        />
+
+        <RecordPreviewModal
+          open={preview.open}
+          record={preview.record}
+          onClose={() => setPreview({ open: false, record: null })}
+        />
+
+        <AuditLogModal
+          open={audit.open}
+          record={audit.record}
+          onClose={() => setAudit({ open: false, record: null })}
         />
       </div>
     </ProtectedRoute>

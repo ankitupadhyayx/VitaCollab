@@ -82,6 +82,26 @@ const recordSchema = new mongoose.Schema(
     rejectedAt: {
       type: Date,
       default: null
+    },
+    flaggedSuspicious: {
+      type: Boolean,
+      default: false,
+      index: true
+    },
+    suspiciousFlagReason: {
+      type: String,
+      default: null,
+      maxlength: 500,
+      trim: true
+    },
+    suspiciousFlaggedAt: {
+      type: Date,
+      default: null
+    },
+    suspiciousFlaggedBy: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+      default: null
     }
   },
   {

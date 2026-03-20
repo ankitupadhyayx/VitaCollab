@@ -39,8 +39,33 @@ const decisionSchema = z
     }
   });
 
+const adminRecordActionSchema = z
+  .object({
+    action: z.enum(["approved", "rejected", "flag_suspicious"]),
+    rejectionReason: z.string().max(1000).optional(),
+    flagReason: z.string().max(500).optional()
+  })
+  .superRefine((value, ctx) => {
+    if (value.action === "rejected" && !value.rejectionReason) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ["rejectionReason"],
+        message: "rejectionReason is required when action is rejected"
+      });
+    }
+
+    if (value.action === "flag_suspicious" && !value.flagReason) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ["flagReason"],
+        message: "flagReason is required when action is flag_suspicious"
+      });
+    }
+  });
+
 module.exports = {
   createRecordSchema,
   listRecordQuerySchema,
-  decisionSchema
+  decisionSchema,
+  adminRecordActionSchema
 };

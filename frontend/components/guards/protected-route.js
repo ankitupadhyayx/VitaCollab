@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { Loader } from "@/components/ui/loader";
 import { useAuth } from "@/components/providers/auth-provider";
 
-export function ProtectedRoute({ children, roles }) {
+export function ProtectedRoute({ children, roles, strict = true }) {
   const router = useRouter();
   const { isLoading, isAuthenticated, user } = useAuth();
 
@@ -20,9 +20,9 @@ export function ProtectedRoute({ children, roles }) {
     }
 
     if (roles?.length && !roles.includes(user?.role)) {
-      router.replace("/dashboard");
+      router.replace(strict ? "/forbidden" : "/dashboard");
     }
-  }, [isLoading, isAuthenticated, user, roles, router]);
+  }, [isLoading, isAuthenticated, user, roles, strict, router]);
 
   if (isLoading) {
     return <Loader />;
