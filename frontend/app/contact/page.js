@@ -1,10 +1,7 @@
-import Link from "next/link";
 import { Navbar } from "@/components/layout/navbar";
 import { Footer } from "@/components/layout/footer";
-import { Button } from "@/components/ui/button";
+import { ContactForm } from "@/components/contact/contact-form";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
 
 export const metadata = {
   title: "Contact – VitaCollab",
@@ -35,16 +32,11 @@ export default function ContactPage() {
           <CardHeader>
             <CardTitle>Send a message</CardTitle>
             <CardDescription>
-              You can also email us directly at <Link className="font-semibold text-primary" href="mailto:ankitupadhyay@vitacollab.in">ankitupadhyay@vitacollab.in</Link>
+              Use this secure contact form for support and partnerships. Direct support inbox: ankitupadhyay@vitacollab.in
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <form action="mailto:ankitupadhyay@vitacollab.in" method="post" encType="text/plain" className="space-y-4">
-              <Input name="name" placeholder="Your name" required />
-              <Input type="email" name="email" placeholder="Your email" required />
-              <Textarea name="message" placeholder="Write your message" rows={6} required />
-              <Button type="submit">Send Message</Button>
-            </form>
+            <ContactForm />
           </CardContent>
         </Card>
       </main>

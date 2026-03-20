@@ -72,13 +72,13 @@ export function Footer() {
           <h3 className="text-sm font-semibold uppercase tracking-wide text-foreground">Contact</h3>
           <div className="hidden space-y-2 text-sm text-muted-foreground md:block">
             <p>
-              Contact: <a href="mailto:contact@vitacollab.in?subject=General Inquiry" className="font-medium text-foreground transition-colors hover:text-primary">contact@vitacollab.in</a>
+              Contact: <Link href="/contact" className="font-medium text-foreground transition-colors hover:text-primary">contact@vitacollab.in</Link>
             </p>
             <p>
-              Support: <a href="mailto:support@vitacollab.in?subject=Support Request" className="font-medium text-foreground transition-colors hover:text-primary">support@vitacollab.in</a>
+              Support: <Link href="/contact" className="font-medium text-foreground transition-colors hover:text-primary">support@vitacollab.in</Link>
             </p>
             <p>
-              Owner: <a href="mailto:ankitupadhyay@vitacollab.in?subject=Direct Contact - VitaCollab" className="font-medium text-foreground transition-colors hover:text-primary">ankitupadhyay@vitacollab.in</a>
+              Owner: <Link href="/contact" className="font-medium text-foreground transition-colors hover:text-primary">ankitupadhyay@vitacollab.in</Link>
             </p>
             <p>
   WhatsApp:{" "}
@@ -103,13 +103,13 @@ export function Footer() {
             <summary className="cursor-pointer list-none font-semibold text-foreground">Contact Info</summary>
             <div className="mt-3 space-y-2">
               <p>
-                Contact: <a href="mailto:contact@vitacollab.in?subject=General Inquiry" className="font-medium text-foreground transition-colors hover:text-primary">contact@vitacollab.in</a>
+                Contact: <Link href="/contact" className="font-medium text-foreground transition-colors hover:text-primary">contact@vitacollab.in</Link>
               </p>
               <p>
-                Support: <a href="mailto:support@vitacollab.in?subject=Support Request" className="font-medium text-foreground transition-colors hover:text-primary">support@vitacollab.in</a>
+                Support: <Link href="/contact" className="font-medium text-foreground transition-colors hover:text-primary">support@vitacollab.in</Link>
               </p>
               <p>
-                Owner: <a href="mailto:ankitupadhyay@vitacollab.in?subject=Direct Contact - VitaCollab" className="font-medium text-foreground transition-colors hover:text-primary">ankitupadhyay@vitacollab.in</a>
+                Owner: <Link href="/contact" className="font-medium text-foreground transition-colors hover:text-primary">ankitupadhyay@vitacollab.in</Link>
               </p>
               <p>
   WhatsApp:{" "}

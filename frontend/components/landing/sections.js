@@ -104,7 +104,7 @@ export function HospitalsSection() {
               </div>
             </div>
           </div>
-          <Link href="mailto:ankitupadhyay@vitacollab.in?subject=Hospital%20Verification%20Request">
+          <Link href="/contact">
             <Button size="lg" className="w-full md:w-auto">
               Request Hospital Verification
               <ArrowRight className="ml-2 h-4 w-4" />

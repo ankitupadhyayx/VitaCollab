@@ -1,7 +1,31 @@
 import Link from "next/link";
+import Script from "next/script";
 import { Navbar } from "@/components/layout/navbar";
 import { Footer } from "@/components/layout/footer";
 import { Card, CardContent } from "@/components/ui/card";
+
+const blogPostingSchema = {
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  headline: "What Is a Digital Health Record and Why It Matters in India",
+  description:
+    "Learn what a digital health record is, its benefits in India, and why VitaCollab helps patients and hospitals collaborate securely.",
+  author: {
+    "@type": "Organization",
+    name: "VitaCollab"
+  },
+  publisher: {
+    "@type": "Organization",
+    name: "VitaCollab",
+    logo: {
+      "@type": "ImageObject",
+      url: "https://vitacollab.in/logo.png"
+    }
+  },
+  mainEntityOfPage: "https://vitacollab.in/blog/what-is-digital-health-record",
+  datePublished: "2026-03-20",
+  dateModified: "2026-03-20"
+};
 
 export const metadata = {
   title: "What Is a Digital Health Record? - VitaCollab Guide",
@@ -15,6 +39,9 @@ export const metadata = {
 export default function DigitalHealthRecordBlogPage() {
   return (
     <div className="min-h-screen">
+      <Script id="blogposting-jsonld" type="application/ld+json" strategy="beforeInteractive">
+        {JSON.stringify(blogPostingSchema)}
+      </Script>
       <Navbar />
 
       <main className="mx-auto max-w-3xl space-y-8 px-4 pb-16 pt-14 sm:px-6">
