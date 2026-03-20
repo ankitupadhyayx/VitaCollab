@@ -195,7 +195,7 @@ export function TestimonialsSection() {
                 </div>
               </CardHeader>
               <CardContent>
-                <p className="text-sm leading-relaxed text-muted-foreground">"{item.feedback}"</p>
+                <p className="text-sm leading-relaxed text-muted-foreground">&ldquo;{item.feedback}&rdquo;</p>
               </CardContent>
             </Card>
           );
