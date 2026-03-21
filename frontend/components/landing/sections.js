@@ -24,8 +24,8 @@ function SectionShell({ eyebrow, title, description, children, className = "" })
             {eyebrow}
           </p>
         ) : null}
-        <h2 className="heading-font text-3xl font-bold tracking-tight sm:text-4xl">{title}</h2>
-        {description ? <p className="body-font max-w-3xl text-muted-foreground">{description}</p> : null}
+        <h2 className="heading-font text-3xl font-bold tracking-tight text-slate-900 dark:text-white sm:text-4xl">{title}</h2>
+        {description ? <p className="body-font max-w-3xl text-muted-foreground dark:text-gray-400">{description}</p> : null}
       </div>
       {children}
     </section>
@@ -61,15 +61,15 @@ export function TrustSecuritySection() {
         {trustItems.map((item) => {
           const Icon = item.icon;
           return (
-            <Card key={item.title} className="animate-rise transition-transform duration-300 hover:-translate-y-1">
+            <Card key={item.title} className="animate-rise transition-transform duration-300 hover:-translate-y-1 dark:border-white/10 dark:bg-slate-800 dark:backdrop-blur-md dark:shadow-lg dark:shadow-blue-500/20">
               <CardHeader>
                 <span className="grid h-10 w-10 place-items-center rounded-xl bg-primary/10 text-primary">
                   <Icon className="h-5 w-5" />
                 </span>
-                <CardTitle className="pt-3 text-xl">{item.title}</CardTitle>
+                <CardTitle className="pt-3 text-xl dark:text-white">{item.title}</CardTitle>
               </CardHeader>
               <CardContent>
-                <p className="text-sm leading-relaxed text-muted-foreground">{item.description}</p>
+                <p className="text-sm leading-relaxed text-muted-foreground dark:text-gray-400">{item.description}</p>
               </CardContent>
             </Card>
           );
@@ -86,26 +86,26 @@ export function HospitalsSection() {
       title="For Hospitals & Clinics"
       description="Streamline the operational path from submission to patient consent with healthcare-native collaboration."
     >
-      <Card className="animate-rise border-primary/20 bg-gradient-to-r from-primary/5 via-white to-primary/10">
+      <Card className="animate-rise border-primary/20 bg-gradient-to-r from-primary/5 via-white to-primary/10 dark:border-white/10 dark:bg-gradient-to-r dark:from-slate-900 dark:to-slate-800 dark:shadow-lg dark:shadow-blue-500/20">
         <CardContent className="grid gap-6 p-6 md:grid-cols-[1fr_auto] md:items-center">
           <div className="space-y-4">
             <div className="grid gap-3 sm:grid-cols-3">
-              <div className="rounded-xl border border-border/80 bg-background/70 p-4 text-sm">
+              <div className="rounded-xl border border-border/80 bg-background/70 p-4 text-sm dark:border-white/10 dark:bg-white/5 dark:text-gray-200 dark:backdrop-blur-md">
                 <Building2 className="mb-2 h-5 w-5 text-primary" />
                 Seamless patient data access
               </div>
-              <div className="rounded-xl border border-border/80 bg-background/70 p-4 text-sm">
+              <div className="rounded-xl border border-border/80 bg-background/70 p-4 text-sm dark:border-white/10 dark:bg-white/5 dark:text-gray-200 dark:backdrop-blur-md">
                 <Handshake className="mb-2 h-5 w-5 text-primary" />
                 Faster approvals
               </div>
-              <div className="rounded-xl border border-border/80 bg-background/70 p-4 text-sm">
+              <div className="rounded-xl border border-border/80 bg-background/70 p-4 text-sm dark:border-white/10 dark:bg-white/5 dark:text-gray-200 dark:backdrop-blur-md">
                 <ShieldCheck className="mb-2 h-5 w-5 text-primary" />
                 Secure collaboration
               </div>
             </div>
           </div>
           <Link href="/contact">
-            <Button size="lg" className="w-full md:w-auto">
+            <Button size="lg" className="w-full md:w-auto dark:bg-blue-600 dark:text-white dark:hover:bg-blue-700 dark:shadow-lg dark:shadow-blue-500/20">
               Request Hospital Verification
               <ArrowRight className="ml-2 h-4 w-4" />
             </Button>
@@ -131,15 +131,15 @@ export function PatientsSection() {
     >
       <div className="grid gap-4 md:grid-cols-3">
         {patientPoints.map((point) => (
-          <Card key={point} className="animate-rise transition-transform duration-300 hover:-translate-y-1">
+            <Card key={point} className="animate-rise transition-transform duration-300 hover:-translate-y-1 dark:border-white/10 dark:bg-slate-800 dark:backdrop-blur-md dark:shadow-lg dark:shadow-blue-500/20">
             <CardHeader>
               <span className="grid h-10 w-10 place-items-center rounded-xl bg-success/15 text-success">
                 <HeartPulse className="h-5 w-5" />
               </span>
-              <CardTitle className="pt-3 text-xl">{point}</CardTitle>
+                <CardTitle className="pt-3 text-xl dark:text-white">{point}</CardTitle>
             </CardHeader>
             <CardContent>
-              <CardDescription>
+                <CardDescription className="dark:text-gray-400">
                 Clear activity history and secure consent checkpoints across your care journey.
               </CardDescription>
             </CardContent>
@@ -182,20 +182,20 @@ export function TestimonialsSection() {
         {testimonials.map((item) => {
           const Icon = item.icon;
           return (
-            <Card key={item.name} className="animate-rise transition-transform duration-300 hover:-translate-y-1">
+            <Card key={item.name} className="animate-rise transition-transform duration-300 hover:-translate-y-1 dark:border-white/10 dark:bg-slate-800 dark:backdrop-blur-md dark:shadow-lg dark:shadow-blue-500/20">
               <CardHeader>
                 <div className="flex items-center gap-3">
                   <span className="grid h-10 w-10 place-items-center rounded-full bg-primary/10 text-primary">
                     <Icon className="h-5 w-5" />
                   </span>
                   <div>
-                    <CardTitle className="text-base">{item.name}</CardTitle>
-                    <CardDescription>{item.role}</CardDescription>
+                    <CardTitle className="text-base dark:text-gray-200">{item.name}</CardTitle>
+                    <CardDescription className="dark:text-gray-400">{item.role}</CardDescription>
                   </div>
                 </div>
               </CardHeader>
               <CardContent>
-                <p className="text-sm leading-relaxed text-muted-foreground">&ldquo;{item.feedback}&rdquo;</p>
+                <p className="text-sm leading-relaxed text-muted-foreground dark:text-gray-400">&ldquo;{item.feedback}&rdquo;</p>
               </CardContent>
             </Card>
           );
@@ -208,16 +208,16 @@ export function TestimonialsSection() {
 export function FinalCtaSection() {
   return (
     <section className="mt-16">
-      <Card className="animate-rise border-primary/20 bg-gradient-to-br from-primary/10 via-white to-primary/5 text-center">
+      <Card className="animate-rise border-primary/20 bg-gradient-to-br from-primary/10 via-white to-primary/5 text-center dark:border-white/10 dark:bg-gradient-to-br dark:from-slate-900 dark:to-slate-800 dark:shadow-lg dark:shadow-blue-500/20">
         <CardContent className="space-y-6 py-14">
-          <h2 className="heading-font text-3xl font-bold tracking-tight sm:text-4xl">
+          <h2 className="heading-font text-3xl font-bold tracking-tight text-slate-900 dark:text-white sm:text-4xl">
             Start Your Secure Health Journey Today
           </h2>
-          <p className="body-font mx-auto max-w-2xl text-muted-foreground">
+          <p className="body-font mx-auto max-w-2xl text-muted-foreground dark:text-gray-400">
             Join VitaCollab to simplify hospital collaboration while keeping patient trust and control at the center.
           </p>
           <Link href="/signup">
-            <Button size="lg" className="animate-pulseGlow">
+            <Button size="lg" className="animate-pulseGlow dark:bg-blue-600 dark:text-white dark:hover:bg-blue-700 dark:shadow-lg dark:shadow-blue-500/20">
               Get Started
               <ArrowRight className="ml-2 h-4 w-4" />
             </Button>

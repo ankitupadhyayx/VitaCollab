@@ -1,6 +1,7 @@
 import { ShieldCheck, Users, Building2, Stethoscope } from "lucide-react";
 import { Navbar } from "@/components/layout/navbar";
 import { Footer } from "@/components/layout/footer";
+import { PageIntro, SectionHeading } from "@/components/ui/page-section";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 
 export const metadata = {
@@ -35,21 +36,15 @@ export default function AboutPage() {
     <div className="min-h-screen">
       <Navbar />
 
-      <main className="mx-auto max-w-7xl space-y-12 px-4 pb-16 pt-14 sm:px-6">
-        <section className="space-y-5 animate-rise">
-          <p className="inline-flex rounded-full border border-primary/35 bg-primary/10 px-3 py-1 text-xs font-semibold uppercase tracking-[0.16em] text-primary">
-            About VitaCollab
-          </p>
-          <h1 className="heading-font text-4xl font-bold tracking-tight sm:text-5xl">
-            Building patient-owned digital health records for trusted care collaboration
-          </h1>
-          <p className="body-font max-w-3xl text-muted-foreground">
-            VitaCollab is a privacy-first healthcare SaaS platform designed to connect patients, doctors, and hospitals around verified records and consent-driven data access.
-          </p>
-        </section>
+      <main className="mx-auto max-w-7xl space-y-10 px-4 pb-20 pt-16 sm:px-6">
+        <PageIntro
+          badge="About VitaCollab"
+          title="Building patient-owned digital health records for trusted care collaboration"
+          description="VitaCollab is a privacy-first healthcare SaaS platform designed to connect patients, doctors, and hospitals around verified records and consent-driven data access."
+        />
 
-        <section className="space-y-4 animate-rise">
-          <h2 className="heading-font text-2xl font-bold tracking-tight sm:text-3xl">Our Mission</h2>
+        <section className="space-y-5 animate-rise">
+          <SectionHeading title="Our Mission" />
           <Card>
             <CardContent className="p-6">
               <p className="body-font leading-relaxed text-muted-foreground">
@@ -60,7 +55,7 @@ export default function AboutPage() {
         </section>
 
         <section className="space-y-5">
-          <h2 className="heading-font text-2xl font-bold tracking-tight sm:text-3xl">How VitaCollab Helps</h2>
+          <SectionHeading title="How VitaCollab Helps" />
           <div className="grid gap-4 md:grid-cols-3">
             {pillars.map((pillar) => {
               const Icon = pillar.icon;
