@@ -63,7 +63,8 @@ const authenticate = async (req, res, next) => {
       role: user.role,
       adminRole: user.adminRole || null,
       email: user.email,
-      verified: user.verified
+      verified: user.verified,
+      isHospitalVerified: user.isHospitalVerified === true
     };
 
     return next();
@@ -74,6 +75,30 @@ const authenticate = async (req, res, next) => {
   }
 };
 
+const requireHospitalVerified = async (req, res, next) => {
+  try {
+    if (req.user?.role !== "hospital") {
+      return next();
+    }
+
+    const hospital = await User.findById(req.user.id).select("isHospitalVerified hospitalProfile");
+    const isVerifiedByAdmin = hospital?.isHospitalVerified === true || hospital?.hospitalProfile?.verifiedByAdmin === true;
+
+    if (!isVerifiedByAdmin) {
+      return res
+        .status(StatusCodes.FORBIDDEN)
+        .json(errorResponse({ message: "Hospital is pending admin verification" }));
+    }
+
+    return next();
+  } catch (error) {
+    return res
+      .status(StatusCodes.UNAUTHORIZED)
+      .json(errorResponse({ message: "Unauthorized" }));
+  }
+};
+
 module.exports = {
-  authenticate
+  authenticate,
+  requireHospitalVerified
 };

@@ -8,7 +8,8 @@
     "dev": "nodemon server.js",
     "start": "node server.js",
     "lint": "eslint .",
-    "seed:admin": "node scripts/seedAdmin.js"
+    "seed:admin": "node scripts/seedAdmin.js",
+    "migrate:hospital-verification": "node scripts/migrateHospitalVerification.js"
   },
   "keywords": [
     "healthtech",

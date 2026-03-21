@@ -64,7 +64,7 @@ const adminUpdateSchema = z.object({
 });
 
 const adminBulkUserActionSchema = z.object({
-  action: z.enum(["SUSPEND", "ACTIVATE", "BLOCK"]),
+  action: z.enum(["SUSPEND", "ACTIVATE", "BLOCK", "VERIFY_HOSPITAL"]),
   ids: z.array(z.string().regex(objectIdRegex)).min(1).max(500),
   reason: z.string().max(300).optional()
 });

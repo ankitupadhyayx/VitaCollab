@@ -12,6 +12,23 @@ const normalizeUrl = (value, fallback) => {
   return normalizedProtocol.replace(/\/+$/, "");
 };
 
+const parseBoolean = (value) => {
+  if (typeof value === "undefined") {
+    return undefined;
+  }
+
+  const normalized = String(value).trim().toLowerCase();
+  if (["true", "1", "yes", "on"].includes(normalized)) {
+    return true;
+  }
+
+  if (["false", "0", "no", "off"].includes(normalized)) {
+    return false;
+  }
+
+  return undefined;
+};
+
 const mongoUri = process.env.MONGO_URI || process.env.MONGODB_URI;
 const jwtBaseSecret = process.env.JWT_SECRET;
 const jwtAccessSecret = process.env.JWT_ACCESS_SECRET || jwtBaseSecret;
@@ -47,6 +64,9 @@ module.exports = {
   jwtAccessExpiresIn: process.env.JWT_ACCESS_EXPIRES_IN || "15m",
   jwtRefreshExpiresIn: process.env.JWT_REFRESH_EXPIRES_IN || "7d",
   refreshCookieName: process.env.REFRESH_COOKIE_NAME || "vc_refresh_token",
+  refreshCookieSameSite: (process.env.REFRESH_COOKIE_SAMESITE || "lax").toLowerCase(),
+  refreshCookieDomain: process.env.REFRESH_COOKIE_DOMAIN || undefined,
+  refreshCookieSecure: parseBoolean(process.env.REFRESH_COOKIE_SECURE),
   aesSecretKey: process.env.AES_SECRET_KEY,
   cloudinaryCloudName: process.env.CLOUDINARY_CLOUD_NAME,
   cloudinaryApiKey: process.env.CLOUDINARY_API_KEY,

@@ -9,7 +9,7 @@ const {
   adminForceRecordAction,
   adminBulkRecordAction
 } = require("../controllers/record.controller");
-const { authenticate } = require("../middleware/auth.middleware");
+const { authenticate, requireHospitalVerified } = require("../middleware/auth.middleware");
 const { authorize, requirePermission } = require("../middleware/role.middleware");
 const { validate } = require("../middleware/validate.middleware");
 const { uploadSingleRecordFile } = require("../middleware/upload");
@@ -28,6 +28,7 @@ router.use(authenticate);
 router.post(
   "/upload",
   authorize("hospital", "admin"),
+  requireHospitalVerified,
   uploadSingleRecordFile,
   validate(createRecordSchema),
   uploadRecord

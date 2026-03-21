@@ -27,6 +27,7 @@ const sanitizeUser = (user) => ({
   hospitalProfile: user.hospitalProfile,
   verified: user.verified,
   isVerified: user.isVerified,
+  isHospitalVerified: user.isHospitalVerified,
   accountStatus: user.accountStatus,
   suspendedUntil: user.suspendedUntil,
   statusReason: user.statusReason,
@@ -293,14 +294,14 @@ const getAdminStats = async (req, res, next) => {
       User.countDocuments({}),
       User.countDocuments({ accountStatus: "active" }),
       User.countDocuments({ role: "patient", verified: true }),
-      User.countDocuments({ role: "hospital", "hospitalProfile.verifiedByAdmin": true }),
+      User.countDocuments({ role: "hospital", isHospitalVerified: true }),
       Record.countDocuments({ status: "rejected" }),
       Record.countDocuments({}),
       Record.countDocuments({ status: "approved" }),
       User.countDocuments({
         role: "hospital",
-        verified: true,
-        "hospitalProfile.verifiedByAdmin": { $ne: true }
+        $or: [{ verified: true }, { isVerified: true }],
+        isHospitalVerified: { $ne: true }
       }),
       AuditLog.aggregate([
         {
@@ -444,7 +445,7 @@ const listUsersAdmin = async (req, res, next) => {
     const users = await User.find(filter)
       .sort({ createdAt: -1 })
       .limit(limit)
-      .select("name email role adminRole accountStatus suspendedUntil statusReason profileImageUrl patientProfile hospitalProfile verified isVerified createdAt lastLoginAt riskMetadata");
+      .select("name email role adminRole accountStatus suspendedUntil statusReason profileImageUrl patientProfile hospitalProfile verified isVerified isHospitalVerified createdAt lastLoginAt riskMetadata");
 
     return res.status(StatusCodes.OK).json(
       successResponse({
@@ -780,12 +781,12 @@ const listPendingHospitals = async (req, res, next) => {
 
     const hospitals = await User.find({
       role: "hospital",
-      verified: true,
-      "hospitalProfile.verifiedByAdmin": { $ne: true }
+      $or: [{ verified: true }, { isVerified: true }],
+      isHospitalVerified: { $ne: true }
     })
       .sort({ createdAt: -1 })
       .limit(limit)
-      .select("name email verified hospitalProfile createdAt");
+      .select("name email verified isHospitalVerified hospitalProfile createdAt");
 
     return res.status(StatusCodes.OK).json(
       successResponse({
@@ -796,6 +797,7 @@ const listPendingHospitals = async (req, res, next) => {
             name: hospital.name,
             email: hospital.email,
             verified: hospital.verified,
+            isHospitalVerified: hospital.isHospitalVerified,
             createdAt: hospital.createdAt,
             hospitalProfile: hospital.hospitalProfile
           }))
@@ -827,14 +829,16 @@ const verifyHospital = async (req, res, next) => {
       });
     }
 
-    if (!hospital.verified) {
+    const hospitalEmailVerified = hospital.isVerified === true || hospital.verified === true;
+
+    if (!hospitalEmailVerified) {
       return res.status(StatusCodes.BAD_REQUEST).json({
         success: false,
         message: "Hospital email is not verified yet"
       });
     }
 
-    if (hospital.hospitalProfile?.verifiedByAdmin) {
+    if (hospital.isHospitalVerified === true || hospital.hospitalProfile?.verifiedByAdmin) {
       return res.status(StatusCodes.OK).json(
         successResponse({
           message: "Hospital already verified",
@@ -843,7 +847,8 @@ const verifyHospital = async (req, res, next) => {
               id: hospital._id,
               name: hospital.name,
               email: hospital.email,
-              verifiedByAdmin: true
+              verifiedByAdmin: true,
+              isHospitalVerified: true
             }
           }
         })
@@ -854,6 +859,7 @@ const verifyHospital = async (req, res, next) => {
       ...(hospital.hospitalProfile || {}),
       verifiedByAdmin: true
     };
+    hospital.isHospitalVerified = true;
     await hospital.save();
 
     logAdminAudit({
@@ -882,7 +888,8 @@ const verifyHospital = async (req, res, next) => {
             id: hospital._id,
             name: hospital.name,
             email: hospital.email,
-            verifiedByAdmin: true
+            verifiedByAdmin: true,
+            isHospitalVerified: true
           }
         }
       })
@@ -896,7 +903,8 @@ const bulkUsersActionAdmin = async (req, res, next) => {
   try {
     const { action, ids, reason } = req.body;
 
-    const status = action === "SUSPEND" ? "suspended" : action === "BLOCK" ? "blocked" : "active";
+    const status =
+      action === "SUSPEND" ? "suspended" : action === "BLOCK" ? "blocked" : action === "ACTIVATE" ? "active" : null;
     const uniqueIds = [...new Set(ids)];
 
     const users = await User.find({ _id: { $in: uniqueIds } }).select("role adminRole accountStatus suspendedUntil statusReason riskMetadata");
@@ -919,8 +927,43 @@ const bulkUsersActionAdmin = async (req, res, next) => {
         continue;
       }
 
-      if (user.role === "admin" && status !== "active") {
+      if (action !== "VERIFY_HOSPITAL" && user.role === "admin" && status !== "active") {
         result.failed.push({ id, reason: "Admin users cannot be suspended or blocked" });
+        continue;
+      }
+
+      if (action === "VERIFY_HOSPITAL") {
+        if (user.role !== "hospital") {
+          result.failed.push({ id, reason: "Only hospital users can be verified" });
+          continue;
+        }
+
+        const userVerified = user.isVerified === true || user.verified === true;
+        if (!userVerified) {
+          result.failed.push({ id, reason: "Hospital email is not verified yet" });
+          continue;
+        }
+
+        user.hospitalProfile = {
+          ...(user.hospitalProfile || {}),
+          verifiedByAdmin: true
+        };
+        user.isHospitalVerified = true;
+        user.statusReason = reason || user.statusReason || null;
+        await user.save();
+
+        result.succeeded.push({ id, isHospitalVerified: true });
+
+        realtimeBroker.publish(ADMIN_EVENTS.USER_UPDATED, {
+          id,
+          isHospitalVerified: true,
+          updatedAt: new Date().toISOString()
+        });
+        continue;
+      }
+
+      if (!status) {
+        result.failed.push({ id, reason: "Invalid bulk action" });
         continue;
       }
 

@@ -919,6 +919,24 @@ export default function AdminPage() {
                     >
                       Bulk Activate
                     </Button>
+                    <Button
+                      size="sm"
+                      variant="secondary"
+                      title={!roleGuard.can("BULK_USERS") ? "Insufficient permissions" : "Bulk verify selected hospitals"}
+                      disabled={!roleGuard.can("BULK_USERS") || !usersBulk.selectedCount || usersBulk.inProgress}
+                      onClick={() =>
+                        openConfirm({
+                          type: "bulk-users",
+                          payload: { action: "VERIFY_HOSPITAL", ids: usersBulk.selectedIds },
+                          title: "Bulk verify hospitals",
+                          description: `You are about to verify selected hospitals from ${usersBulk.selectedCount} items`,
+                          confirmLabel: "Verify selected",
+                          danger: false
+                        })
+                      }
+                    >
+                      Bulk Verify Hospitals
+                    </Button>
                   </div>
 
                   {tableLoading.users ? <Loader /> : null}
@@ -941,6 +959,11 @@ export default function AdminPage() {
                               {user.accountStatus}
                             </Badge>
                             <p className="mt-1 text-xs capitalize text-muted-foreground">{user.role}</p>
+                            {user.role === "hospital" ? (
+                              <p className={`mt-1 text-xs font-semibold ${user.isHospitalVerified ? "text-success" : "text-warning"}`}>
+                                {user.isHospitalVerified ? "Hospital verified" : "Hospital verification pending"}
+                              </p>
+                            ) : null}
                           </div>
                           <p className="text-xs text-muted-foreground">
                             Last login: {user.lastLoginAt ? new Date(user.lastLoginAt).toLocaleString() : "Never"}

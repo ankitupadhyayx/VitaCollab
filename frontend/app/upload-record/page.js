@@ -11,10 +11,12 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { FormField } from "@/components/ui/form-field";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import { useAuth } from "@/components/providers/auth-provider";
 import { useToast } from "@/hooks/use-toast";
 import { uploadRecord } from "@/services/record.service";
 
 export default function UploadRecordPage() {
+  const { user } = useAuth();
   const [form, setForm] = useState({ patientId: "", type: "report", description: "" });
   const [query, setQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
@@ -32,6 +34,7 @@ export default function UploadRecordPage() {
   ];
 
   const update = (key, value) => setForm((prev) => ({ ...prev, [key]: value }));
+  const hospitalPendingVerification = user?.role === "hospital" && user?.isHospitalVerified !== true;
 
   const filteredPatients = useMemo(
     () => patientSuggestions.filter((item) => item.toLowerCase().includes(form.patientId.toLowerCase())).slice(0, 5),
@@ -59,6 +62,11 @@ export default function UploadRecordPage() {
 
     if (!file) {
       toast.error("Please choose a file");
+      return;
+    }
+
+    if (hospitalPendingVerification) {
+      toast.error("Hospital is pending admin verification");
       return;
     }
 
@@ -101,6 +109,12 @@ export default function UploadRecordPage() {
               </CardHeader>
               <CardContent>
                 <form className="grid gap-4" onSubmit={submit}>
+                  {hospitalPendingVerification ? (
+                    <div className="rounded-2xl border border-warning/35 bg-warning/10 p-3 text-sm text-warning-foreground">
+                      Hospital verification is pending admin approval. Record upload is disabled until approval.
+                    </div>
+                  ) : null}
+
                   <FormField label="Patient Search" required hint="Start typing patient email for autocomplete">
                     <div className="relative">
                       <Input
@@ -154,7 +168,7 @@ export default function UploadRecordPage() {
 
                   <UploadZone file={file} onFileChange={setFile} />
 
-                  <Button type="submit" className="w-full sm:w-fit" disabled={submitting}>
+                  <Button type="submit" className="w-full sm:w-fit" disabled={submitting || hospitalPendingVerification}>
                     {submitting ? "Uploading..." : "Upload Record"}
                   </Button>
                 </form>

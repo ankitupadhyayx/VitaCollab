@@ -90,7 +90,7 @@ const uploadRecord = async (req, res, next) => {
         .json(errorResponse({ message: "Invalid hospital context" }));
     }
 
-    if (req.user.role === "hospital" && !hospital.hospitalProfile?.verifiedByAdmin) {
+    if (req.user.role === "hospital" && hospital.isHospitalVerified !== true) {
       return res
         .status(StatusCodes.FORBIDDEN)
         .json(errorResponse({ message: "Hospital is pending admin verification" }));

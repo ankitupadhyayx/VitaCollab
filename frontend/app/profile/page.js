@@ -390,7 +390,7 @@ export default function ProfilePage() {
                   {isHospital ? (
                     <div className="inline-flex items-center gap-2 rounded-full bg-success/15 px-3 py-1 text-xs font-semibold text-success">
                       <ShieldCheck className="h-4 w-4" />
-                      {user?.hospitalProfile?.verifiedByAdmin ? "Verified hospital" : "Verification in review"}
+                      {user?.isHospitalVerified ? "Verified hospital" : "Verification in review"}
                     </div>
                   ) : (
                     <div className="inline-flex items-center gap-2 rounded-full bg-primary/15 px-3 py-1 text-xs font-semibold text-primary">

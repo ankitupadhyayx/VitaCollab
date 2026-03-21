@@ -95,6 +95,11 @@ const userSchema = new mongoose.Schema(
       type: Boolean,
       default: false
     },
+    isHospitalVerified: {
+      type: Boolean,
+      default: false,
+      index: true
+    },
     patientProfile: {
       type: patientProfileSchema,
       default: undefined

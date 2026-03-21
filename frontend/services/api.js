@@ -76,7 +76,18 @@ api.interceptors.response.use(
   async (error) => {
     const originalRequest = error.config;
     const status = error?.response?.status;
-    const isAuthRoute = originalRequest?.url?.includes("/auth/");
+    const requestUrl = String(originalRequest?.url || "");
+    const skipRefreshRoutes = [
+      "/auth/login",
+      "/auth/register",
+      "/auth/refresh",
+      "/auth/logout",
+      "/auth/verify-email",
+      "/auth/resend-verification",
+      "/auth/forgot-password",
+      "/auth/reset-password"
+    ];
+    const shouldSkipRefresh = skipRefreshRoutes.some((route) => requestUrl.includes(route));
 
     if (!originalRequest?._networkRetry && (!status || status >= 500)) {
       originalRequest._networkRetry = true;
@@ -84,7 +95,7 @@ api.interceptors.response.use(
       return api(originalRequest);
     }
 
-    if (status !== 401 || originalRequest?._retry || isAuthRoute) {
+    if (status !== 401 || originalRequest?._retry || shouldSkipRefresh) {
       logger.error("API request failed", {
         url: originalRequest?.url,
         method: originalRequest?.method,
