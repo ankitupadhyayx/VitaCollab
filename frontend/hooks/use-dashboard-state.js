@@ -6,16 +6,24 @@ import { Activity, BellDot, FileHeart, Hospital } from "lucide-react";
 import { useAuth } from "@/components/providers/auth-provider";
 import { useOptimisticUpdate } from "@/hooks/use-optimistic-update";
 import { useRealtimeEvents } from "@/hooks/use-realtime-events";
+import { useSharedNotifications } from "@/hooks/use-shared-notifications";
 import { queryKeys } from "@/lib/query-keys";
-import { fetchMyNotifications, markNotificationRead } from "@/services/notification.service";
 import { decideRecord, fetchRecords } from "@/services/record.service";
 
 export default function useDashboardState({ toast }) {
   const { user } = useAuth();
   const role = user?.role || "patient";
   const [records, setRecords] = useState([]);
-  const [notifications, setNotifications] = useState([]);
   const { runOptimistic, isPending } = useOptimisticUpdate(records, setRecords);
+
+  const {
+    notifications,
+    markRead: markNotificationAsRead
+  } = useSharedNotifications({
+    enabled: role === "patient",
+    refetchInterval: 60000,
+    refetchIntervalInBackground: false
+  });
 
   const {
     data: recordsResponse,
@@ -24,7 +32,9 @@ export default function useDashboardState({ toast }) {
   } = useQuery({
     queryKey: queryKeys.records,
     queryFn: () => fetchRecords({ limit: 100 }),
-    refetchInterval: 30000
+    enabled: Boolean(user),
+    refetchInterval: 120000,
+    refetchIntervalInBackground: false
   });
 
   useEffect(() => {
@@ -38,31 +48,6 @@ export default function useDashboardState({ toast }) {
       toast.error(recordsError?.response?.data?.message || "Failed to load dashboard data");
     }
   }, [recordsError, toast]);
-
-  useEffect(() => {
-    let mounted = true;
-
-    const loadNotifications = async () => {
-      try {
-        const response = await fetchMyNotifications();
-        if (mounted) {
-          setNotifications(response?.data?.notifications || []);
-        }
-      } catch {
-        if (mounted) {
-          setNotifications([]);
-        }
-      }
-    };
-
-    if (role === "patient") {
-      loadNotifications();
-    }
-
-    return () => {
-      mounted = false;
-    };
-  }, [role]);
 
   const realtimeConfigs = useMemo(
     () => [
@@ -85,12 +70,7 @@ export default function useDashboardState({ toast }) {
             }
             return [payload, ...prev].slice(0, 100);
           });
-        },
-        poller: async () => {
-          const response = await fetchRecords({ limit: 100 });
-          return response?.data?.records || [];
-        },
-        pollInterval: 20000
+        }
       },
       {
         eventName: "approval:changed",
@@ -232,11 +212,6 @@ export default function useDashboardState({ toast }) {
     if (!result.ok) {
       toast.error(result.error?.response?.data?.message || "Failed to update record");
     }
-  };
-
-  const markNotificationAsRead = async (id) => {
-    await markNotificationRead(id);
-    setNotifications((prev) => prev.map((entry) => (entry.id === id ? { ...entry, isRead: true } : entry)));
   };
 
   return {

@@ -1,42 +1,33 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { motion } from "framer-motion";
-import { useQuery } from "@tanstack/react-query";
 import { ProtectedRoute } from "@/components/guards/protected-route";
 import { Navbar } from "@/components/layout/navbar";
 import { Sidebar } from "@/components/layout/sidebar";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { EmptyState } from "@/components/ui/empty-state";
 import { Loader } from "@/components/ui/loader";
-import { useOptimisticUpdate } from "@/hooks/use-optimistic-update";
 import { useRealtimeEvents } from "@/hooks/use-realtime-events";
+import { useSharedNotifications } from "@/hooks/use-shared-notifications";
 import { useToast } from "@/hooks/use-toast";
-import { queryKeys } from "@/lib/query-keys";
-import { fetchMyNotifications, markNotificationRead } from "@/services/notification.service";
 
 export default function NotificationsPage() {
   const [activeTab, setActiveTab] = useState("unread");
   const [category, setCategory] = useState("all");
-  const [notifications, setNotifications] = useState([]);
   const toast = useToast();
-  const { isPending, runOptimistic } = useOptimisticUpdate(notifications, setNotifications);
-
   const {
-    data: notificationsResponse,
+    notifications,
+    unreadCount,
     isLoading: loading,
-    error: notificationsError
-  } = useQuery({
-    queryKey: queryKeys.notifications,
-    queryFn: fetchMyNotifications,
-    refetchInterval: 30000
+    error: notificationsError,
+    setNotifications,
+    markRead,
+    markAllRead
+  } = useSharedNotifications({
+    refetchInterval: 60000,
+    refetchIntervalInBackground: false
   });
-
-  useEffect(() => {
-    if (notificationsResponse) {
-      setNotifications(notificationsResponse?.data?.notifications || []);
-    }
-  }, [notificationsResponse]);
 
   useEffect(() => {
     if (notificationsError) {
@@ -57,12 +48,7 @@ export default function NotificationsPage() {
             return;
           }
           setNotifications((prev) => [payload, ...prev].slice(0, 50));
-        },
-        poller: async () => {
-          const response = await fetchMyNotifications();
-          return response?.data?.notifications || [];
-        },
-        pollInterval: 15000
+        }
       }
     ],
     []
@@ -70,7 +56,6 @@ export default function NotificationsPage() {
 
   useRealtimeEvents(realtimeConfigs);
 
-  const unreadCount = notifications.filter((item) => !item.isRead).length;
   const visibleNotifications = useMemo(() => {
     return notifications.filter((item) => {
       if (activeTab === "all") {
@@ -83,34 +68,20 @@ export default function NotificationsPage() {
     });
   }, [activeTab, category, notifications]);
 
-  const markAllRead = async () => {
-    const unreadIds = notifications.filter((item) => !item.isRead).map((item) => item.id);
-    if (!unreadIds.length) {
-      return;
-    }
-
-    const result = await runOptimistic({
-      key: "notifications:mark-all",
-      apply: (prev) => prev.map((item) => ({ ...item, isRead: true })),
-      request: async () => Promise.all(unreadIds.map((id) => markNotificationRead(id)))
-    });
-
-    if (result.ok) {
+  const handleMarkAllRead = async () => {
+    try {
+      await markAllRead();
       toast.success("All notifications marked as read");
-    } else {
-      toast.error(result.error?.response?.data?.message || "Failed to mark all notifications");
+    } catch (error) {
+      toast.error(error?.response?.data?.message || "Failed to mark all notifications");
     }
   };
 
-  const markRead = async (id) => {
-    const result = await runOptimistic({
-      key: `notification:${id}`,
-      apply: (prev) => prev.map((item) => (item.id === id ? { ...item, isRead: true } : item)),
-      request: async () => markNotificationRead(id)
-    });
-
-    if (!result.ok) {
-      toast.error(result.error?.response?.data?.message || "Failed to update notification");
+  const handleMarkRead = async (id) => {
+    try {
+      await markRead(id);
+    } catch (error) {
+      toast.error(error?.response?.data?.message || "Failed to update notification");
     }
   };
 
@@ -154,7 +125,7 @@ export default function NotificationsPage() {
                   <option value="record">Records</option>
                   <option value="approval">Approvals</option>
                 </select>
-                <button type="button" className="text-xs font-semibold text-primary" onClick={markAllRead}>Mark all read</button>
+                <button type="button" className="text-xs font-semibold text-primary" onClick={handleMarkAllRead}>Mark all read</button>
               </div>
             </section>
 
@@ -174,7 +145,7 @@ export default function NotificationsPage() {
                     dragElastic={0.08}
                     onDragEnd={(_, info) => {
                       if (!item.isRead && info.offset.x < -70) {
-                        markRead(item.id);
+                        handleMarkRead(item.id);
                       }
                     }}
                     className="relative z-10"
@@ -189,10 +160,9 @@ export default function NotificationsPage() {
                         {!item.isRead ? (
                           <button
                             className="mt-3 text-xs font-semibold text-primary"
-                            onClick={() => markRead(item.id)}
-                            disabled={isPending(`notification:${item.id}`)}
+                            onClick={() => handleMarkRead(item.id)}
                           >
-                            {isPending(`notification:${item.id}`) ? "Updating..." : "Mark as read"}
+                            Mark as read
                           </button>
                         ) : null}
                       </CardContent>

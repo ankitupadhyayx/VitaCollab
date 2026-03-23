@@ -1,13 +1,27 @@
 import api from "@/services/api";
 
+const recordsInFlight = new Map();
+
 export const fetchMyTimeline = async (status) => {
   const response = await api.get("/records/timeline/me", { params: status ? { status } : {} });
   return response.data;
 };
 
-export const fetchRecords = async (params = {}) => {
-  const response = await api.get("/records", { params });
-  return response.data;
+export const fetchRecords = async (params = {}, options = {}) => {
+  const key = JSON.stringify(params || {});
+
+  if (recordsInFlight.has(key) && !options.force) {
+    return recordsInFlight.get(key);
+  }
+
+  const request = api.get("/records", { params })
+    .then((response) => response.data)
+    .finally(() => {
+      recordsInFlight.delete(key);
+    });
+
+  recordsInFlight.set(key, request);
+  return request;
 };
 
 export const decideRecord = async (id, decision, rejectionReason) => {

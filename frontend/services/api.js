@@ -95,6 +95,23 @@ api.interceptors.response.use(
       return api(originalRequest);
     }
 
+    if (status === 429 && !originalRequest?._rateLimitedRetry) {
+      originalRequest._rateLimitedRetry = true;
+      const retryAfterHeader = Number(error?.response?.headers?.["retry-after"] || 0);
+      const retryDelayMs = Number.isFinite(retryAfterHeader) && retryAfterHeader > 0
+        ? retryAfterHeader * 1000
+        : 5000;
+
+      logger.warn("Rate limited request, backing off", {
+        url: originalRequest?.url,
+        method: originalRequest?.method,
+        retryDelayMs
+      });
+
+      await new Promise((resolve) => setTimeout(resolve, retryDelayMs));
+      return api(originalRequest);
+    }
+
     if (status !== 401 || originalRequest?._retry || shouldSkipRefresh) {
       logger.error("API request failed", {
         url: originalRequest?.url,

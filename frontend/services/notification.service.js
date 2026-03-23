@@ -1,8 +1,19 @@
 import api from "@/services/api";
 
-export const fetchMyNotifications = async () => {
-  const response = await api.get("/notifications/my");
-  return response.data;
+let notificationsInFlight = null;
+
+export const fetchMyNotifications = async (options = {}) => {
+  if (notificationsInFlight && !options.force) {
+    return notificationsInFlight;
+  }
+
+  notificationsInFlight = api.get("/notifications/my")
+    .then((response) => response.data)
+    .finally(() => {
+      notificationsInFlight = null;
+    });
+
+  return notificationsInFlight;
 };
 
 export const markNotificationRead = async (id) => {

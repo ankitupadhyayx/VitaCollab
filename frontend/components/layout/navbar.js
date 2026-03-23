@@ -2,15 +2,15 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Bell, CircleDot, Menu, Search, ShieldCheck } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { MobileBottomNav } from "@/components/layout/mobile-bottom-nav";
 import { ThemeToggle } from "@/components/layout/theme-toggle";
 import { useAuth } from "@/components/providers/auth-provider";
 import { useDebounce } from "@/hooks/use-debounce";
+import { useSharedNotifications } from "@/hooks/use-shared-notifications";
 import { useToast } from "@/hooks/use-toast";
-import { fetchMyNotifications, markNotificationRead } from "@/services/notification.service";
 import { fetchRecords } from "@/services/record.service";
 
 export function Navbar() {
@@ -20,39 +20,20 @@ export function Navbar() {
   const [searchPanelOpen, setSearchPanelOpen] = useState(false);
   const [searchInput, setSearchInput] = useState("");
   const [searchResults, setSearchResults] = useState([]);
-  const [notifications, setNotifications] = useState([]);
   const { isAuthenticated, logout, user } = useAuth();
   const toast = useToast();
   const debouncedSearch = useDebounce(searchInput, 350);
+  const isSearchingRef = useRef(false);
 
-  useEffect(() => {
-    if (!isAuthenticated) {
-      setNotifications([]);
-      return;
-    }
-
-    let mounted = true;
-
-    const load = async () => {
-      try {
-        const response = await fetchMyNotifications();
-        if (mounted) {
-          setNotifications(response?.data?.notifications || []);
-        }
-      } catch {
-        if (mounted) {
-          setNotifications([]);
-        }
-      }
-    };
-
-    load();
-    const interval = setInterval(load, 15000);
-    return () => {
-      mounted = false;
-      clearInterval(interval);
-    };
-  }, [isAuthenticated]);
+  const {
+    notifications,
+    unreadCount,
+    markRead
+  } = useSharedNotifications({
+    enabled: isAuthenticated,
+    refetchInterval: isAuthenticated ? 60000 : false,
+    refetchIntervalInBackground: false
+  });
 
   useEffect(() => {
     if (!isAuthenticated || !debouncedSearch.trim()) {
@@ -64,7 +45,12 @@ export function Navbar() {
     let mounted = true;
 
     const run = async () => {
+      if (isSearchingRef.current) {
+        return;
+      }
+
       try {
+        isSearchingRef.current = true;
         const response = await fetchRecords({ search: debouncedSearch.trim(), limit: 8, page: 1 });
         const records = response?.data?.records || [];
         const parsed = records.filter((item) => {
@@ -82,6 +68,8 @@ export function Navbar() {
           setSearchResults([]);
           setSearchPanelOpen(true);
         }
+      } finally {
+        isSearchingRef.current = false;
       }
     };
 
@@ -130,12 +118,9 @@ export function Navbar() {
     return true;
   });
 
-  const unreadCount = useMemo(() => notifications.filter((item) => !item.isRead).length, [notifications]);
-
   const handleMarkRead = async (id) => {
     try {
-      await markNotificationRead(id);
-      setNotifications((prev) => prev.map((item) => (item.id === id ? { ...item, isRead: true } : item)));
+      await markRead(id);
     } catch {
       toast.error("Unable to mark notification as read");
     }
