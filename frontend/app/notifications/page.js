@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { motion } from "framer-motion";
 import { ProtectedRoute } from "@/components/guards/protected-route";
 import { Navbar } from "@/components/layout/navbar";
@@ -33,7 +33,7 @@ export default function NotificationsPage() {
     if (notificationsError) {
       toast.error(notificationsError?.response?.data?.message || "Failed to fetch notifications");
     }
-  }, [notificationsError]);
+  }, [notificationsError, toast]);
 
   const realtimeConfigs = useMemo(
     () => [
@@ -51,7 +51,7 @@ export default function NotificationsPage() {
         }
       }
     ],
-    []
+    [setNotifications]
   );
 
   useRealtimeEvents(realtimeConfigs);

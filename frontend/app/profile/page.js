@@ -156,7 +156,7 @@ export default function ProfilePage() {
     return () => {
       mounted = false;
     };
-  }, []);
+  }, [toast]);
 
   const completion = useMemo(() => {
     const form = isHospital ? hospitalForm : patientForm;

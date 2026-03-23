@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { ProtectedRoute } from "@/components/guards/protected-route";
 import { Navbar } from "@/components/layout/navbar";
 import { Sidebar } from "@/components/layout/sidebar";
@@ -29,7 +29,7 @@ export default function TimelinePage() {
   const toast = useToast();
   const { runOptimistic, isPending } = useOptimisticUpdate(records, setRecords);
 
-  const loadTimeline = async () => {
+  const loadTimeline = useCallback(async () => {
     try {
       setLoading(true);
       const [approvedRes, pendingRes, rejectedRes] = await Promise.all([
@@ -50,11 +50,11 @@ export default function TimelinePage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [toast]);
 
   useEffect(() => {
     loadTimeline();
-  }, []);
+  }, [loadTimeline]);
 
   const realtimeConfigs = useMemo(
     () => [

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import {
   Activity,
   AlertTriangle,
@@ -189,13 +189,13 @@ export default function AdminPage() {
     setTableLoading((prev) => ({ ...prev, [key]: value }));
   };
 
-  const loadStats = async () => {
+  const loadStats = useCallback(async () => {
     const statsRes = await fetchAdminStats();
     setStats(statsRes?.data?.metrics || null);
     setCharts(statsRes?.data?.charts || { dailyActivity: [], growthTrend: [] });
-  };
+  }, []);
 
-  const loadUsers = async () => {
+  const loadUsers = useCallback(async () => {
     setTableBusy("users", true);
     try {
       const params = {
@@ -209,9 +209,9 @@ export default function AdminPage() {
     } finally {
       setTableBusy("users", false);
     }
-  };
+  }, [usersFilter]);
 
-  const loadRecords = async ({ page = recordsPage, limit = recordsPageSize } = {}) => {
+  const loadRecords = useCallback(async ({ page = recordsPage, limit = recordsPageSize } = {}) => {
     setTableBusy("records", true);
     try {
       const params = {
@@ -226,9 +226,9 @@ export default function AdminPage() {
     } finally {
       setTableBusy("records", false);
     }
-  };
+  }, [recordsFilter, recordsPage, recordsPageSize]);
 
-  const loadActivity = async () => {
+  const loadActivity = useCallback(async () => {
     setTableBusy("activity", true);
     try {
       const response = await fetchActivityFeed({
@@ -239,9 +239,9 @@ export default function AdminPage() {
     } finally {
       setTableBusy("activity", false);
     }
-  };
+  }, [activityFilter]);
 
-  const loadReviews = async () => {
+  const loadReviews = useCallback(async () => {
     setTableBusy("reviews", true);
     try {
       const response = await fetchAdminReviews({ status: reviewsFilter, page: 1, limit: 100 });
@@ -249,9 +249,9 @@ export default function AdminPage() {
     } finally {
       setTableBusy("reviews", false);
     }
-  };
+  }, [reviewsFilter]);
 
-  const loadAudit = async () => {
+  const loadAudit = useCallback(async () => {
     setTableBusy("audit", true);
     try {
       const params = {
@@ -266,9 +266,9 @@ export default function AdminPage() {
     } finally {
       setTableBusy("audit", false);
     }
-  };
+  }, [auditFilter]);
 
-  const loadSessions = async () => {
+  const loadSessions = useCallback(async () => {
     setTableBusy("sessions", true);
     try {
       const response = await fetchActiveSessions();
@@ -276,9 +276,9 @@ export default function AdminPage() {
     } finally {
       setTableBusy("sessions", false);
     }
-  };
+  }, []);
 
-  const loadPendingHospitals = async () => {
+  const loadPendingHospitals = useCallback(async () => {
     setTableBusy("pendingHospitals", true);
     try {
       const response = await fetchPendingHospitals();
@@ -286,9 +286,9 @@ export default function AdminPage() {
     } finally {
       setTableBusy("pendingHospitals", false);
     }
-  };
+  }, []);
 
-  const loadAll = async () => {
+  const loadAll = useCallback(async () => {
     try {
       setLoading(true);
       await Promise.all([
@@ -306,11 +306,11 @@ export default function AdminPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [loadActivity, loadAudit, loadPendingHospitals, loadRecords, loadReviews, loadSessions, loadStats, loadUsers, toast]);
 
   useEffect(() => {
     loadAll();
-  }, []);
+  }, [loadAll]);
 
   const realtimeConfigs = useMemo(
     () => [
@@ -335,18 +335,18 @@ export default function AdminPage() {
         }
       }
     ],
-    [usersFilter, recordsFilter, activityFilter, auditFilter, recordsPage, recordsPageSize]
+    [loadActivity, loadAudit, loadRecords, loadSessions, loadUsers]
   );
 
   useRealtimeEvents(realtimeConfigs);
 
   useEffect(() => {
     usersBulk.clear();
-  }, [users]);
+  }, [users, usersBulk]);
 
   useEffect(() => {
     recordsBulk.clear();
-  }, [records]);
+  }, [records, recordsBulk]);
 
   const usersTotalPages = Math.max(1, Math.ceil(users.length / usersPageSize));
   const activityTotalPages = Math.max(1, Math.ceil(activity.length / activityPageSize));

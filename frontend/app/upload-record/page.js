@@ -49,7 +49,7 @@ export default function UploadRecordPage() {
 
   const filteredPatients = useMemo(
     () => patientSuggestions.filter((item) => item.toLowerCase().includes(form.patientId.toLowerCase())).slice(0, 5),
-    [form.patientId]
+    [form.patientId, patientSuggestions]
   );
 
   const visibleUploads = useMemo(() => {
