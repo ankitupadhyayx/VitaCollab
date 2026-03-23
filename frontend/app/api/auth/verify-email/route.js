@@ -1,20 +1,5 @@
 import { AUTH_COPY } from "@/lib/auth-feedback";
-
-const API_VERSION_PREFIX = "/api/v1";
-
-const normalizeApiBaseUrl = (url) => (url || "").trim().replace(/\/+$/, "");
-
-const resolveApiBaseUrl = () => {
-  const raw =
-    normalizeApiBaseUrl(process.env.NEXT_PUBLIC_API_URL) ||
-    normalizeApiBaseUrl(process.env.API_BASE_URL);
-
-  if (!raw) {
-    throw new Error("Missing NEXT_PUBLIC_API_URL or API_BASE_URL environment variable.");
-  }
-
-  return raw.endsWith(API_VERSION_PREFIX) ? raw : `${raw}${API_VERSION_PREFIX}`;
-};
+import { resolveServerApiBaseUrl } from "@/lib/api";
 
 export async function GET(request) {
   try {
@@ -27,7 +12,7 @@ export async function GET(request) {
       );
     }
 
-    const apiBaseUrl = resolveApiBaseUrl();
+    const apiBaseUrl = resolveServerApiBaseUrl();
     const verifyUrl = `${apiBaseUrl}/auth/verify-email?token=${encodeURIComponent(token)}`;
 
     const response = await fetch(verifyUrl, {

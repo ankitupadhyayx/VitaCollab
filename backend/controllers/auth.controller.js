@@ -415,7 +415,15 @@ const login = async (req, res, next) => {
 
 const refresh = async (req, res, next) => {
   try {
-    const providedToken = req.body.refreshToken || req.cookies?.[env.refreshCookieName];
+    const cookieToken = req.cookies?.[env.refreshCookieName];
+    const bodyToken = req.body.refreshToken;
+    const providedToken = cookieToken || bodyToken;
+
+    logger.info("Refresh token source check", {
+      hasCookieToken: Boolean(cookieToken),
+      hasBodyToken: Boolean(bodyToken),
+      refreshCookieName: env.refreshCookieName
+    });
 
     if (!providedToken) {
       return res

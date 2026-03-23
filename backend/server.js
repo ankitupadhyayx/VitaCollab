@@ -12,13 +12,23 @@ const { getRefreshCookieOptions } = require("./utils/authCookies");
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 
 const warnOnCookieConfigMismatch = () => {
+  const options = getRefreshCookieOptions();
+  const sameSite = String(options.sameSite || "").toLowerCase();
+  const secure = options.secure === true;
+  logger.info("Effective backend auth/cors settings", {
+    nodeEnv: env.nodeEnv,
+    corsOrigins: env.corsOrigins,
+    refreshCookieName: env.refreshCookieName,
+    sameSite,
+    secure,
+    domain: options.domain || "<not-set>",
+    path: options.path || "/"
+  });
+
   if (env.nodeEnv !== "production") {
     return;
   }
 
-  const options = getRefreshCookieOptions();
-  const sameSite = String(options.sameSite || "").toLowerCase();
-  const secure = options.secure === true;
   logger.info("Effective refresh cookie settings", {
     sameSite,
     secure,

@@ -14,12 +14,13 @@ const env = require("./utils/env");
 
 const app = express();
 app.set("trust proxy", 1);
+const isProd = env.nodeEnv === "production";
 
-const allowedOrigins = new Set([
-  "https://vitacollab.in",
-  "https://www.vitacollab.in",
-  "http://localhost:3000"
-]);
+const allowedOrigins = new Set(
+  isProd
+    ? env.corsOrigins || ["https://vitacollab.in", "https://www.vitacollab.in"]
+    : env.corsOrigins || ["http://localhost:3000"]
+);
 
 app.disable("x-powered-by");
 app.use(helmet());

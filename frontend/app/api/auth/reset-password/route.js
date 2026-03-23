@@ -1,21 +1,6 @@
 import { NextResponse } from "next/server";
 import { AUTH_COPY } from "@/lib/auth-feedback";
-
-const API_VERSION_PREFIX = "/api/v1";
-
-const normalizeApiBaseUrl = (url) => (url || "").trim().replace(/\/+$/, "");
-
-const resolveApiBaseUrl = () => {
-  const raw =
-    normalizeApiBaseUrl(process.env.NEXT_PUBLIC_API_URL) ||
-    normalizeApiBaseUrl(process.env.API_URL);
-
-  if (!raw) {
-    throw new Error("API URL is not configured");
-  }
-
-  return raw.endsWith(API_VERSION_PREFIX) ? raw : `${raw}${API_VERSION_PREFIX}`;
-};
+import { resolveServerApiBaseUrl } from "@/lib/api";
 
 export async function POST(request) {
   try {
@@ -27,7 +12,7 @@ export async function POST(request) {
       return NextResponse.json({ message: AUTH_COPY.RESET_TOKEN_REQUIRED }, { status: 400 });
     }
 
-    const response = await fetch(`${resolveApiBaseUrl()}/auth/reset-password`, {
+    const response = await fetch(`${resolveServerApiBaseUrl()}/auth/reset-password`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json"

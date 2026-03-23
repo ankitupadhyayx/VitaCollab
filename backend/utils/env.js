@@ -29,10 +29,18 @@ const parseBoolean = (value) => {
   return undefined;
 };
 
+const parseCsv = (value) =>
+  String(value || "")
+    .split(",")
+    .map((item) => item.trim())
+    .filter(Boolean);
+
 const mongoUri = process.env.MONGO_URI || process.env.MONGODB_URI;
 const jwtBaseSecret = process.env.JWT_SECRET;
 const jwtAccessSecret = process.env.JWT_ACCESS_SECRET || jwtBaseSecret;
 const jwtRefreshSecret = process.env.JWT_REFRESH_SECRET || jwtBaseSecret;
+const nodeEnv = process.env.NODE_ENV || "development";
+const isProd = nodeEnv === "production";
 
 const requiredVars = [
   { name: "MONGO_URI or MONGODB_URI", value: mongoUri },
@@ -48,24 +56,31 @@ requiredVars.forEach(({ name, value }) => {
 });
 
 module.exports = {
-  nodeEnv: process.env.NODE_ENV || "development",
+  nodeEnv,
+  isProd,
   port: Number(process.env.PORT) || 5000,
   mongodbUri: mongoUri,
   clientUrl: normalizeUrl(
     process.env.CLIENT_URL || process.env.APP_URL,
-    process.env.NODE_ENV === "production" ? "https://vitacollab.in" : "http://localhost:3000"
+    isProd ? "https://vitacollab.in" : "http://localhost:3000"
   ),
   appUrl: normalizeUrl(
     process.env.APP_URL || process.env.CLIENT_URL,
-    process.env.NODE_ENV === "production" ? "https://vitacollab.in" : "http://localhost:3000"
+    isProd ? "https://vitacollab.in" : "http://localhost:3000"
   ),
+  corsOrigins:
+    parseCsv(process.env.CORS_ORIGINS).length > 0
+      ? parseCsv(process.env.CORS_ORIGINS)
+      : isProd
+        ? ["https://vitacollab.in", "https://www.vitacollab.in"]
+        : ["http://localhost:3000", "https://vitacollab.in", "https://www.vitacollab.in"],
   jwtAccessSecret,
   jwtRefreshSecret,
   jwtAccessExpiresIn: process.env.JWT_ACCESS_EXPIRES_IN || "15m",
   jwtRefreshExpiresIn: process.env.JWT_REFRESH_EXPIRES_IN || "7d",
-  refreshCookieName: process.env.REFRESH_COOKIE_NAME || "vc_refresh_token",
-  refreshCookieSameSite: (process.env.REFRESH_COOKIE_SAMESITE || "lax").toLowerCase(),
-  refreshCookieDomain: process.env.REFRESH_COOKIE_DOMAIN || undefined,
+  refreshCookieName: process.env.REFRESH_COOKIE_NAME || "refreshToken",
+  refreshCookieSameSite: (process.env.REFRESH_COOKIE_SAMESITE || (isProd ? "none" : "lax")).toLowerCase(),
+  refreshCookieDomain: process.env.REFRESH_COOKIE_DOMAIN || (isProd ? ".vitacollab.in" : undefined),
   refreshCookieSecure: parseBoolean(process.env.REFRESH_COOKIE_SECURE),
   aesSecretKey: process.env.AES_SECRET_KEY,
   cloudinaryCloudName: process.env.CLOUDINARY_CLOUD_NAME,
