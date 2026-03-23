@@ -32,13 +32,35 @@ const StarRating = ({ value, onChange }) => {
 };
 
 const statusToBadge = (status) => {
-  if (status === "approved") {
+  if (status === "active" || status === "approved") {
     return "approved";
   }
-  if (status === "rejected") {
+  if (status === "deleted" || status === "rejected") {
     return "rejected";
   }
   return "pending";
+};
+
+const statusToLabel = (item) => {
+  if (item?.isDeleted || item?.status === "deleted") {
+    return "deleted";
+  }
+  if (item?.isPublished === false || item?.status === "pending" || item?.status === "rejected") {
+    return "hidden";
+  }
+  return "visible";
+};
+
+const isPubliclyVisible = (item) => {
+  if (!item) {
+    return false;
+  }
+
+  if (item.isDeleted || item.status === "deleted" || item.status === "rejected") {
+    return false;
+  }
+
+  return item.isPublished !== false;
 };
 
 export default function FeedbackSection({ role, records = [] }) {
@@ -115,16 +137,29 @@ export default function FeedbackSection({ role, records = [] }) {
 
     try {
       setSubmitting(true);
-      await submitReview({
+      const response = await submitReview({
         target,
         targetHospitalId: role === "patient" && target === "hospital" ? hospitalId : undefined,
         rating,
         comment: comment.trim()
       });
-      toast.success("Feedback submitted for moderation.");
+      const createdReview = response?.data?.review;
+      if (createdReview) {
+        setMyReviews((prev) => [createdReview, ...prev]);
+
+        const shouldAddToPublicFeed =
+          isPubliclyVisible(createdReview) &&
+          createdReview.target === target &&
+          (target !== "hospital" || !hospitalId || String(createdReview.targetHospitalId || "") === String(hospitalId));
+
+        if (shouldAddToPublicFeed) {
+          setApprovedReviews((prev) => [createdReview, ...prev]);
+        }
+      }
+
+      toast.success("Feedback published successfully.");
       setComment("");
       setRating(5);
-      await loadData();
     } catch (error) {
       toast.error(error?.response?.data?.message || "Unable to submit feedback");
     } finally {
@@ -199,7 +234,7 @@ export default function FeedbackSection({ role, records = [] }) {
                 <div key={item.id} className="rounded-lg border border-border/70 bg-background px-3 py-2 text-xs">
                   <div className="mb-1 flex items-center justify-between">
                     <span className="font-semibold capitalize">{item.target}</span>
-                    <Badge status={statusToBadge(item.status)}>{item.status}</Badge>
+                    <Badge status={statusToBadge(item.status)}>{statusToLabel(item)}</Badge>
                   </div>
                   <p className="line-clamp-2 text-muted-foreground">{item.comment}</p>
                 </div>
@@ -211,12 +246,12 @@ export default function FeedbackSection({ role, records = [] }) {
 
       <Card>
         <CardHeader>
-          <CardTitle>Approved Reviews</CardTitle>
-          <CardDescription>Only admin-approved feedback is visible.</CardDescription>
+          <CardTitle>Public Reviews</CardTitle>
+          <CardDescription>Visible feedback shown to users.</CardDescription>
         </CardHeader>
         <CardContent className="space-y-2">
           {loading ? <p className="text-sm text-muted-foreground">Loading reviews...</p> : null}
-          {!loading && !approvedReviews.length ? <p className="text-sm text-muted-foreground">No approved reviews yet.</p> : null}
+          {!loading && !approvedReviews.length ? <p className="text-sm text-muted-foreground">No public reviews yet.</p> : null}
           {!loading
             ? approvedReviews.slice(0, 6).map((item) => (
                 <div key={item.id} className="rounded-xl border border-border/70 bg-background/55 p-3">

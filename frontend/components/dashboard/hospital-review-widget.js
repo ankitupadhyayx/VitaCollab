@@ -157,14 +157,14 @@ export default function HospitalReviewWidget({ hospitalId }) {
             <MessageSquareHeart className="h-5 w-5 text-primary" />
             Public Feedback Score
           </CardTitle>
-          <CardDescription>Approved patient reviews for your hospital profile.</CardDescription>
+          <CardDescription>Visible patient reviews for your hospital profile.</CardDescription>
         </CardHeader>
         <CardContent className="space-y-3">
           {loading ? <Skeleton className="h-16 w-full" /> : null}
           {!loading ? (
             <>
               <p className="text-3xl font-bold">{averageRating.toFixed(1)} / 5</p>
-              <p className="text-xs text-muted-foreground">Based on {reviews.length} approved review{reviews.length === 1 ? "" : "s"}</p>
+              <p className="text-xs text-muted-foreground">Based on {reviews.length} public review{reviews.length === 1 ? "" : "s"}</p>
               <TrendBadge trend={trend} />
             </>
           ) : null}
@@ -174,7 +174,7 @@ export default function HospitalReviewWidget({ hospitalId }) {
       <Card>
         <CardHeader>
           <CardTitle>Review Trend</CardTitle>
-          <CardDescription>Approved review volume over the last 6 months.</CardDescription>
+          <CardDescription>Public review volume over the last 6 months.</CardDescription>
         </CardHeader>
         <CardContent>
           {loading ? <Skeleton className="h-24 w-full" /> : null}
@@ -198,7 +198,7 @@ export default function HospitalReviewWidget({ hospitalId }) {
 
       <Card>
         <CardHeader>
-          <CardTitle>Recent Approved Reviews</CardTitle>
+          <CardTitle>Recent Public Reviews</CardTitle>
           <CardDescription>Latest public feedback shown on your profile.</CardDescription>
         </CardHeader>
         <CardContent className="space-y-2">
@@ -208,7 +208,7 @@ export default function HospitalReviewWidget({ hospitalId }) {
               <Skeleton className="h-16 w-full" />
             </>
           ) : null}
-          {!loading && !reviews.length ? <p className="text-sm text-muted-foreground">No approved reviews yet.</p> : null}
+          {!loading && !reviews.length ? <p className="text-sm text-muted-foreground">No public reviews yet.</p> : null}
           {!loading
             ? reviews.slice(0, 3).map((item) => (
                 <div key={item.id} className="rounded-xl border border-border/70 bg-background/55 p-3">

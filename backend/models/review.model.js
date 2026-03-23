@@ -2,7 +2,8 @@ const mongoose = require("mongoose");
 
 const REVIEW_ROLES = ["patient", "hospital"];
 const REVIEW_TARGETS = ["hospital", "platform"];
-const REVIEW_STATUSES = ["pending", "approved", "rejected"];
+// Keep legacy status values for backward compatibility with existing data.
+const REVIEW_STATUSES = ["active", "deleted", "pending", "approved", "rejected"];
 
 const reviewSchema = new mongoose.Schema(
   {
@@ -53,7 +54,17 @@ const reviewSchema = new mongoose.Schema(
     status: {
       type: String,
       enum: REVIEW_STATUSES,
-      default: "pending",
+      default: "active",
+      index: true
+    },
+    isPublished: {
+      type: Boolean,
+      default: true,
+      index: true
+    },
+    isDeleted: {
+      type: Boolean,
+      default: false,
       index: true
     },
     moderationNote: {
@@ -79,6 +90,7 @@ const reviewSchema = new mongoose.Schema(
 
 reviewSchema.index({ status: 1, createdAt: -1 });
 reviewSchema.index({ userId: 1, createdAt: -1 });
+reviewSchema.index({ isPublished: 1, isDeleted: 1, createdAt: -1 });
 
 const Review = mongoose.model("Review", reviewSchema);
 

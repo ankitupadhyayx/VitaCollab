@@ -6,6 +6,26 @@ const { API_MESSAGES } = require("../utils/apiMessages");
 
 const isValidObjectId = (value) => mongoose.Types.ObjectId.isValid(value);
 
+const isReviewDeleted = (review) => {
+  const status = String(review.status || "").toLowerCase();
+  return review.isDeleted === true || status === "deleted";
+};
+
+const isReviewPublished = (review) => {
+  const status = String(review.status || "").toLowerCase();
+  if (isReviewDeleted(review)) {
+    return false;
+  }
+
+  if (status === "rejected") {
+    return false;
+  }
+
+  return review.isPublished !== false;
+};
+
+const normalizedReviewStatus = (review) => (isReviewDeleted(review) ? "deleted" : "active");
+
 const toReviewPayload = (review) => ({
   id: review._id,
   userId: review.userId?._id || review.userId,
@@ -17,7 +37,10 @@ const toReviewPayload = (review) => ({
   targetHospitalName: review.targetHospitalName || null,
   rating: review.rating,
   comment: review.comment,
-  status: review.status,
+  status: normalizedReviewStatus(review),
+  legacyStatus: review.status,
+  isPublished: isReviewPublished(review),
+  isDeleted: isReviewDeleted(review),
   moderationNote: review.moderationNote,
   moderatedBy: review.moderatedBy,
   moderatedAt: review.moderatedAt,
@@ -78,7 +101,9 @@ const createReview = async (req, res, next) => {
       targetHospitalName: target === "hospital" ? hospitalTarget.name : null,
       rating,
       comment,
-      status: "pending"
+      status: "active",
+      isPublished: true,
+      isDeleted: false
     });
 
     return res.status(StatusCodes.CREATED).json(
@@ -99,7 +124,11 @@ const listApprovedReviews = async (req, res, next) => {
     const limit = Number(req.query.limit) || 10;
     const skip = (page - 1) * limit;
 
-    const filter = { status: "approved" };
+    const filter = {
+      isDeleted: { $ne: true },
+      isPublished: { $ne: false },
+      status: { $nin: ["deleted", "rejected"] }
+    };
     if (target) {
       filter.target = target;
     }
@@ -163,7 +192,16 @@ const listReviewsAdmin = async (req, res, next) => {
 
     const filter = {};
     if (status) {
-      filter.status = status;
+      if (status === "active") {
+        filter.$and = [
+          { isDeleted: { $ne: true } },
+          { status: { $ne: "deleted" } }
+        ];
+      } else if (status === "deleted") {
+        filter.$or = [{ isDeleted: true }, { status: "deleted" }];
+      } else {
+        filter.status = status;
+      }
     }
 
     const [reviews, total] = await Promise.all([
@@ -197,7 +235,7 @@ const listReviewsAdmin = async (req, res, next) => {
 const moderateReviewAdmin = async (req, res, next) => {
   try {
     const { id } = req.params;
-    const { status, moderationNote } = req.body;
+    const { status, moderationNote, isPublished, isDeleted } = req.body;
 
     if (!isValidObjectId(id)) {
       return res
@@ -212,8 +250,35 @@ const moderateReviewAdmin = async (req, res, next) => {
         .json(errorResponse({ message: API_MESSAGES.REVIEWS.REVIEW_NOT_FOUND }));
     }
 
-    review.status = status;
-    review.moderationNote = moderationNote || null;
+    if (status === "approved") {
+      review.isPublished = true;
+      review.isDeleted = false;
+    } else if (status === "rejected" || status === "pending") {
+      review.isPublished = false;
+      review.isDeleted = false;
+    } else if (status === "active") {
+      review.isDeleted = false;
+      if (typeof review.isPublished === "undefined") {
+        review.isPublished = true;
+      }
+    } else if (status === "deleted") {
+      review.isDeleted = true;
+      review.isPublished = false;
+    }
+
+    if (typeof isPublished === "boolean") {
+      review.isPublished = isPublished;
+    }
+
+    if (typeof isDeleted === "boolean") {
+      review.isDeleted = isDeleted;
+      if (isDeleted) {
+        review.isPublished = false;
+      }
+    }
+
+    review.status = review.isDeleted ? "deleted" : "active";
+    review.moderationNote = typeof moderationNote === "string" ? moderationNote : review.moderationNote;
     review.moderatedBy = req.user.id;
     review.moderatedAt = new Date();
 
@@ -247,7 +312,12 @@ const deleteReviewAdmin = async (req, res, next) => {
         .json(errorResponse({ message: API_MESSAGES.REVIEWS.REVIEW_NOT_FOUND }));
     }
 
-    await review.deleteOne();
+    review.isDeleted = true;
+    review.isPublished = false;
+    review.status = "deleted";
+    review.moderatedBy = req.user.id;
+    review.moderatedAt = new Date();
+    await review.save();
 
     return res.status(StatusCodes.OK).json(
       successResponse({

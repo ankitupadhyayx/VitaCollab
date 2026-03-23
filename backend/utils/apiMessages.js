@@ -45,12 +45,13 @@ const API_MESSAGES = {
     HOSPITAL_TARGET_REQUIRED: "Please select a hospital.",
     HOSPITAL_TARGET_INVALID: "Please provide a valid hospital for feedback.",
     RATE_LIMIT_LOCAL: "Please wait before submitting another review.",
-    REVIEW_SUBMITTED: "Thank you for your feedback. It is pending moderation.",
-    APPROVED_FETCHED: "Approved reviews fetched successfully.",
+    REVIEW_SUBMITTED: "Thank you for your feedback. It is now published.",
+    APPROVED_FETCHED: "Public reviews fetched successfully.",
     MY_REVIEWS_FETCHED: "Your reviews fetched successfully.",
     REVIEW_NOT_FOUND: "Review not found.",
     REVIEW_MODERATED: "Review status updated successfully.",
-    REVIEW_DELETED: "Review deleted successfully."
+    REVIEW_DELETED: "Review deleted successfully.",
+    REVIEW_RESTORED: "Review restored successfully."
   },
   NOTIFICATIONS: {
     LIST_FETCHED: "Notifications fetched successfully.",

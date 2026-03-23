@@ -32,15 +32,28 @@ const listPublicReviewsQuerySchema = z.object({
 });
 
 const adminListReviewsQuerySchema = z.object({
-  status: z.enum(["pending", "approved", "rejected"]).optional(),
+  status: z.enum(["active", "deleted", "pending", "approved", "rejected"]).optional(),
   page: z.coerce.number().int().min(1).default(1),
   limit: z.coerce.number().int().min(1).max(100).default(20)
 });
 
-const adminModerateReviewSchema = z.object({
-  status: z.enum(["approved", "rejected"]),
-  moderationNote: z.string().max(300).optional()
-});
+const adminModerateReviewSchema = z
+  .object({
+    status: z.enum(["active", "deleted", "pending", "approved", "rejected"]).optional(),
+    isPublished: z.boolean().optional(),
+    isDeleted: z.boolean().optional(),
+    moderationNote: z.string().max(300).optional()
+  })
+  .refine(
+    (value) =>
+      typeof value.status !== "undefined" ||
+      typeof value.isPublished !== "undefined" ||
+      typeof value.isDeleted !== "undefined" ||
+      typeof value.moderationNote !== "undefined",
+    {
+      message: "Please provide at least one moderation field."
+    }
+  );
 
 module.exports = {
   createReviewSchema,

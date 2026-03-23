@@ -94,6 +94,18 @@ const emptyConfirm = {
   needsReason: false
 };
 
+const getReviewDisplayState = (review) => {
+  if (review?.isDeleted || review?.status === "deleted") {
+    return { label: "deleted", badge: "rejected" };
+  }
+
+  if (review?.isPublished === false) {
+    return { label: "hidden", badge: "pending" };
+  }
+
+  return { label: "visible", badge: "approved" };
+};
+
 const toCsvValue = (value) => {
   const normalized = value === null || typeof value === "undefined" ? "" : String(value);
   return `"${normalized.replace(/"/g, '""')}"`;
@@ -151,7 +163,7 @@ export default function AdminPage() {
   const [recordsFilter, setRecordsFilter] = useState({ status: "all", search: "" });
   const [activityFilter, setActivityFilter] = useState("all");
   const [auditFilter, setAuditFilter] = useState({ user: "", action: "", startDate: "", endDate: "" });
-  const [reviewsFilter, setReviewsFilter] = useState("pending");
+  const [reviewsFilter, setReviewsFilter] = useState("all");
 
   const [broadcastMessage, setBroadcastMessage] = useState("");
   const [adminForm, setAdminForm] = useState({ name: "", email: "", password: "", adminRole: "ADMIN" });
@@ -244,7 +256,11 @@ export default function AdminPage() {
   const loadReviews = useCallback(async () => {
     setTableBusy("reviews", true);
     try {
-      const response = await fetchAdminReviews({ status: reviewsFilter, page: 1, limit: 100 });
+      const response = await fetchAdminReviews({
+        ...(reviewsFilter !== "all" ? { status: reviewsFilter } : {}),
+        page: 1,
+        limit: 100
+      });
       setReviews(response?.data?.reviews || []);
     } finally {
       setTableBusy("reviews", false);
@@ -529,14 +545,14 @@ export default function AdminPage() {
       }
 
       if (confirm.type === "review-status") {
-        await moderateAdminReview(confirm.payload.id, { status: confirm.payload.status });
-        toast.success(confirm.payload.status === "approved" ? "Review approved" : "Review rejected");
+        await moderateAdminReview(confirm.payload.id, confirm.payload.patch || {});
+        toast.success(confirm.payload.successMessage || "Review updated");
         await loadReviews();
       }
 
       if (confirm.type === "review-delete") {
         await deleteAdminReview(confirm.payload.id);
-        toast.success("Review deleted");
+        toast.success("Review removed from public view");
         await loadReviews();
       }
 
@@ -1460,11 +1476,11 @@ export default function AdminPage() {
               <Card>
                 <CardHeader>
                   <CardTitle>Review Management</CardTitle>
-                  <CardDescription>Moderate patient and hospital feedback before public visibility.</CardDescription>
+                  <CardDescription>Reviews are auto-published. Use controls to hide, restore, or soft-delete feedback.</CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4">
                   <div className="flex flex-wrap items-center gap-2">
-                    {["pending", "approved", "rejected"].map((status) => (
+                    {["all", "active", "deleted", "pending", "approved", "rejected"].map((status) => (
                       <button
                         key={status}
                         type="button"
@@ -1483,6 +1499,14 @@ export default function AdminPage() {
                     <div className="space-y-2">
                       {reviews.map((review) => (
                         <div key={review.id} className="rounded-2xl border border-border/80 bg-background/60 p-3">
+                          {(() => {
+                            const displayState = getReviewDisplayState(review);
+                            const isDeleted = displayState.label === "deleted";
+                            const isHidden = displayState.label === "hidden";
+                            const isVisible = displayState.label === "visible";
+
+                            return (
+                              <>
                           <div className="flex flex-wrap items-start justify-between gap-2">
                             <div className="flex items-center gap-2">
                               {review.userProfileImageUrl ? (
@@ -1498,7 +1522,7 @@ export default function AdminPage() {
                                 <p className="text-xs capitalize text-muted-foreground">{review.role} • {review.target}{review.targetHospitalName ? ` (${review.targetHospitalName})` : ""}</p>
                               </div>
                             </div>
-                            <Badge status={review.status === "approved" ? "approved" : review.status === "rejected" ? "rejected" : "pending"}>{review.status}</Badge>
+                            <Badge status={displayState.badge}>{displayState.label}</Badge>
                           </div>
 
                           <div className="mt-2 flex items-center gap-1">
@@ -1512,45 +1536,75 @@ export default function AdminPage() {
                           <div className="mt-3 flex flex-wrap gap-2">
                             <Button
                               size="sm"
-                              disabled={review.status === "approved"}
+                              disabled={isVisible}
                               onClick={() =>
                                 openConfirm({
                                   type: "review-status",
-                                  payload: { id: review.id, status: "approved" },
-                                  title: "Approve review",
+                                  payload: {
+                                    id: review.id,
+                                    patch: { status: "active", isPublished: true, isDeleted: false },
+                                    successMessage: "Review is now visible"
+                                  },
+                                  title: "Show review",
                                   description: "Make this review publicly visible?",
-                                  confirmLabel: "Approve",
+                                  confirmLabel: "Show",
                                   danger: false
                                 })
                               }
                             >
-                              Approve
+                              Show
                             </Button>
                             <Button
                               size="sm"
                               variant="secondary"
-                              disabled={review.status === "rejected"}
+                              disabled={isHidden || isDeleted}
                               onClick={() =>
                                 openConfirm({
                                   type: "review-status",
-                                  payload: { id: review.id, status: "rejected" },
-                                  title: "Reject review",
-                                  description: "Reject this review from public display?",
-                                  confirmLabel: "Reject"
+                                  payload: {
+                                    id: review.id,
+                                    patch: { status: "active", isPublished: false, isDeleted: false },
+                                    successMessage: "Review hidden from public view"
+                                  },
+                                  title: "Hide review",
+                                  description: "Hide this review from public display?",
+                                  confirmLabel: "Hide"
                                 })
                               }
                             >
-                              Reject
+                              Hide
+                            </Button>
+                            <Button
+                              size="sm"
+                              variant="secondary"
+                              disabled={!isDeleted}
+                              onClick={() =>
+                                openConfirm({
+                                  type: "review-status",
+                                  payload: {
+                                    id: review.id,
+                                    patch: { status: "active", isPublished: true, isDeleted: false },
+                                    successMessage: "Review restored"
+                                  },
+                                  title: "Restore review",
+                                  description: "Restore this review and make it visible?",
+                                  confirmLabel: "Restore",
+                                  danger: false
+                                })
+                              }
+                            >
+                              Restore
                             </Button>
                             <Button
                               size="sm"
                               variant="danger"
+                              disabled={isDeleted}
                               onClick={() =>
                                 openConfirm({
                                   type: "review-delete",
                                   payload: { id: review.id },
-                                  title: "Delete review",
-                                  description: "Permanently delete this review?",
+                                  title: "Soft delete review",
+                                  description: "Remove this review from public view and mark as deleted?",
                                   confirmLabel: "Delete"
                                 })
                               }
@@ -1558,6 +1612,9 @@ export default function AdminPage() {
                               Delete
                             </Button>
                           </div>
+                              </>
+                            );
+                          })()}
                         </div>
                       ))}
                       {!reviews.length ? <p className="text-sm text-muted-foreground">No reviews found for this filter.</p> : null}
