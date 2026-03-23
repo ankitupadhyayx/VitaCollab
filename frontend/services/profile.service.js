@@ -1,8 +1,20 @@
 import api from "@/services/api";
 
+let inFlightProfileRequest = null;
+
 export const getProfile = async () => {
-  const response = await api.get("/users/profile");
-  return response.data;
+  if (inFlightProfileRequest) {
+    return inFlightProfileRequest;
+  }
+
+  inFlightProfileRequest = api
+    .get("/users/profile")
+    .then((response) => response.data)
+    .finally(() => {
+      inFlightProfileRequest = null;
+    });
+
+  return inFlightProfileRequest;
 };
 
 export const updateProfile = async (payload, onUploadProgress) => {

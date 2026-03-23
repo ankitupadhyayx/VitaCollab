@@ -2,5 +2,7 @@ export const queryKeys = {
   notifications: ["notifications"],
   records: ["records"],
   timeline: ["timeline"],
-  profile: ["profile"]
+  profile: ["profile"],
+  myReviews: ["reviews", "my"],
+  publicReviews: (params = {}) => ["reviews", "public", params]
 };

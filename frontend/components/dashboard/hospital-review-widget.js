@@ -1,10 +1,10 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useMemo } from "react";
 import { ArrowDownRight, ArrowRight, ArrowUpRight, MessageSquareHeart, Star } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { useSharedPublicReviews } from "@/hooks/use-shared-reviews";
 import { Skeleton } from "@/components/ui/skeleton";
-import { fetchApprovedReviews } from "@/services/review.service";
 
 const getAverage = (values) => {
   if (!values.length) {
@@ -74,50 +74,18 @@ const TrendBadge = ({ trend }) => {
 };
 
 export default function HospitalReviewWidget({ hospitalId }) {
-  const [loading, setLoading] = useState(true);
-  const [reviews, setReviews] = useState([]);
-
-  useEffect(() => {
-    let mounted = true;
-
-    const load = async () => {
-      if (!hospitalId) {
-        if (mounted) {
-          setReviews([]);
-          setLoading(false);
-        }
-        return;
-      }
-
-      try {
-        setLoading(true);
-        const response = await fetchApprovedReviews({
-          target: "hospital",
-          hospitalId,
-          limit: 50,
-          page: 1
-        });
-
-        if (mounted) {
-          setReviews(response?.data?.reviews || []);
-        }
-      } catch {
-        if (mounted) {
-          setReviews([]);
-        }
-      } finally {
-        if (mounted) {
-          setLoading(false);
-        }
-      }
-    };
-
-    load();
-
-    return () => {
-      mounted = false;
-    };
-  }, [hospitalId]);
+  const { reviews, isLoading: loading } = useSharedPublicReviews(
+    {
+      target: "hospital",
+      hospitalId,
+      limit: 50,
+      page: 1
+    },
+    {
+      enabled: Boolean(hospitalId),
+      staleTime: 2 * 60 * 1000
+    }
+  );
 
   const averageRating = useMemo(() => getAverage(reviews), [reviews]);
   const trend = useMemo(() => getTrend(reviews), [reviews]);

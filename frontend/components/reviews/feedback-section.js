@@ -1,13 +1,14 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { MessageSquareHeart, Star } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
+import { useSharedMyReviews, useSharedPublicReviews } from "@/hooks/use-shared-reviews";
 import { useToast } from "@/hooks/use-toast";
-import { fetchApprovedReviews, fetchMyReviews, submitReview } from "@/services/review.service";
+import { submitReview } from "@/services/review.service";
 
 const StarRating = ({ value, onChange }) => {
   return (
@@ -70,9 +71,6 @@ export default function FeedbackSection({ role, records = [] }) {
   const [rating, setRating] = useState(5);
   const [comment, setComment] = useState("");
   const [submitting, setSubmitting] = useState(false);
-  const [loading, setLoading] = useState(true);
-  const [approvedReviews, setApprovedReviews] = useState([]);
-  const [myReviews, setMyReviews] = useState([]);
 
   const hospitalOptions = useMemo(() => {
     const map = new Map();
@@ -84,34 +82,50 @@ export default function FeedbackSection({ role, records = [] }) {
     return Array.from(map.entries()).map(([id, name]) => ({ id, name }));
   }, [records]);
 
-  const loadData = useCallback(async () => {
-    setLoading(true);
-    try {
-      const approvedParams =
-        target === "hospital"
-          ? {
-              target: "hospital",
-              ...(hospitalId ? { hospitalId } : {})
-            }
-          : { target: "platform" };
+  const publicReviewParams = useMemo(
+    () =>
+      target === "hospital"
+        ? {
+            target: "hospital",
+            ...(hospitalId ? { hospitalId } : {})
+          }
+        : { target: "platform" },
+    [hospitalId, target]
+  );
 
-      const [approvedRes, myRes] = await Promise.all([
-        fetchApprovedReviews(approvedParams),
-        fetchMyReviews()
-      ]);
+  const {
+    reviews: approvedReviews,
+    isLoading: isLoadingApprovedReviews,
+    error: approvedReviewsError,
+    setReviews: setApprovedReviews
+  } = useSharedPublicReviews(publicReviewParams, {
+    enabled: role === "patient" || role === "hospital",
+    staleTime: 60 * 1000
+  });
 
-      setApprovedReviews(approvedRes?.data?.reviews || []);
-      setMyReviews(myRes?.data?.reviews || []);
-    } catch (error) {
-      toast.error(error?.response?.data?.message || "Failed to load feedback");
-    } finally {
-      setLoading(false);
-    }
-  }, [hospitalId, target, toast]);
+  const {
+    reviews: myReviews,
+    isLoading: isLoadingMyReviews,
+    error: myReviewsError,
+    setReviews: setMyReviews
+  } = useSharedMyReviews({
+    enabled: role === "patient" || role === "hospital",
+    staleTime: 60 * 1000
+  });
+
+  const loading = isLoadingApprovedReviews || isLoadingMyReviews;
 
   useEffect(() => {
-    loadData();
-  }, [loadData]);
+    if (approvedReviewsError) {
+      toast.error(approvedReviewsError?.response?.data?.message || "Failed to load feedback");
+    }
+  }, [approvedReviewsError, toast]);
+
+  useEffect(() => {
+    if (myReviewsError) {
+      toast.error(myReviewsError?.response?.data?.message || "Failed to load feedback");
+    }
+  }, [myReviewsError, toast]);
 
   useEffect(() => {
     if (role === "hospital") {
