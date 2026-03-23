@@ -1,3 +1,5 @@
+import { AUTH_COPY } from "@/lib/auth-feedback";
+
 const API_VERSION_PREFIX = "/api/v1";
 
 const normalizeApiBaseUrl = (url) => (url || "").trim().replace(/\/+$/, "");
@@ -20,7 +22,7 @@ export async function GET(request) {
 
     if (!token) {
       return Response.json(
-        { success: false, message: "Verification token is required" },
+        { success: false, message: AUTH_COPY.VERIFY_TOKEN_REQUIRED },
         { status: 400 }
       );
     }
@@ -39,7 +41,7 @@ export async function GET(request) {
       return Response.json(
         {
           success: false,
-          message: payload?.message || "Invalid or expired verification link"
+          message: payload?.message || AUTH_COPY.VERIFY_INVALID_OR_EXPIRED
         },
         { status: response.status }
       );
@@ -48,7 +50,7 @@ export async function GET(request) {
     return Response.json(
       {
         success: true,
-        message: payload?.message || "Email verified successfully"
+        message: payload?.message || AUTH_COPY.VERIFY_SUCCESS
       },
       { status: 200 }
     );
@@ -56,7 +58,7 @@ export async function GET(request) {
     return Response.json(
       {
         success: false,
-        message: error?.message || "Unable to verify email"
+        message: AUTH_COPY.VERIFY_FAILED
       },
       { status: 500 }
     );

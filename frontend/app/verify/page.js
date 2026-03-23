@@ -4,10 +4,11 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { AUTH_COPY, normalizeAuthErrorMessage } from "@/lib/auth-feedback";
 
 export default function VerifyPage() {
   const [status, setStatus] = useState("loading");
-  const [message, setMessage] = useState("Verifying your email...");
+  const [message, setMessage] = useState("Verifying your email address...");
 
   useEffect(() => {
     const verify = async () => {
@@ -15,7 +16,7 @@ export default function VerifyPage() {
 
       if (!token) {
         setStatus("error");
-        setMessage("Invalid or expired link");
+        setMessage(AUTH_COPY.VERIFY_INVALID_OR_EXPIRED);
         return;
       }
 
@@ -28,15 +29,15 @@ export default function VerifyPage() {
 
         if (!response.ok || !result?.success) {
           setStatus("error");
-          setMessage(result?.message || "Invalid or expired link");
+          setMessage(normalizeAuthErrorMessage(result?.message, AUTH_COPY.VERIFY_INVALID_OR_EXPIRED));
           return;
         }
 
         setStatus("success");
-        setMessage("Email verified successfully");
+        setMessage(result?.message || AUTH_COPY.VERIFY_SUCCESS);
       } catch {
         setStatus("error");
-        setMessage("Invalid or expired link");
+        setMessage(AUTH_COPY.VERIFY_FAILED);
       }
     };
 

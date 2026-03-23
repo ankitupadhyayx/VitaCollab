@@ -1,6 +1,7 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { useSearchParams } from "next/navigation";
 import { Search } from "lucide-react";
 import { ProtectedRoute } from "@/components/guards/protected-route";
 import { Navbar } from "@/components/layout/navbar";
@@ -17,6 +18,7 @@ import { uploadRecord } from "@/services/record.service";
 
 export default function UploadRecordPage() {
   const { user } = useAuth();
+  const searchParams = useSearchParams();
   const [form, setForm] = useState({ patientId: "", type: "report", description: "" });
   const [query, setQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
@@ -35,6 +37,15 @@ export default function UploadRecordPage() {
 
   const update = (key, value) => setForm((prev) => ({ ...prev, [key]: value }));
   const hospitalPendingVerification = user?.role === "hospital" && user?.isHospitalVerified !== true;
+
+  useEffect(() => {
+    const patientEmail = searchParams.get("patientEmail");
+    if (!patientEmail) {
+      return;
+    }
+
+    setForm((prev) => (prev.patientId ? prev : { ...prev, patientId: patientEmail }));
+  }, [searchParams]);
 
   const filteredPatients = useMemo(
     () => patientSuggestions.filter((item) => item.toLowerCase().includes(form.patientId.toLowerCase())).slice(0, 5),

@@ -5,13 +5,22 @@ const objectIdRegex = /^[0-9a-fA-F]{24}$/;
 
 const createRecordSchema = z.object({
   patientId: z
-    .string()
-    .min(3)
+    .string({
+      required_error: "Please provide a patient ID or email address.",
+      invalid_type_error: "Please provide a patient ID or email address."
+    })
+    .min(3, "Please provide a patient ID or email address.")
     .refine((value) => objectIdRegex.test(value) || z.string().email().safeParse(value).success, {
-      message: "patientId must be a valid patient id or email"
+      message: "Please provide a valid patient ID or email address."
     }),
   type: z.enum(RECORD_TYPES),
-  description: z.string().min(4).max(2000),
+  description: z
+    .string({
+      required_error: "Please enter a record description.",
+      invalid_type_error: "Please enter a record description."
+    })
+    .min(4, "Please enter at least 4 characters in the description.")
+    .max(2000, "Please keep the description within 2000 characters."),
   recordDate: z.string().datetime().optional()
 });
 
@@ -19,7 +28,7 @@ const listRecordQuerySchema = z.object({
   status: z.enum(["pending", "approved", "rejected"]).optional(),
   type: z.enum(RECORD_TYPES).optional(),
   search: z.string().max(100).optional(),
-  patientId: z.string().regex(objectIdRegex).optional(),
+  patientId: z.string().regex(objectIdRegex, "Please provide a valid patient ID.").optional(),
   page: z.coerce.number().int().min(1).default(1),
   limit: z.coerce.number().int().min(1).max(100).default(10)
 });
@@ -34,7 +43,7 @@ const decisionSchema = z
       ctx.addIssue({
         code: z.ZodIssueCode.custom,
         path: ["rejectionReason"],
-        message: "rejectionReason is required when decision is rejected"
+        message: "Please provide a rejection reason when rejecting a record."
       });
     }
   });
@@ -50,7 +59,7 @@ const adminRecordActionSchema = z
       ctx.addIssue({
         code: z.ZodIssueCode.custom,
         path: ["rejectionReason"],
-        message: "rejectionReason is required when action is rejected"
+        message: "Please provide a rejection reason when rejecting a record."
       });
     }
 
@@ -58,7 +67,7 @@ const adminRecordActionSchema = z
       ctx.addIssue({
         code: z.ZodIssueCode.custom,
         path: ["flagReason"],
-        message: "flagReason is required when action is flag_suspicious"
+        message: "Please provide a reason when flagging a record as suspicious."
       });
     }
   });
@@ -75,7 +84,7 @@ const adminBulkRecordActionSchema = z
       ctx.addIssue({
         code: z.ZodIssueCode.custom,
         path: ["rejectionReason"],
-        message: "rejectionReason is required when action is REJECT"
+        message: "Please provide a rejection reason when rejecting records."
       });
     }
 
@@ -83,7 +92,7 @@ const adminBulkRecordActionSchema = z
       ctx.addIssue({
         code: z.ZodIssueCode.custom,
         path: ["flagReason"],
-        message: "flagReason is required when action is FLAG"
+        message: "Please provide a reason when flagging records."
       });
     }
   });

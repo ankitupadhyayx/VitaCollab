@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { AUTH_COPY } from "@/lib/auth-feedback";
 
 const API_VERSION_PREFIX = "/api/v1";
 
@@ -22,7 +23,7 @@ export async function POST(request) {
     const email = typeof body?.email === "string" ? body.email.trim() : "";
 
     if (!email) {
-      return NextResponse.json({ message: "Email is required" }, { status: 400 });
+      return NextResponse.json({ message: AUTH_COPY.EMAIL_REQUIRED }, { status: 400 });
     }
 
     const response = await fetch(`${resolveApiBaseUrl()}/auth/forgot-password`, {
@@ -37,13 +38,13 @@ export async function POST(request) {
 
     if (!response.ok) {
       return NextResponse.json(
-        { message: data?.message || "Unable to process request" },
+        { message: data?.message || AUTH_COPY.FORGOT_PASSWORD_FAILED },
         { status: response.status }
       );
     }
 
-    return NextResponse.json({ message: data?.message || "If your email exists, a reset link was sent" });
+    return NextResponse.json({ message: data?.message || AUTH_COPY.FORGOT_PASSWORD_SUCCESS });
   } catch (error) {
-    return NextResponse.json({ message: "Failed to process forgot password request" }, { status: 500 });
+    return NextResponse.json({ message: AUTH_COPY.FORGOT_PASSWORD_FAILED }, { status: 500 });
   }
 }

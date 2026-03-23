@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { AUTH_COPY } from "@/lib/auth-feedback";
 
 const API_VERSION_PREFIX = "/api/v1";
 
@@ -23,7 +24,7 @@ export async function POST(request) {
     const newPassword = typeof body?.newPassword === "string" ? body.newPassword : "";
 
     if (!token || !newPassword) {
-      return NextResponse.json({ message: "Token and new password are required" }, { status: 400 });
+      return NextResponse.json({ message: AUTH_COPY.RESET_TOKEN_REQUIRED }, { status: 400 });
     }
 
     const response = await fetch(`${resolveApiBaseUrl()}/auth/reset-password`, {
@@ -38,13 +39,13 @@ export async function POST(request) {
 
     if (!response.ok) {
       return NextResponse.json(
-        { message: data?.message || "Unable to reset password" },
+        { message: data?.message || AUTH_COPY.RESET_PASSWORD_FAILED },
         { status: response.status }
       );
     }
 
-    return NextResponse.json({ message: data?.message || "Password reset successful" });
+    return NextResponse.json({ message: data?.message || AUTH_COPY.RESET_PASSWORD_SUCCESS });
   } catch (error) {
-    return NextResponse.json({ message: "Failed to reset password" }, { status: 500 });
+    return NextResponse.json({ message: AUTH_COPY.RESET_PASSWORD_FAILED }, { status: 500 });
   }
 }

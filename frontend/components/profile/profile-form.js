@@ -36,6 +36,15 @@ export function ProfileForm({ isHospital, patientForm, setPatientForm, hospitalF
           <FormField label="Address" className="sm:col-span-2">
             <Textarea disabled={locked} rows={3} value={patientForm.address} onChange={(event) => setPatientForm((prev) => ({ ...prev, address: event.target.value }))} />
           </FormField>
+          <FormField label="Allergies (comma separated)" className="sm:col-span-2">
+            <Input disabled={locked} value={patientForm.allergies} onChange={(event) => setPatientForm((prev) => ({ ...prev, allergies: event.target.value }))} placeholder="e.g. Penicillin, Pollen" />
+          </FormField>
+          <FormField label="Medical Conditions (comma separated)" className="sm:col-span-2">
+            <Input disabled={locked} value={patientForm.medicalConditions} onChange={(event) => setPatientForm((prev) => ({ ...prev, medicalConditions: event.target.value }))} placeholder="e.g. Hypertension, Asthma" />
+          </FormField>
+          <FormField label="Medications (comma separated)" className="sm:col-span-2">
+            <Input disabled={locked} value={patientForm.medications} onChange={(event) => setPatientForm((prev) => ({ ...prev, medications: event.target.value }))} placeholder="e.g. Metformin, Aspirin" />
+          </FormField>
         </>
       ) : (
         <>

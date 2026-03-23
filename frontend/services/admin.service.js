@@ -102,3 +102,18 @@ export const sendAuditClientLog = async (payload) => {
   const response = await api.post("/users/admin/activity", payload);
   return response.data;
 };
+
+export const fetchAdminReviews = async (params = {}) => {
+  const response = await api.get("/reviews/admin", { params });
+  return response.data;
+};
+
+export const moderateAdminReview = async (id, payload) => {
+  const response = await api.patch(`/reviews/admin/${id}/status`, payload);
+  return response.data;
+};
+
+export const deleteAdminReview = async (id) => {
+  const response = await api.delete(`/reviews/admin/${id}`);
+  return response.data;
+};

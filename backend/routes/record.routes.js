@@ -7,7 +7,9 @@ const {
   deleteRecord,
   getMyTimeline,
   adminForceRecordAction,
-  adminBulkRecordAction
+  adminBulkRecordAction,
+  createRecordShareLink,
+  getSharedRecordByToken
 } = require("../controllers/record.controller");
 const { authenticate, requireHospitalVerified } = require("../middleware/auth.middleware");
 const { authorize, requirePermission } = require("../middleware/role.middleware");
@@ -23,6 +25,8 @@ const {
 
 const router = express.Router();
 
+router.get("/shared/:token", getSharedRecordByToken);
+
 router.use(authenticate);
 
 router.post(
@@ -36,6 +40,7 @@ router.post(
 
 router.get("/", validate(listRecordQuerySchema, "query"), listRecords);
 router.get("/timeline/me", authorize("patient"), getMyTimeline);
+router.post("/:id/share-link", authorize("patient", "admin"), createRecordShareLink);
 router.get("/:id", getRecordById);
 router.patch(
   "/:id/decision",

@@ -13,6 +13,7 @@ const { ADMIN_EVENTS, realtimeBroker } = require("../services/realtime.service")
 const adminUserService = require("../services/admin-user.service");
 const { ROLE_RANK } = require("../constants/admin-rbac");
 const env = require("../utils/env");
+const { API_MESSAGES } = require("../utils/apiMessages");
 
 const isValidObjectId = (value) => mongoose.Types.ObjectId.isValid(value);
 
@@ -76,13 +77,13 @@ const getMyProfile = async (req, res, next) => {
     if (!user) {
       return res.status(StatusCodes.NOT_FOUND).json({
         success: false,
-        message: "User not found"
+        message: API_MESSAGES.COMMON.USER_NOT_FOUND
       });
     }
 
     return res.status(StatusCodes.OK).json(
       successResponse({
-        message: "Profile fetched",
+        message: API_MESSAGES.USERS.PROFILE_FETCHED,
         data: {
           user: sanitizeUser(user)
         }
@@ -100,14 +101,14 @@ const updateMyProfile = async (req, res, next) => {
     if (!user) {
       return res.status(StatusCodes.NOT_FOUND).json({
         success: false,
-        message: "User not found"
+        message: API_MESSAGES.COMMON.USER_NOT_FOUND
       });
     }
 
     if (user.isVerified !== true && user.verified !== true) {
       return res.status(StatusCodes.FORBIDDEN).json({
         success: false,
-        message: "Please verify your email to update profile"
+        message: API_MESSAGES.COMMON.EMAIL_VERIFICATION_REQUIRED
       });
     }
 
@@ -117,6 +118,10 @@ const updateMyProfile = async (req, res, next) => {
       age,
       gender,
       bloodGroup,
+      dob,
+      allergies,
+      medicalConditions,
+      medications,
       address,
       emergencyContact,
       hospitalName,
@@ -132,6 +137,21 @@ const updateMyProfile = async (req, res, next) => {
     }
 
     if (user.role === "patient") {
+      const parseStringList = (value) => {
+        if (Array.isArray(value)) {
+          return value.map((item) => String(item).trim()).filter(Boolean);
+        }
+
+        if (typeof value === "string") {
+          return value
+            .split(",")
+            .map((item) => item.trim())
+            .filter(Boolean);
+        }
+
+        return undefined;
+      };
+
       user.patientProfile = {
         ...(user.patientProfile || {}),
         ...(typeof phone === "string" ? { phone: phone.trim() } : {}),
@@ -139,7 +159,11 @@ const updateMyProfile = async (req, res, next) => {
         ...(typeof gender === "string" ? { gender } : {}),
         ...(typeof bloodGroup === "string" ? { bloodGroup } : {}),
         ...(typeof emergencyContact === "string" ? { emergencyContact: emergencyContact.trim() } : {}),
-        ...(typeof address === "string" ? { address: address.trim() } : {})
+        ...(typeof address === "string" ? { address: address.trim() } : {}),
+        ...(typeof dob === "string" && dob ? { dob: new Date(dob) } : {}),
+        ...(parseStringList(allergies) ? { allergies: parseStringList(allergies) } : {}),
+        ...(parseStringList(medicalConditions) ? { medicalConditions: parseStringList(medicalConditions) } : {}),
+        ...(parseStringList(medications) ? { medications: parseStringList(medications) } : {})
       };
     }
 
@@ -188,7 +212,7 @@ const updateMyProfile = async (req, res, next) => {
 
     return res.status(StatusCodes.OK).json(
       successResponse({
-        message: "Profile updated",
+        message: API_MESSAGES.USERS.PROFILE_UPDATED,
         data: {
           user: sanitizeUser(user)
         }
@@ -206,7 +230,7 @@ const getMyQrToken = async (req, res, next) => {
     if (!user) {
       return res.status(StatusCodes.NOT_FOUND).json({
         success: false,
-        message: "User not found"
+        message: API_MESSAGES.COMMON.USER_NOT_FOUND
       });
     }
 
@@ -218,7 +242,7 @@ const getMyQrToken = async (req, res, next) => {
 
     return res.status(StatusCodes.OK).json(
       successResponse({
-        message: "QR token created",
+        message: API_MESSAGES.USERS.QR_TOKEN_CREATED,
         data: {
           token,
           patientId: user._id.toString()
@@ -238,7 +262,7 @@ const resolvePatientQr = async (req, res, next) => {
     if (!decoded?.sub || decoded?.type !== "patient-identity") {
       return res.status(StatusCodes.BAD_REQUEST).json({
         success: false,
-        message: "Invalid QR token"
+        message: API_MESSAGES.USERS.QR_TOKEN_INVALID
       });
     }
 
@@ -246,13 +270,13 @@ const resolvePatientQr = async (req, res, next) => {
     if (!patient || patient.role !== "patient") {
       return res.status(StatusCodes.NOT_FOUND).json({
         success: false,
-        message: "Patient not found"
+        message: API_MESSAGES.USERS.PATIENT_NOT_FOUND
       });
     }
 
     return res.status(StatusCodes.OK).json(
       successResponse({
-        message: "Patient profile resolved",
+        message: API_MESSAGES.USERS.PATIENT_PROFILE_RESOLVED,
         data: {
           patient: {
             id: patient._id,
@@ -270,7 +294,7 @@ const resolvePatientQr = async (req, res, next) => {
     if (error?.name === "JsonWebTokenError" || error?.name === "TokenExpiredError") {
       return res.status(StatusCodes.BAD_REQUEST).json({
         success: false,
-        message: "Invalid or expired QR token"
+        message: API_MESSAGES.USERS.QR_TOKEN_INVALID_OR_EXPIRED
       });
     }
     return next(error);
@@ -343,7 +367,7 @@ const getAdminStats = async (req, res, next) => {
 
     return res.status(StatusCodes.OK).json(
       successResponse({
-        message: "Admin stats fetched",
+        message: API_MESSAGES.USERS.ADMIN_STATS_FETCHED,
         data: {
           metrics: {
             totalUsers,
@@ -397,7 +421,7 @@ const getAuditLogs = async (req, res, next) => {
 
     return res.status(StatusCodes.OK).json(
       successResponse({
-        message: "Audit logs fetched",
+        message: API_MESSAGES.USERS.AUDIT_LOGS_FETCHED,
         data: {
           logs: logs.map((log) => ({
             id: log._id,
@@ -449,7 +473,7 @@ const listUsersAdmin = async (req, res, next) => {
 
     return res.status(StatusCodes.OK).json(
       successResponse({
-        message: "Users fetched",
+        message: API_MESSAGES.USERS.USERS_FETCHED,
         data: {
           users: users.map((user) => sanitizeUser(user))
         }
@@ -467,7 +491,7 @@ const getUserByIdAdmin = async (req, res, next) => {
     if (!isValidObjectId(id)) {
       return res.status(StatusCodes.BAD_REQUEST).json({
         success: false,
-        message: "Invalid user id"
+        message: API_MESSAGES.COMMON.INVALID_USER_ID
       });
     }
 
@@ -475,13 +499,13 @@ const getUserByIdAdmin = async (req, res, next) => {
     if (!user) {
       return res.status(StatusCodes.NOT_FOUND).json({
         success: false,
-        message: "User not found"
+        message: API_MESSAGES.COMMON.USER_NOT_FOUND
       });
     }
 
     return res.status(StatusCodes.OK).json(
       successResponse({
-        message: "User fetched",
+        message: API_MESSAGES.USERS.USER_FETCHED,
         data: {
           user: sanitizeUser(user)
         }
@@ -500,14 +524,14 @@ const updateUserStatusAdmin = async (req, res, next) => {
     if (!isValidObjectId(id)) {
       return res.status(StatusCodes.BAD_REQUEST).json({
         success: false,
-        message: "Invalid user id"
+        message: API_MESSAGES.COMMON.INVALID_USER_ID
       });
     }
 
     if (!["active", "suspended", "blocked"].includes(status)) {
       return res.status(StatusCodes.BAD_REQUEST).json({
         success: false,
-        message: "Invalid account status"
+        message: API_MESSAGES.USERS.INVALID_ACCOUNT_STATUS
       });
     }
 
@@ -515,21 +539,21 @@ const updateUserStatusAdmin = async (req, res, next) => {
     if (!user) {
       return res.status(StatusCodes.NOT_FOUND).json({
         success: false,
-        message: "User not found"
+        message: API_MESSAGES.COMMON.USER_NOT_FOUND
       });
     }
 
     if (user.role === "admin" && status !== "active") {
       return res.status(StatusCodes.BAD_REQUEST).json({
         success: false,
-        message: "Admin users cannot be suspended or blocked"
+        message: API_MESSAGES.USERS.ADMIN_STATUS_CHANGE_BLOCKED
       });
     }
 
     if (user.role === "admin" && user.adminRole && !canMutateAdminTarget(req.user.adminRole, user.adminRole)) {
       return res.status(StatusCodes.FORBIDDEN).json({
         success: false,
-        message: "You cannot modify an admin with equal or higher hierarchy"
+        message: API_MESSAGES.USERS.ADMIN_HIERARCHY_MODIFY_BLOCKED
       });
     }
 
@@ -580,7 +604,7 @@ const updateUserStatusAdmin = async (req, res, next) => {
 
     return res.status(StatusCodes.OK).json(
       successResponse({
-        message: "User status updated",
+        message: API_MESSAGES.USERS.USER_STATUS_UPDATED,
         data: {
           user: sanitizeUser(user)
         }
@@ -609,7 +633,7 @@ const listActivityFeedAdmin = async (req, res, next) => {
 
     return res.status(StatusCodes.OK).json(
       successResponse({
-        message: "Activity feed fetched",
+        message: API_MESSAGES.USERS.ACTIVITY_FEED_FETCHED,
         data: {
           activities: logs.map((log) => ({
             id: log._id,
@@ -661,7 +685,7 @@ const listActiveSessionsAdmin = async (req, res, next) => {
 
     return res.status(StatusCodes.OK).json(
       successResponse({
-        message: "Active sessions fetched",
+        message: API_MESSAGES.USERS.ACTIVE_SESSIONS_FETCHED,
         data: {
           sessions: suspicious
         }
@@ -679,7 +703,7 @@ const forceLogoutUserAdmin = async (req, res, next) => {
     if (!isValidObjectId(id)) {
       return res.status(StatusCodes.BAD_REQUEST).json({
         success: false,
-        message: "Invalid user id"
+        message: API_MESSAGES.COMMON.INVALID_USER_ID
       });
     }
 
@@ -687,7 +711,7 @@ const forceLogoutUserAdmin = async (req, res, next) => {
     if (!user) {
       return res.status(StatusCodes.NOT_FOUND).json({
         success: false,
-        message: "User not found"
+        message: API_MESSAGES.COMMON.USER_NOT_FOUND
       });
     }
 
@@ -714,7 +738,7 @@ const forceLogoutUserAdmin = async (req, res, next) => {
 
     return res.status(StatusCodes.OK).json(
       successResponse({
-        message: "User session revoked"
+        message: API_MESSAGES.USERS.USER_SESSION_REVOKED
       })
     );
   } catch (error) {
@@ -730,7 +754,7 @@ const broadcastSystemAnnouncementAdmin = async (req, res, next) => {
     if (!users.length) {
       return res.status(StatusCodes.OK).json(
         successResponse({
-          message: "No users available for broadcast"
+          message: API_MESSAGES.USERS.NO_USERS_FOR_BROADCAST
         })
       );
     }
@@ -764,7 +788,7 @@ const broadcastSystemAnnouncementAdmin = async (req, res, next) => {
 
     return res.status(StatusCodes.OK).json(
       successResponse({
-        message: "System announcement broadcasted",
+        message: API_MESSAGES.USERS.SYSTEM_ANNOUNCEMENT_BROADCASTED,
         data: {
           recipients: users.length
         }
@@ -790,7 +814,7 @@ const listPendingHospitals = async (req, res, next) => {
 
     return res.status(StatusCodes.OK).json(
       successResponse({
-        message: "Pending hospitals fetched",
+        message: API_MESSAGES.USERS.PENDING_HOSPITALS_FETCHED,
         data: {
           hospitals: hospitals.map((hospital) => ({
             id: hospital._id,
@@ -816,7 +840,7 @@ const verifyHospital = async (req, res, next) => {
     if (!isValidObjectId(id)) {
       return res.status(StatusCodes.BAD_REQUEST).json({
         success: false,
-        message: "Invalid hospital id"
+        message: API_MESSAGES.COMMON.INVALID_HOSPITAL_ID
       });
     }
 
@@ -825,7 +849,7 @@ const verifyHospital = async (req, res, next) => {
     if (!hospital) {
       return res.status(StatusCodes.NOT_FOUND).json({
         success: false,
-        message: "Hospital not found"
+        message: API_MESSAGES.USERS.HOSPITAL_NOT_FOUND
       });
     }
 
@@ -834,14 +858,14 @@ const verifyHospital = async (req, res, next) => {
     if (!hospitalEmailVerified) {
       return res.status(StatusCodes.BAD_REQUEST).json({
         success: false,
-        message: "Hospital email is not verified yet"
+        message: API_MESSAGES.USERS.HOSPITAL_EMAIL_NOT_VERIFIED
       });
     }
 
     if (hospital.isHospitalVerified === true || hospital.hospitalProfile?.verifiedByAdmin) {
       return res.status(StatusCodes.OK).json(
         successResponse({
-          message: "Hospital already verified",
+          message: API_MESSAGES.USERS.HOSPITAL_ALREADY_VERIFIED,
           data: {
             hospital: {
               id: hospital._id,
@@ -882,7 +906,7 @@ const verifyHospital = async (req, res, next) => {
 
     return res.status(StatusCodes.OK).json(
       successResponse({
-        message: "Hospital verified successfully",
+        message: API_MESSAGES.USERS.HOSPITAL_VERIFIED_SUCCESS,
         data: {
           hospital: {
             id: hospital._id,
@@ -918,29 +942,29 @@ const bulkUsersActionAdmin = async (req, res, next) => {
     for (const id of uniqueIds) {
       const user = foundMap.get(id);
       if (!user) {
-        result.failed.push({ id, reason: "User not found" });
+        result.failed.push({ id, reason: API_MESSAGES.USERS.BATCH_REASON_USER_NOT_FOUND });
         continue;
       }
 
       if (user.role === "admin" && user.adminRole && !canMutateAdminTarget(req.user.adminRole, user.adminRole)) {
-        result.failed.push({ id, reason: "Cannot modify equal or higher admin hierarchy" });
+        result.failed.push({ id, reason: API_MESSAGES.USERS.BATCH_REASON_ADMIN_HIERARCHY_BLOCKED });
         continue;
       }
 
       if (action !== "VERIFY_HOSPITAL" && user.role === "admin" && status !== "active") {
-        result.failed.push({ id, reason: "Admin users cannot be suspended or blocked" });
+        result.failed.push({ id, reason: API_MESSAGES.USERS.BATCH_REASON_ADMIN_STATUS_CHANGE_BLOCKED });
         continue;
       }
 
       if (action === "VERIFY_HOSPITAL") {
         if (user.role !== "hospital") {
-          result.failed.push({ id, reason: "Only hospital users can be verified" });
+          result.failed.push({ id, reason: API_MESSAGES.USERS.BATCH_REASON_ONLY_HOSPITAL_VERIFY });
           continue;
         }
 
         const userVerified = user.isVerified === true || user.verified === true;
         if (!userVerified) {
-          result.failed.push({ id, reason: "Hospital email is not verified yet" });
+          result.failed.push({ id, reason: API_MESSAGES.USERS.BATCH_REASON_HOSPITAL_EMAIL_NOT_VERIFIED });
           continue;
         }
 
@@ -963,7 +987,7 @@ const bulkUsersActionAdmin = async (req, res, next) => {
       }
 
       if (!status) {
-        result.failed.push({ id, reason: "Invalid bulk action" });
+        result.failed.push({ id, reason: API_MESSAGES.USERS.BATCH_REASON_INVALID_ACTION });
         continue;
       }
 
@@ -1012,7 +1036,7 @@ const bulkUsersActionAdmin = async (req, res, next) => {
 
     return res.status(StatusCodes.OK).json(
       successResponse({
-        message: "Bulk user action executed",
+        message: API_MESSAGES.USERS.BULK_USER_ACTION_COMPLETED,
         data: {
           action,
           total: uniqueIds.length,
@@ -1106,7 +1130,7 @@ const createAdminUser = async (req, res, next) => {
     if (!canMutateAdminTarget(req.user.adminRole, adminRole)) {
       return res.status(StatusCodes.FORBIDDEN).json({
         success: false,
-        message: "You cannot create an admin with equal or higher hierarchy"
+        message: API_MESSAGES.USERS.ADMIN_CREATE_HIERARCHY_BLOCKED
       });
     }
 
@@ -1117,7 +1141,7 @@ const createAdminUser = async (req, res, next) => {
       if (error?.code === "EMAIL_EXISTS") {
         return res.status(StatusCodes.CONFLICT).json({
           success: false,
-          message: "Email already exists"
+          message: API_MESSAGES.USERS.EMAIL_ALREADY_EXISTS
         });
       }
       throw error;
@@ -1126,7 +1150,7 @@ const createAdminUser = async (req, res, next) => {
     if (!user) {
       return res.status(StatusCodes.CONFLICT).json({
         success: false,
-        message: "Unable to create admin"
+        message: API_MESSAGES.USERS.ADMIN_CREATE_FAILED
       });
     }
 
@@ -1151,7 +1175,7 @@ const createAdminUser = async (req, res, next) => {
 
     return res.status(StatusCodes.CREATED).json(
       successResponse({
-        message: "Admin created",
+        message: API_MESSAGES.USERS.ADMIN_CREATED,
         data: {
           user: sanitizeUser(user)
         }
@@ -1170,21 +1194,21 @@ const updateAdminUser = async (req, res, next) => {
     if (!target || target.role !== "admin") {
       return res.status(StatusCodes.NOT_FOUND).json({
         success: false,
-        message: "Admin not found"
+        message: API_MESSAGES.USERS.ADMIN_NOT_FOUND
       });
     }
 
     if (!canMutateAdminTarget(req.user.adminRole, target.adminRole)) {
       return res.status(StatusCodes.FORBIDDEN).json({
         success: false,
-        message: "You cannot update an admin with equal or higher hierarchy"
+        message: API_MESSAGES.USERS.ADMIN_UPDATE_HIERARCHY_BLOCKED
       });
     }
 
     if (req.body.adminRole && !canMutateAdminTarget(req.user.adminRole, req.body.adminRole)) {
       return res.status(StatusCodes.FORBIDDEN).json({
         success: false,
-        message: "You cannot assign equal or higher hierarchy"
+        message: API_MESSAGES.USERS.ADMIN_ASSIGN_HIERARCHY_BLOCKED
       });
     }
 
@@ -1211,7 +1235,7 @@ const updateAdminUser = async (req, res, next) => {
 
     return res.status(StatusCodes.OK).json(
       successResponse({
-        message: "Admin updated",
+        message: API_MESSAGES.USERS.ADMIN_UPDATED,
         data: {
           user: sanitizeUser(updated)
         }
@@ -1229,7 +1253,7 @@ const deleteAdminUser = async (req, res, next) => {
     if (id === req.user.id) {
       return res.status(StatusCodes.BAD_REQUEST).json({
         success: false,
-        message: "You cannot delete your own admin account"
+        message: API_MESSAGES.USERS.ADMIN_DELETE_SELF_BLOCKED
       });
     }
 
@@ -1237,14 +1261,14 @@ const deleteAdminUser = async (req, res, next) => {
     if (!target || target.role !== "admin") {
       return res.status(StatusCodes.NOT_FOUND).json({
         success: false,
-        message: "Admin not found"
+        message: API_MESSAGES.USERS.ADMIN_NOT_FOUND
       });
     }
 
     if (!canMutateAdminTarget(req.user.adminRole, target.adminRole)) {
       return res.status(StatusCodes.FORBIDDEN).json({
         success: false,
-        message: "You cannot delete an admin with equal or higher hierarchy"
+        message: API_MESSAGES.USERS.ADMIN_DELETE_HIERARCHY_BLOCKED
       });
     }
 
@@ -1270,7 +1294,7 @@ const deleteAdminUser = async (req, res, next) => {
 
     return res.status(StatusCodes.OK).json(
       successResponse({
-        message: "Admin deleted"
+        message: API_MESSAGES.USERS.ADMIN_DELETED
       })
     );
   } catch (error) {

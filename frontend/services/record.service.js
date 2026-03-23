@@ -38,3 +38,13 @@ export const uploadRecord = async ({ patientId, type, description, file, recordD
 
   return response.data;
 };
+
+export const generateRecordShareLink = async (id) => {
+  const response = await api.post(`/records/${id}/share-link`, {});
+  return response.data;
+};
+
+export const fetchSharedRecord = async (token) => {
+  const response = await api.get(`/records/shared/${token}`);
+  return response.data;
+};

@@ -10,7 +10,13 @@ const patientProfileSchema = new mongoose.Schema(
     age: { type: Number, min: 0, max: 140 },
     gender: { type: String, enum: ["male", "female", "other"] },
     bloodGroup: { type: String, enum: BLOOD_GROUPS },
-    phone: { type: String, trim: true, maxlength: 20 }
+    phone: { type: String, trim: true, maxlength: 20 },
+    address: { type: String, trim: true, maxlength: 260 },
+    emergencyContact: { type: String, trim: true, maxlength: 40 },
+    dob: { type: Date, default: null },
+    allergies: [{ type: String, trim: true, maxlength: 80 }],
+    medicalConditions: [{ type: String, trim: true, maxlength: 120 }],
+    medications: [{ type: String, trim: true, maxlength: 120 }]
   },
   { _id: false }
 );

@@ -14,6 +14,7 @@ const {
 const { createTokenWithHash } = require("../utils/cryptoTokens");
 const { sendEmail } = require("../utils/mailer");
 const { uploadBufferToCloudinary, cloudinaryEnabled } = require("../utils/cloudinary");
+const { AUTH_MESSAGES } = require("../utils/authMessages");
 const env = require("../utils/env");
 const logger = require("../utils/logger");
 const { getRefreshCookieOptions, getClearRefreshCookieOptions } = require("../utils/authCookies");
@@ -139,20 +140,20 @@ const register = async (req, res, next) => {
     if (!req.file) {
       return res
         .status(StatusCodes.BAD_REQUEST)
-        .json(errorResponse({ message: "Profile image is required" }));
+        .json(errorResponse({ message: AUTH_MESSAGES.PROFILE_IMAGE_REQUIRED }));
     }
 
     if (role === "admin") {
       return res
         .status(StatusCodes.FORBIDDEN)
-        .json(errorResponse({ message: "Admin registration is not allowed publicly" }));
+        .json(errorResponse({ message: AUTH_MESSAGES.ADMIN_PUBLIC_REGISTRATION_BLOCKED }));
     }
 
     const exists = await User.findOne({ email });
     if (exists) {
       return res
         .status(StatusCodes.CONFLICT)
-        .json(errorResponse({ message: "Email is already registered" }));
+        .json(errorResponse({ message: AUTH_MESSAGES.EMAIL_ALREADY_REGISTERED }));
     }
 
     const { token, tokenHash } = createTokenWithHash();
@@ -221,7 +222,7 @@ const register = async (req, res, next) => {
 
     return res.status(StatusCodes.CREATED).json(
       successResponse({
-        message: "Registration successful. Please verify your email.",
+        message: AUTH_MESSAGES.SIGNUP_SUCCESS,
         data: {
           user: sanitizeUser(user),
           verificationPreviewToken: env.nodeEnv === "development" ? token : undefined
@@ -240,7 +241,7 @@ const verifyEmail = async (req, res, next) => {
     if (!token) {
       return res
         .status(StatusCodes.BAD_REQUEST)
-        .json(errorResponse({ message: "Verification token is required" }));
+        .json(errorResponse({ message: AUTH_MESSAGES.VERIFY_TOKEN_REQUIRED }));
     }
 
     const tokenHash = hashToken(token);
@@ -253,7 +254,7 @@ const verifyEmail = async (req, res, next) => {
     if (!user) {
       return res
         .status(StatusCodes.BAD_REQUEST)
-        .json(errorResponse({ message: "Invalid or expired verification token" }));
+        .json(errorResponse({ message: AUTH_MESSAGES.VERIFY_INVALID_OR_EXPIRED }));
     }
 
     user.verified = true;
@@ -264,7 +265,7 @@ const verifyEmail = async (req, res, next) => {
 
     return res.status(StatusCodes.OK).json(
       successResponse({
-        message: "Email verified successfully"
+        message: AUTH_MESSAGES.VERIFY_SUCCESS
       })
     );
   } catch (error) {
@@ -280,7 +281,7 @@ const resendVerification = async (req, res, next) => {
     if (!user) {
       return res.status(StatusCodes.OK).json(
         successResponse({
-          message: "If that email exists, a verification link has been sent"
+          message: AUTH_MESSAGES.RESEND_VERIFICATION_SUCCESS
         })
       );
     }
@@ -288,7 +289,7 @@ const resendVerification = async (req, res, next) => {
     if (user.isVerified === true || user.verified === true) {
       return res.status(StatusCodes.OK).json(
         successResponse({
-          message: "Account already verified"
+          message: AUTH_MESSAGES.ACCOUNT_ALREADY_VERIFIED
         })
       );
     }
@@ -299,7 +300,7 @@ const resendVerification = async (req, res, next) => {
         const retryAfterSeconds = Math.ceil((resendVerificationCooldownMs - elapsedMs) / 1000);
         return res
           .status(StatusCodes.TOO_MANY_REQUESTS)
-          .json(errorResponse({ message: `Please wait ${retryAfterSeconds}s before requesting another verification email` }));
+          .json(errorResponse({ message: `Please wait ${retryAfterSeconds}s before requesting another verification email.` }));
       }
     }
 
@@ -318,7 +319,7 @@ const resendVerification = async (req, res, next) => {
 
     return res.status(StatusCodes.OK).json(
       successResponse({
-        message: "Verification email sent"
+        message: AUTH_MESSAGES.RESEND_VERIFICATION_SUCCESS
       })
     );
   } catch (error) {
@@ -334,7 +335,7 @@ const login = async (req, res, next) => {
     if (!user) {
       return res
         .status(StatusCodes.UNAUTHORIZED)
-        .json(errorResponse({ message: "Invalid email or password" }));
+        .json(errorResponse({ message: AUTH_MESSAGES.INVALID_CREDENTIALS }));
     }
 
     const isMatch = await comparePassword(password, user.password);
@@ -347,7 +348,7 @@ const login = async (req, res, next) => {
       await user.save();
       return res
         .status(StatusCodes.UNAUTHORIZED)
-        .json(errorResponse({ message: "Invalid email or password" }));
+        .json(errorResponse({ message: AUTH_MESSAGES.INVALID_CREDENTIALS }));
     }
 
     const userVerified = user.isVerified === true || user.verified === true;
@@ -355,13 +356,13 @@ const login = async (req, res, next) => {
     if (!userVerified) {
       return res
         .status(StatusCodes.FORBIDDEN)
-        .json(errorResponse({ message: "Please verify your email" }));
+        .json(errorResponse({ message: AUTH_MESSAGES.EMAIL_VERIFICATION_REQUIRED }));
     }
 
     if (user.accountStatus === "blocked") {
       return res
         .status(StatusCodes.FORBIDDEN)
-        .json(errorResponse({ message: "Your account has been blocked by admin" }));
+        .json(errorResponse({ message: AUTH_MESSAGES.ACCOUNT_BLOCKED }));
     }
 
     if (user.accountStatus === "suspended") {
@@ -369,7 +370,7 @@ const login = async (req, res, next) => {
       if (!suspensionExpired) {
         return res
           .status(StatusCodes.FORBIDDEN)
-          .json(errorResponse({ message: "Your account is currently suspended" }));
+          .json(errorResponse({ message: AUTH_MESSAGES.ACCOUNT_SUSPENDED }));
       }
 
       user.accountStatus = "active";
@@ -399,7 +400,7 @@ const login = async (req, res, next) => {
 
     return res.status(StatusCodes.OK).json(
       successResponse({
-        message: "Login successful",
+        message: AUTH_MESSAGES.LOGIN_SUCCESS,
         data: {
           accessToken,
           refreshToken,
@@ -419,7 +420,7 @@ const refresh = async (req, res, next) => {
     if (!providedToken) {
       return res
         .status(StatusCodes.UNAUTHORIZED)
-        .json(errorResponse({ message: "Refresh token is required" }));
+        .json(errorResponse({ message: AUTH_MESSAGES.REFRESH_TOKEN_REQUIRED }));
     }
 
     let decoded;
@@ -428,14 +429,14 @@ const refresh = async (req, res, next) => {
     } catch (error) {
       return res
         .status(StatusCodes.UNAUTHORIZED)
-        .json(errorResponse({ message: "Invalid or expired refresh token" }));
+        .json(errorResponse({ message: AUTH_MESSAGES.REFRESH_TOKEN_INVALID_OR_EXPIRED }));
     }
 
     const user = await User.findById(decoded.sub).select("+refreshTokenHash");
     if (!user || !user.refreshTokenHash) {
       return res
         .status(StatusCodes.UNAUTHORIZED)
-        .json(errorResponse({ message: "Invalid refresh session" }));
+        .json(errorResponse({ message: AUTH_MESSAGES.REFRESH_SESSION_INVALID }));
     }
 
     if (user.refreshTokenHash !== hashToken(providedToken)) {
@@ -447,7 +448,7 @@ const refresh = async (req, res, next) => {
       await user.save();
       return res
         .status(StatusCodes.UNAUTHORIZED)
-        .json(errorResponse({ message: "Refresh token mismatch" }));
+        .json(errorResponse({ message: AUTH_MESSAGES.REFRESH_TOKEN_MISMATCH }));
     }
 
     const { accessToken, refreshToken, user: safeUser } = buildAuthPayload(user);
@@ -458,7 +459,7 @@ const refresh = async (req, res, next) => {
 
     return res.status(StatusCodes.OK).json(
       successResponse({
-        message: "Token refreshed",
+        message: AUTH_MESSAGES.TOKEN_REFRESHED,
         data: {
           accessToken,
           refreshToken,
@@ -500,7 +501,7 @@ const logout = async (req, res, next) => {
 
     return res.status(StatusCodes.OK).json(
       successResponse({
-        message: "Logged out successfully"
+        message: AUTH_MESSAGES.LOGOUT_SUCCESS
       })
     );
   } catch (error) {
@@ -516,7 +517,7 @@ const forgotPassword = async (req, res, next) => {
     if (!user) {
       return res.status(StatusCodes.OK).json(
         successResponse({
-          message: "If that email exists, a reset link has been sent"
+          message: AUTH_MESSAGES.FORGOT_PASSWORD_SUCCESS
         })
       );
     }
@@ -535,7 +536,7 @@ const forgotPassword = async (req, res, next) => {
 
     return res.status(StatusCodes.OK).json(
       successResponse({
-        message: "Password reset link sent"
+        message: AUTH_MESSAGES.FORGOT_PASSWORD_SUCCESS
       })
     );
   } catch (error) {
@@ -556,7 +557,7 @@ const resetPassword = async (req, res, next) => {
     if (!user) {
       return res
         .status(StatusCodes.BAD_REQUEST)
-        .json(errorResponse({ message: "Invalid or expired reset token" }));
+        .json(errorResponse({ message: AUTH_MESSAGES.RESET_TOKEN_INVALID_OR_EXPIRED }));
     }
 
     user.password = await hashPassword(newPassword);
@@ -567,7 +568,7 @@ const resetPassword = async (req, res, next) => {
 
     return res.status(StatusCodes.OK).json(
       successResponse({
-        message: "Password reset successful"
+        message: AUTH_MESSAGES.RESET_PASSWORD_SUCCESS
       })
     );
   } catch (error) {
@@ -582,12 +583,12 @@ const getCurrentUser = async (req, res, next) => {
     if (!user) {
       return res
         .status(StatusCodes.NOT_FOUND)
-        .json(errorResponse({ message: "User not found" }));
+        .json(errorResponse({ message: AUTH_MESSAGES.USER_NOT_FOUND }));
     }
 
     return res.status(StatusCodes.OK).json(
       successResponse({
-        message: "Current user fetched",
+        message: AUTH_MESSAGES.CURRENT_USER_FETCHED,
         data: {
           user: sanitizeUser(user)
         }

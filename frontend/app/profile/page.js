@@ -36,11 +36,14 @@ export default function ProfilePage() {
     name: user?.name || "",
     email: user?.email || "",
     phone: user?.patientProfile?.phone || "",
-    address: "",
+    address: user?.patientProfile?.address || "",
     bloodGroup: user?.patientProfile?.bloodGroup || "",
     age: user?.patientProfile?.age || "",
-    dob: "",
-    emergencyContact: ""
+    dob: user?.patientProfile?.dob ? new Date(user.patientProfile.dob).toISOString().slice(0, 10) : "",
+    emergencyContact: user?.patientProfile?.emergencyContact || "",
+    allergies: Array.isArray(user?.patientProfile?.allergies) ? user.patientProfile.allergies.join(", ") : "",
+    medicalConditions: Array.isArray(user?.patientProfile?.medicalConditions) ? user.patientProfile.medicalConditions.join(", ") : "",
+    medications: Array.isArray(user?.patientProfile?.medications) ? user.patientProfile.medications.join(", ") : ""
   });
 
   const [hospitalForm, setHospitalForm] = useState({
@@ -122,8 +125,14 @@ export default function ProfilePage() {
           name: nextUser.name || "",
           email: nextUser.email || "",
           phone: nextUser.patientProfile?.phone || "",
+          address: nextUser.patientProfile?.address || "",
+          emergencyContact: nextUser.patientProfile?.emergencyContact || "",
           bloodGroup: nextUser.patientProfile?.bloodGroup || "",
-          age: nextUser.patientProfile?.age || ""
+          age: nextUser.patientProfile?.age || "",
+          dob: nextUser.patientProfile?.dob ? new Date(nextUser.patientProfile.dob).toISOString().slice(0, 10) : "",
+          allergies: Array.isArray(nextUser.patientProfile?.allergies) ? nextUser.patientProfile.allergies.join(", ") : "",
+          medicalConditions: Array.isArray(nextUser.patientProfile?.medicalConditions) ? nextUser.patientProfile.medicalConditions.join(", ") : "",
+          medications: Array.isArray(nextUser.patientProfile?.medications) ? nextUser.patientProfile.medications.join(", ") : ""
         }));
         setHospitalForm((prev) => ({
           ...prev,
@@ -225,8 +234,12 @@ export default function ProfilePage() {
           phone: patientForm.phone,
           bloodGroup: patientForm.bloodGroup,
           age: patientForm.age,
+          dob: patientForm.dob,
           address: patientForm.address,
           emergencyContact: patientForm.emergencyContact,
+          allergies: patientForm.allergies,
+          medicalConditions: patientForm.medicalConditions,
+          medications: patientForm.medications,
           profileImage: avatarFile
         };
 
@@ -242,7 +255,22 @@ export default function ProfilePage() {
             ...(user?.patientProfile || {}),
             phone: patientForm.phone,
             bloodGroup: patientForm.bloodGroup,
-            age: patientForm.age
+            age: patientForm.age,
+            dob: patientForm.dob || null,
+            address: patientForm.address,
+            emergencyContact: patientForm.emergencyContact,
+            allergies: patientForm.allergies
+              .split(",")
+              .map((item) => item.trim())
+              .filter(Boolean),
+            medicalConditions: patientForm.medicalConditions
+              .split(",")
+              .map((item) => item.trim())
+              .filter(Boolean),
+            medications: patientForm.medications
+              .split(",")
+              .map((item) => item.trim())
+              .filter(Boolean)
           },
       hospitalProfile: isHospital
         ? {

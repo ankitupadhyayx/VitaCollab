@@ -55,10 +55,22 @@ const resetPasswordLimiter = rateLimit({
   }
 });
 
+const reviewSubmitLimiter = rateLimit({
+  windowMs: 10 * 60 * 1000,
+  max: 6,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: {
+    success: false,
+    message: "Too many feedback submissions. Please try again later."
+  }
+});
+
 module.exports = {
   apiLimiter,
   loginLimiter,
   forgotPasswordLimiter,
   resendVerificationLimiter,
-  resetPasswordLimiter
+  resetPasswordLimiter,
+  reviewSubmitLimiter
 };

@@ -12,6 +12,7 @@ import {
   Search,
   ShieldAlert,
   ShieldCheck,
+  Star,
   UserCog,
   Users,
   XCircle
@@ -54,6 +55,7 @@ import {
   exportAdminDataset,
   fetchActiveSessions,
   fetchActivityFeed,
+  fetchAdminReviews,
   fetchAdminRecords,
   fetchAdminStats,
   fetchAdminUserProfile,
@@ -62,16 +64,19 @@ import {
   fetchPendingHospitals,
   forceLogoutUser,
   forceRecordAction,
+  moderateAdminReview,
   sendAdminBroadcast,
   updateAdmin,
   updateAdminUserStatus,
-  verifyHospital
+  verifyHospital,
+  deleteAdminReview
 } from "@/services/admin.service";
 
 const adminSections = [
   { id: "overview", label: "Overview", icon: Activity },
   { id: "users", label: "User Management", icon: Users },
   { id: "records", label: "Record Oversight", icon: FileClock },
+  { id: "reviews", label: "Review Management", icon: Star },
   { id: "activity", label: "Activity Monitoring", icon: AlertTriangle },
   { id: "audit", label: "Audit & Logs", icon: ShieldCheck },
   { id: "security", label: "Security Panel", icon: ShieldAlert },
@@ -137,6 +142,7 @@ export default function AdminPage() {
   const [activity, setActivity] = useState([]);
   const [logs, setLogs] = useState([]);
   const [sessions, setSessions] = useState([]);
+  const [reviews, setReviews] = useState([]);
 
   const [userDetail, setUserDetail] = useState(null);
   const [pendingHospitals, setPendingHospitals] = useState([]);
@@ -145,6 +151,7 @@ export default function AdminPage() {
   const [recordsFilter, setRecordsFilter] = useState({ status: "all", search: "" });
   const [activityFilter, setActivityFilter] = useState("all");
   const [auditFilter, setAuditFilter] = useState({ user: "", action: "", startDate: "", endDate: "" });
+  const [reviewsFilter, setReviewsFilter] = useState("pending");
 
   const [broadcastMessage, setBroadcastMessage] = useState("");
   const [adminForm, setAdminForm] = useState({ name: "", email: "", password: "", adminRole: "ADMIN" });
@@ -168,6 +175,7 @@ export default function AdminPage() {
   const [tableLoading, setTableLoading] = useState({
     users: false,
     records: false,
+    reviews: false,
     activity: false,
     audit: false,
     sessions: false,
@@ -233,6 +241,16 @@ export default function AdminPage() {
     }
   };
 
+  const loadReviews = async () => {
+    setTableBusy("reviews", true);
+    try {
+      const response = await fetchAdminReviews({ status: reviewsFilter, page: 1, limit: 100 });
+      setReviews(response?.data?.reviews || []);
+    } finally {
+      setTableBusy("reviews", false);
+    }
+  };
+
   const loadAudit = async () => {
     setTableBusy("audit", true);
     try {
@@ -277,6 +295,7 @@ export default function AdminPage() {
         loadStats(),
         loadUsers(),
         loadRecords(),
+        loadReviews(),
         loadActivity(),
         loadAudit(),
         loadSessions(),
@@ -507,6 +526,18 @@ export default function AdminPage() {
         await deleteAdmin(confirm.payload.id);
         toast.success("Admin deleted");
         await Promise.all([loadUsers(), loadAudit(), loadActivity()]);
+      }
+
+      if (confirm.type === "review-status") {
+        await moderateAdminReview(confirm.payload.id, { status: confirm.payload.status });
+        toast.success(confirm.payload.status === "approved" ? "Review approved" : "Review rejected");
+        await loadReviews();
+      }
+
+      if (confirm.type === "review-delete") {
+        await deleteAdminReview(confirm.payload.id);
+        toast.success("Review deleted");
+        await loadReviews();
       }
 
       await logAction({ type: confirm.type, payload: confirm.payload, at: new Date().toISOString() });
@@ -1419,6 +1450,117 @@ export default function AdminPage() {
                           Go
                         </Button>
                       </div>
+                    </div>
+                  ) : null}
+                </CardContent>
+              </Card>
+            ) : null}
+
+            {!loading && activeSection === "reviews" ? (
+              <Card>
+                <CardHeader>
+                  <CardTitle>Review Management</CardTitle>
+                  <CardDescription>Moderate patient and hospital feedback before public visibility.</CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="flex flex-wrap items-center gap-2">
+                    {["pending", "approved", "rejected"].map((status) => (
+                      <button
+                        key={status}
+                        type="button"
+                        className={`rounded-xl px-3 py-2 text-xs font-semibold capitalize ${reviewsFilter === status ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground"}`}
+                        onClick={() => setReviewsFilter(status)}
+                      >
+                        {status}
+                      </button>
+                    ))}
+                    <Button size="sm" variant="secondary" onClick={loadReviews}>Apply</Button>
+                  </div>
+
+                  {tableLoading.reviews ? <Loader /> : null}
+
+                  {!tableLoading.reviews ? (
+                    <div className="space-y-2">
+                      {reviews.map((review) => (
+                        <div key={review.id} className="rounded-2xl border border-border/80 bg-background/60 p-3">
+                          <div className="flex flex-wrap items-start justify-between gap-2">
+                            <div className="flex items-center gap-2">
+                              {review.userProfileImageUrl ? (
+                                // eslint-disable-next-line @next/next/no-img-element
+                                <img src={review.userProfileImageUrl} alt={review.userName} className="h-8 w-8 rounded-full object-cover" />
+                              ) : (
+                                <div className="grid h-8 w-8 place-items-center rounded-full bg-muted text-xs font-semibold">
+                                  {String(review.userName || "U").slice(0, 1).toUpperCase()}
+                                </div>
+                              )}
+                              <div>
+                                <p className="text-sm font-semibold">{review.userName}</p>
+                                <p className="text-xs capitalize text-muted-foreground">{review.role} • {review.target}{review.targetHospitalName ? ` (${review.targetHospitalName})` : ""}</p>
+                              </div>
+                            </div>
+                            <Badge status={review.status === "approved" ? "approved" : review.status === "rejected" ? "rejected" : "pending"}>{review.status}</Badge>
+                          </div>
+
+                          <div className="mt-2 flex items-center gap-1">
+                            {Array.from({ length: 5 }).map((_, index) => (
+                              <Star key={`${review.id}-${index}`} className={`h-3.5 w-3.5 ${index < Number(review.rating || 0) ? "fill-amber-400 text-amber-500" : "text-muted-foreground"}`} />
+                            ))}
+                          </div>
+
+                          <p className="mt-2 text-sm text-muted-foreground">{review.comment}</p>
+
+                          <div className="mt-3 flex flex-wrap gap-2">
+                            <Button
+                              size="sm"
+                              disabled={review.status === "approved"}
+                              onClick={() =>
+                                openConfirm({
+                                  type: "review-status",
+                                  payload: { id: review.id, status: "approved" },
+                                  title: "Approve review",
+                                  description: "Make this review publicly visible?",
+                                  confirmLabel: "Approve",
+                                  danger: false
+                                })
+                              }
+                            >
+                              Approve
+                            </Button>
+                            <Button
+                              size="sm"
+                              variant="secondary"
+                              disabled={review.status === "rejected"}
+                              onClick={() =>
+                                openConfirm({
+                                  type: "review-status",
+                                  payload: { id: review.id, status: "rejected" },
+                                  title: "Reject review",
+                                  description: "Reject this review from public display?",
+                                  confirmLabel: "Reject"
+                                })
+                              }
+                            >
+                              Reject
+                            </Button>
+                            <Button
+                              size="sm"
+                              variant="danger"
+                              onClick={() =>
+                                openConfirm({
+                                  type: "review-delete",
+                                  payload: { id: review.id },
+                                  title: "Delete review",
+                                  description: "Permanently delete this review?",
+                                  confirmLabel: "Delete"
+                                })
+                              }
+                            >
+                              Delete
+                            </Button>
+                          </div>
+                        </div>
+                      ))}
+                      {!reviews.length ? <p className="text-sm text-muted-foreground">No reviews found for this filter.</p> : null}
                     </div>
                   ) : null}
                 </CardContent>

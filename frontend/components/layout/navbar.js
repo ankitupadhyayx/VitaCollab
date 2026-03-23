@@ -3,21 +3,27 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
-import { Bell, CircleDot, Menu, ShieldCheck } from "lucide-react";
+import { Bell, CircleDot, Menu, Search, ShieldCheck } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { MobileBottomNav } from "@/components/layout/mobile-bottom-nav";
 import { ThemeToggle } from "@/components/layout/theme-toggle";
 import { useAuth } from "@/components/providers/auth-provider";
+import { useDebounce } from "@/hooks/use-debounce";
 import { useToast } from "@/hooks/use-toast";
 import { fetchMyNotifications, markNotificationRead } from "@/services/notification.service";
+import { fetchRecords } from "@/services/record.service";
 
 export function Navbar() {
   const router = useRouter();
   const [mobileOpen, setMobileOpen] = useState(false);
   const [panelOpen, setPanelOpen] = useState(false);
+  const [searchPanelOpen, setSearchPanelOpen] = useState(false);
+  const [searchInput, setSearchInput] = useState("");
+  const [searchResults, setSearchResults] = useState([]);
   const [notifications, setNotifications] = useState([]);
   const { isAuthenticated, logout, user } = useAuth();
   const toast = useToast();
+  const debouncedSearch = useDebounce(searchInput, 350);
 
   useEffect(() => {
     if (!isAuthenticated) {
@@ -47,6 +53,44 @@ export function Navbar() {
       clearInterval(interval);
     };
   }, [isAuthenticated]);
+
+  useEffect(() => {
+    if (!isAuthenticated || !debouncedSearch.trim()) {
+      setSearchResults([]);
+      setSearchPanelOpen(false);
+      return;
+    }
+
+    let mounted = true;
+
+    const run = async () => {
+      try {
+        const response = await fetchRecords({ search: debouncedSearch.trim(), limit: 8, page: 1 });
+        const records = response?.data?.records || [];
+        const parsed = records.filter((item) => {
+          const normalizedDate = new Date(item.recordDate || item.createdAt).toLocaleDateString();
+          const q = debouncedSearch.toLowerCase();
+          return normalizedDate.toLowerCase().includes(q) || `${item.type} ${item.hospitalName} ${item.description}`.toLowerCase().includes(q);
+        });
+
+        if (mounted) {
+          setSearchResults(parsed);
+          setSearchPanelOpen(true);
+        }
+      } catch {
+        if (mounted) {
+          setSearchResults([]);
+          setSearchPanelOpen(true);
+        }
+      }
+    };
+
+    run();
+
+    return () => {
+      mounted = false;
+    };
+  }, [debouncedSearch, isAuthenticated]);
 
   const handleLogout = async () => {
     await logout();
@@ -121,6 +165,53 @@ export function Navbar() {
         </nav>
 
         <div className="flex items-center gap-2">
+          {isAuthenticated ? (
+            <div className="relative hidden lg:block">
+              <div className="relative">
+                <input
+                  value={searchInput}
+                  onChange={(event) => setSearchInput(event.target.value)}
+                  onFocus={() => {
+                    if (searchInput.trim()) {
+                      setSearchPanelOpen(true);
+                    }
+                  }}
+                  placeholder="Search records, hospitals, type, date"
+                  className="h-9 w-80 rounded-xl border border-border bg-background pl-9 pr-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary/35"
+                />
+                <Search className="pointer-events-none absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
+              </div>
+
+              {searchPanelOpen ? (
+                <div className="absolute right-0 top-11 z-40 w-[420px] rounded-2xl border border-border/80 bg-card/95 p-2 shadow-soft">
+                  <p className="px-2 pb-1 text-xs font-semibold uppercase tracking-[0.12em] text-muted-foreground">Global Search</p>
+                  <div className="max-h-80 space-y-1 overflow-auto">
+                    {searchResults.length ? (
+                      searchResults.map((item) => (
+                        <button
+                          key={item.id}
+                          type="button"
+                          className="w-full rounded-xl px-2 py-2 text-left hover:bg-muted"
+                          onClick={() => {
+                            setSearchPanelOpen(false);
+                            setSearchInput("");
+                            router.push("/timeline");
+                          }}
+                        >
+                          <p className="text-xs font-semibold capitalize text-foreground">{item.type} • {item.hospitalName}</p>
+                          <p className="line-clamp-1 text-xs text-muted-foreground">{item.description}</p>
+                          <p className="text-[11px] text-muted-foreground">{new Date(item.recordDate || item.createdAt).toLocaleDateString()}</p>
+                        </button>
+                      ))
+                    ) : (
+                      <p className="px-2 py-3 text-xs text-muted-foreground">No records found for this query.</p>
+                    )}
+                  </div>
+                </div>
+              ) : null}
+            </div>
+          ) : null}
+
           {isAuthenticated ? (
             <div className="relative">
               <Button

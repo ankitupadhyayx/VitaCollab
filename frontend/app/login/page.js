@@ -3,10 +3,11 @@
 import Link from "next/link";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { CheckCircle2, Loader2 } from "lucide-react";
+import { CheckCircle2, Eye, EyeOff, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
+import { AUTH_COPY, normalizeAuthErrorMessage } from "@/lib/auth-feedback";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/components/providers/auth-provider";
 
@@ -14,6 +15,7 @@ export default function LoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [rememberMe, setRememberMe] = useState(true);
+  const [showPassword, setShowPassword] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [resending, setResending] = useState(false);
   const [inlineError, setInlineError] = useState("");
@@ -27,12 +29,12 @@ export default function LoginPage() {
     setInlineError("");
 
     if (!hasValidEmail) {
-      setInlineError("Enter a valid email address.");
+      setInlineError(AUTH_COPY.INVALID_EMAIL);
       return;
     }
 
     if (!password.trim()) {
-      setInlineError("Password is required.");
+      setInlineError(AUTH_COPY.PASSWORD_REQUIRED);
       return;
     }
 
@@ -50,7 +52,7 @@ export default function LoginPage() {
         router.push("/dashboard");
       }
     } catch (error) {
-      const message = error?.response?.data?.message || "Unable to sign in";
+      const message = normalizeAuthErrorMessage(error?.response?.data?.message, AUTH_COPY.LOGIN_FAILED);
       setInlineError(message);
       toast.error(message);
     } finally {
@@ -62,7 +64,7 @@ export default function LoginPage() {
     const normalizedEmail = email.trim();
 
     if (!normalizedEmail) {
-      toast.error("Enter your email first");
+      toast.error(AUTH_COPY.EMAIL_REQUIRED);
       return;
     }
 
@@ -79,32 +81,28 @@ export default function LoginPage() {
       const data = await response.json().catch(() => ({}));
 
       if (!response.ok) {
-        throw new Error(data?.message || "Unable to resend verification email");
+        throw new Error(data?.message || AUTH_COPY.RESEND_VERIFICATION_FAILED);
       }
 
-      toast.success(data?.message || "Verification email sent");
+      toast.success(data?.message || AUTH_COPY.RESEND_VERIFICATION_SUCCESS);
     } catch (error) {
-      if (error?.message?.toLowerCase().includes("user not found")) {
-        toast.error("User not found");
-      } else {
-        toast.error(error?.message || "Unable to resend verification email");
-      }
+      toast.error(normalizeAuthErrorMessage(error?.message, AUTH_COPY.RESEND_VERIFICATION_FAILED));
     } finally {
       setResending(false);
     }
   };
 
   return (
-    <main className="grid min-h-screen place-items-center bg-gradient-to-b from-sky-50 via-white to-blue-50 px-4 py-12">
-      <Card className="w-full max-w-md animate-rise border-slate-200 bg-white shadow-[0_20px_60px_rgba(2,31,72,0.12)]">
-        <CardHeader>
-          <CardTitle className="text-2xl">Welcome back</CardTitle>
-          <CardDescription>Sign in to your secure VitaCollab workspace.</CardDescription>
+    <main className="grid min-h-screen place-items-center px-4 py-10 sm:py-14">
+      <Card className="w-full max-w-md animate-rise border border-slate-200/70 bg-white/95 shadow-[0_20px_60px_rgba(2,31,72,0.12)] backdrop-blur-md dark:border-white/10 dark:bg-white/5">
+        <CardHeader className="space-y-2 pb-2">
+          <CardTitle className="text-2xl text-slate-900 dark:text-white">Welcome back</CardTitle>
+          <CardDescription className="text-slate-600 dark:text-neutral-300">Sign in to your secure VitaCollab workspace.</CardDescription>
         </CardHeader>
         <CardContent>
-          <form className="space-y-4" onSubmit={onSubmit} noValidate>
-            <div className="space-y-2">
-              <label htmlFor="email" className="text-sm font-medium text-slate-700">Email</label>
+          <form className="space-y-5" onSubmit={onSubmit} noValidate>
+            <div className="space-y-2.5">
+              <label htmlFor="email" className="text-sm font-medium text-slate-700 dark:text-neutral-200">Email</label>
               <div className="relative">
                 <Input
                   id="email"
@@ -115,44 +113,59 @@ export default function LoginPage() {
                   autoFocus
                   autoComplete="email"
                   aria-invalid={!hasValidEmail && email.length > 0}
-                  className="pr-10"
+                  className="pr-10 bg-white/80 border-slate-300 text-slate-900 placeholder:text-slate-400 focus:ring-2 focus:ring-blue-500 dark:bg-white/10 dark:border-neutral-600 dark:text-white dark:placeholder:text-neutral-400"
                 />
                 {hasValidEmail ? <CheckCircle2 className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-emerald-500" /> : null}
               </div>
             </div>
 
-            <div className="space-y-2">
-              <label htmlFor="password" className="text-sm font-medium text-slate-700">Password</label>
-              <Input
-                id="password"
-                type="password"
-                placeholder="Password"
-                value={password}
-                onChange={(event) => setPassword(event.target.value)}
-                autoComplete="current-password"
-              />
+            <div className="space-y-2.5">
+              <label htmlFor="password" className="text-sm font-medium text-slate-700 dark:text-neutral-200">Password</label>
+              <div className="relative">
+                <Input
+                  id="password"
+                  type={showPassword ? "text" : "password"}
+                  placeholder="Password"
+                  value={password}
+                  onChange={(event) => setPassword(event.target.value)}
+                  autoComplete="current-password"
+                  className="pr-10 bg-white/80 border-slate-300 text-slate-900 placeholder:text-slate-400 focus:ring-2 focus:ring-blue-500 dark:bg-white/10 dark:border-neutral-600 dark:text-white dark:placeholder:text-neutral-400"
+                />
+                <button
+                  type="button"
+                  aria-label={showPassword ? "Hide password" : "Show password"}
+                  onClick={() => setShowPassword((prev) => !prev)}
+                  className="absolute right-2 top-1/2 -translate-y-1/2 rounded-md p-1 text-slate-500 transition hover:bg-slate-100 hover:text-slate-700 dark:text-neutral-300 dark:hover:bg-white/10 dark:hover:text-white"
+                >
+                  {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                </button>
+              </div>
             </div>
 
             {inlineError ? (
-              <p className="rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700" role="alert">
+              <p className="rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700 dark:border-red-400/40 dark:bg-red-900/20 dark:text-red-300" role="alert">
                 {inlineError}
               </p>
             ) : null}
 
-            <div className="flex items-center justify-between gap-3 text-sm text-muted-foreground">
+            <div className="flex items-center justify-between gap-3 text-sm text-slate-600 dark:text-neutral-300">
               <label className="flex items-center gap-2">
                 <input
                   type="checkbox"
                   checked={rememberMe}
                   onChange={(event) => setRememberMe(event.target.checked)}
-                  className="h-4 w-4 rounded border-border text-primary"
+                  className="h-4 w-4 rounded border border-slate-400 bg-white text-blue-600 focus:ring-2 focus:ring-blue-500 dark:border-neutral-500 dark:bg-neutral-800"
                 />
                 Remember me
               </label>
-              <Link className="font-semibold text-primary" href="/forgot-password">Forgot password?</Link>
+              <Link className="font-semibold text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300" href="/forgot-password">Forgot password?</Link>
             </div>
 
-            <Button type="submit" className="w-full" disabled={submitting}>
+            <Button
+              type="submit"
+              className="w-full rounded-lg bg-blue-600 text-white font-semibold hover:bg-blue-700 active:scale-[0.99]"
+              disabled={submitting}
+            >
               {submitting ? (
                 <span className="inline-flex items-center gap-2">
                   <Loader2 className="h-4 w-4 animate-spin" />
@@ -161,24 +174,26 @@ export default function LoginPage() {
               ) : "Sign In"}
             </Button>
 
-            <Button type="button" variant="secondary" className="w-full" disabled>
+            <Button type="button" variant="secondary" className="w-full rounded-lg" disabled>
               Continue with Google
             </Button>
+
+            <p className="text-xs text-slate-500 dark:text-neutral-400">We never share your data.</p>
           </form>
 
-          <p className="mt-2 text-center text-sm text-muted-foreground">
+          <p className="mt-3 text-center text-sm text-slate-600 dark:text-neutral-300">
             Didn&apos;t verify your email?{" "}
             <button
               type="button"
-              className="font-semibold text-primary"
+              className="font-semibold text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300"
               onClick={onResendVerification}
               disabled={resending}
             >
               {resending ? "Sending..." : "Resend verification"}
             </button>
           </p>
-          <p className="mt-4 text-center text-sm text-muted-foreground">
-            New to VitaCollab? <Link className="font-semibold text-primary" href="/signup">Create account</Link>
+          <p className="mt-4 text-center text-sm text-slate-600 dark:text-neutral-300">
+            New to VitaCollab? <Link className="font-semibold text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300" href="/signup">Create account</Link>
           </p>
         </CardContent>
       </Card>
