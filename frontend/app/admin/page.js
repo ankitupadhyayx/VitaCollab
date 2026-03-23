@@ -44,7 +44,6 @@ import { toRecordExportRow } from "@/features/admin/records";
 import { toUserExportRow } from "@/features/admin/users";
 import { useAuditLogger } from "@/hooks/use-audit-logger";
 import { useBulkAction } from "@/hooks/use-bulk-action";
-import { useRealtimeEvents } from "@/hooks/use-realtime-events";
 import { useRoleGuard } from "@/hooks/use-role-guard";
 import { useToast } from "@/hooks/use-toast";
 import {
@@ -328,33 +327,19 @@ export default function AdminPage() {
     loadAll();
   }, [loadAll]);
 
-  const realtimeConfigs = useMemo(
-    () => [
-      {
-        eventName: "admin:user:updated",
-        onEvent: () => {
-          loadUsers();
-          loadSessions();
-        }
-      },
-      {
-        eventName: "admin:record:updated",
-        onEvent: () => {
-          loadRecords();
-        }
-      },
-      {
-        eventName: "admin:audit:new",
-        onEvent: () => {
-          loadAudit();
-          loadActivity();
-        }
-      }
-    ],
-    [loadActivity, loadAudit, loadRecords, loadSessions, loadUsers]
-  );
+  useEffect(() => {
+    const interval = setInterval(() => {
+      loadUsers();
+      loadSessions();
+      loadRecords();
+      loadAudit();
+      loadActivity();
+    }, 20000);
 
-  useRealtimeEvents(realtimeConfigs);
+    return () => {
+      clearInterval(interval);
+    };
+  }, [loadActivity, loadAudit, loadRecords, loadSessions, loadUsers]);
 
   useEffect(() => {
     usersBulk.clear();

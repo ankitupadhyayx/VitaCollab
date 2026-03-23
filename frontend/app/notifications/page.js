@@ -8,7 +8,6 @@ import { Sidebar } from "@/components/layout/sidebar";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { EmptyState } from "@/components/ui/empty-state";
 import { Loader } from "@/components/ui/loader";
-import { useRealtimeEvents } from "@/hooks/use-realtime-events";
 import { useSharedNotifications } from "@/hooks/use-shared-notifications";
 import { useToast } from "@/hooks/use-toast";
 
@@ -21,7 +20,6 @@ export default function NotificationsPage() {
     unreadCount,
     isLoading: loading,
     error: notificationsError,
-    setNotifications,
     markRead,
     markAllRead
   } = useSharedNotifications({
@@ -34,27 +32,6 @@ export default function NotificationsPage() {
       toast.error(notificationsError?.response?.data?.message || "Failed to fetch notifications");
     }
   }, [notificationsError, toast]);
-
-  const realtimeConfigs = useMemo(
-    () => [
-      {
-        eventName: "notification:new",
-        onEvent: (payload) => {
-          if (!payload) {
-            return;
-          }
-          if (Array.isArray(payload)) {
-            setNotifications(payload);
-            return;
-          }
-          setNotifications((prev) => [payload, ...prev].slice(0, 50));
-        }
-      }
-    ],
-    [setNotifications]
-  );
-
-  useRealtimeEvents(realtimeConfigs);
 
   const visibleNotifications = useMemo(() => {
     return notifications.filter((item) => {

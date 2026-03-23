@@ -6,9 +6,6 @@ import { ProtectedRoute } from "@/components/guards/protected-route";
 import { Navbar } from "@/components/layout/navbar";
 import { Sidebar } from "@/components/layout/sidebar";
 import { useAuth } from "@/components/providers/auth-provider";
-import { REALTIME_EVENT_TYPES } from "@/lib/realtime-event-schema";
-import { useRealtimeEvents } from "@/hooks/use-realtime-events";
-import { websocketService } from "@/services/websocket-service";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 
@@ -32,34 +29,6 @@ export default function ChatPage() {
     () => conversations.find((item) => item.id === activeConversation) || conversations[0],
     [activeConversation]
   );
-
-  const realtimeConfigs = useMemo(
-    () => [
-      {
-        eventName: REALTIME_EVENT_TYPES.CHAT_MESSAGE,
-        onEvent: (payload) => {
-          if (!payload?.conversationId || payload.conversationId !== activeConversation) {
-            return;
-          }
-
-          setMessages((prev) => [
-            ...prev,
-            {
-              id: payload.messageId || `m-${Date.now()}`,
-              conversationId: payload.conversationId,
-              from: payload.senderId === user?.id ? "me" : "other",
-              text: payload.text,
-              at: payload.createdAt || new Date().toISOString(),
-              deliveryStatus: payload.deliveryStatus || "delivered"
-            }
-          ]);
-        }
-      }
-    ],
-    [activeConversation, user?.id]
-  );
-
-  useRealtimeEvents(realtimeConfigs);
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth", block: "end" });
@@ -86,15 +55,6 @@ export default function ChatPage() {
     ]);
     setDraft("");
     setTypingVisible(true);
-
-    websocketService.emit(REALTIME_EVENT_TYPES.CHAT_MESSAGE, {
-      conversationId: activeConversation,
-      messageId: optimistic.id,
-      senderId: user?.id,
-      text,
-      createdAt: optimistic.at,
-      deliveryStatus: "delivered"
-    });
 
     window.setTimeout(() => {
       setMessages((prev) => prev.map((item) => (item.id === optimistic.id ? { ...item, deliveryStatus: "delivered" } : item)));
@@ -136,7 +96,7 @@ export default function ChatPage() {
               <CardHeader>
                 <CardTitle>{activeMeta.name}</CardTitle>
                 <CardDescription>
-                  Secure messaging thread for {user?.role === "hospital" ? "patient coordination" : "care coordination"}. WebSocket-ready channel.
+                  Secure messaging thread for {user?.role === "hospital" ? "patient coordination" : "care coordination"}.
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-3">

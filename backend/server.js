@@ -6,7 +6,6 @@ const env = require("./utils/env");
 const connectDb = require("./config/db");
 const logger = require("./utils/logger");
 const { ensureDefaultAdmin } = require("./utils/seedAdmin");
-const { attachWebSocketServer } = require("./realtime/wsServer");
 const { getRefreshCookieOptions } = require("./utils/authCookies");
 
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
@@ -63,8 +62,13 @@ const startServer = async () => {
   await ensureDefaultAdmin();
   warnOnCookieConfigMismatch();
 
+  if (env.enableWebsocket) {
+    logger.warn("ENABLE_WEBSOCKET is true but backend WebSocket server is disabled in this build", {
+      hint: "Set ENABLE_WEBSOCKET=false to silence this warning"
+    });
+  }
+
   const server = http.createServer(app);
-  attachWebSocketServer(server);
 
   server.listen(env.port, () => {
     logger.info(`VitaCollab backend running on port ${env.port}`);

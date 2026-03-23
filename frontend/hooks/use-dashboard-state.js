@@ -5,7 +5,6 @@ import { useQuery } from "@tanstack/react-query";
 import { Activity, BellDot, FileHeart, Hospital } from "lucide-react";
 import { useAuth } from "@/components/providers/auth-provider";
 import { useOptimisticUpdate } from "@/hooks/use-optimistic-update";
-import { useRealtimeEvents } from "@/hooks/use-realtime-events";
 import { useSharedNotifications } from "@/hooks/use-shared-notifications";
 import { queryKeys } from "@/lib/query-keys";
 import { decideRecord, fetchRecords } from "@/services/record.service";
@@ -48,45 +47,6 @@ export default function useDashboardState({ toast }) {
       toast.error(recordsError?.response?.data?.message || "Failed to load dashboard data");
     }
   }, [recordsError, toast]);
-
-  const realtimeConfigs = useMemo(
-    () => [
-      {
-        eventName: "record:updated",
-        onEvent: (payload) => {
-          if (!payload) {
-            return;
-          }
-
-          if (Array.isArray(payload)) {
-            setRecords(payload);
-            return;
-          }
-
-          setRecords((prev) => {
-            const existing = prev.find((item) => item.id === payload.id);
-            if (existing) {
-              return prev.map((item) => (item.id === payload.id ? { ...item, ...payload } : item));
-            }
-            return [payload, ...prev].slice(0, 100);
-          });
-        }
-      },
-      {
-        eventName: "approval:changed",
-        onEvent: (payload) => {
-          if (!payload?.id) {
-            return;
-          }
-
-          setRecords((prev) => prev.map((item) => (item.id === payload.id ? { ...item, ...payload } : item)));
-        }
-      }
-    ],
-    []
-  );
-
-  useRealtimeEvents(realtimeConfigs);
 
   const patientInsights = useMemo(() => {
     const pendingCount = records.filter((item) => item.status === "pending").length;

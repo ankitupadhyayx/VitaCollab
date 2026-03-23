@@ -11,7 +11,6 @@ import { RecordCard } from "@/components/records/record-card";
 import { EmptyState } from "@/components/ui/empty-state";
 import { Loader } from "@/components/ui/loader";
 import { useOptimisticUpdate } from "@/hooks/use-optimistic-update";
-import { useRealtimeEvents } from "@/hooks/use-realtime-events";
 import { useToast } from "@/hooks/use-toast";
 import { useDebounce } from "@/hooks/use-debounce";
 import { toAbsoluteApiUrl } from "@/services/api";
@@ -56,45 +55,15 @@ export default function TimelinePage() {
     loadTimeline();
   }, [loadTimeline]);
 
-  const realtimeConfigs = useMemo(
-    () => [
-      {
-        eventName: "record:updated",
-        onEvent: (payload) => {
-          if (!payload?.id) {
-            return;
-          }
-          setRecords((prev) => prev.map((item) => (item.id === payload.id ? { ...item, ...payload } : item)));
-        }
-      },
-      {
-        eventName: "approval:changed",
-        onEvent: (payload) => {
-          if (!payload?.id) {
-            return;
-          }
-          setRecords((prev) => prev.map((item) => (item.id === payload.id ? { ...item, ...payload } : item)));
-        },
-        poller: async () => {
-          const [approvedRes, pendingRes, rejectedRes] = await Promise.all([
-            fetchMyTimeline("approved"),
-            fetchMyTimeline("pending"),
-            fetchMyTimeline("rejected")
-          ]);
+  useEffect(() => {
+    const interval = setInterval(() => {
+      loadTimeline();
+    }, 20000);
 
-          return [
-            ...(approvedRes?.data?.timeline || []),
-            ...(pendingRes?.data?.timeline || []),
-            ...(rejectedRes?.data?.timeline || [])
-          ];
-        },
-        pollInterval: 20000
-      }
-    ],
-    []
-  );
-
-  useRealtimeEvents(realtimeConfigs);
+    return () => {
+      clearInterval(interval);
+    };
+  }, [loadTimeline]);
 
   const openModal = (record, mode) => setModal({ open: true, mode, record });
 

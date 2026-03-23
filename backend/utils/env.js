@@ -82,6 +82,7 @@ module.exports = {
   refreshCookieSameSite: (process.env.REFRESH_COOKIE_SAMESITE || (isProd ? "none" : "lax")).toLowerCase(),
   refreshCookieDomain: process.env.REFRESH_COOKIE_DOMAIN || (isProd ? ".vitacollab.in" : undefined),
   refreshCookieSecure: parseBoolean(process.env.REFRESH_COOKIE_SECURE),
+  enableWebsocket: parseBoolean(process.env.ENABLE_WEBSOCKET) || false,
   aesSecretKey: process.env.AES_SECRET_KEY,
   cloudinaryCloudName: process.env.CLOUDINARY_CLOUD_NAME,
   cloudinaryApiKey: process.env.CLOUDINARY_API_KEY,
