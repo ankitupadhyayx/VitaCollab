@@ -87,6 +87,11 @@ module.exports = {
   cloudinaryCloudName: process.env.CLOUDINARY_CLOUD_NAME,
   cloudinaryApiKey: process.env.CLOUDINARY_API_KEY,
   cloudinaryApiSecret: process.env.CLOUDINARY_API_SECRET,
+  recordUploadMaxMb: Math.max(1, Number(process.env.RECORD_UPLOAD_MAX_MB) || 5),
+  clamavEnabled: parseBoolean(process.env.CLAMAV_ENABLED) ?? false,
+  clamavHost: process.env.CLAMAV_HOST || "127.0.0.1",
+  clamavPort: Math.max(1, Number(process.env.CLAMAV_PORT) || 3310),
+  clamavTimeoutMs: Math.max(1000, Number(process.env.CLAMAV_TIMEOUT_MS) || 10000),
   defaultAdminEmail: process.env.DEFAULT_ADMIN_EMAIL,
   defaultAdminPassword: process.env.DEFAULT_ADMIN_PASSWORD,
   logLevel: process.env.LOG_LEVEL || "info"

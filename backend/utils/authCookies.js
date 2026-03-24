@@ -1,26 +1,10 @@
 const env = require("./env");
 
-const normalizeSameSite = (value) => {
-  const candidate = String(value || "").toLowerCase();
-  if (["lax", "strict", "none"].includes(candidate)) {
-    return candidate;
-  }
-  return "lax";
-};
-
 const buildCookieBaseOptions = () => {
-  const sameSite = normalizeSameSite(env.refreshCookieSameSite);
-  const secure =
-    typeof env.refreshCookieSecure === "boolean"
-      ? env.refreshCookieSecure
-      : sameSite === "none"
-        ? true
-        : env.nodeEnv === "production";
-
   return {
     httpOnly: true,
-    secure,
-    sameSite,
+    secure: true,
+    sameSite: "none",
     path: "/",
     ...(env.refreshCookieDomain ? { domain: env.refreshCookieDomain } : {})
   };

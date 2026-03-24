@@ -2,7 +2,7 @@ const fs = require("fs/promises");
 const path = require("path");
 const { randomUUID } = require("crypto");
 const { StatusCodes } = require("http-status-codes");
-const { User, AuditLog } = require("../models");
+const { User } = require("../models");
 const { successResponse, errorResponse } = require("../utils/apiResponse");
 const { hashPassword, comparePassword } = require("../utils/password");
 const {
@@ -18,6 +18,7 @@ const { AUTH_MESSAGES } = require("../utils/authMessages");
 const env = require("../utils/env");
 const logger = require("../utils/logger");
 const { getRefreshCookieOptions, getClearRefreshCookieOptions } = require("../utils/authCookies");
+const { logSecurityAudit } = require("../services/audit.service");
 
 const verificationTokenTtlMs = 60 * 60 * 1000;
 const resetTokenTtlMs = 15 * 60 * 1000;
@@ -99,6 +100,11 @@ const buildAuthPayload = (user) => {
     user: sanitizeUser(user)
   };
 };
+
+const buildAuthResponsePayload = (user, accessToken) => ({
+  accessToken,
+  user: sanitizeUser(user)
+});
 
 const setRefreshCookie = (res, refreshToken) => {
   res.cookie(env.refreshCookieName, refreshToken, getRefreshCookieOptions());
@@ -378,7 +384,7 @@ const login = async (req, res, next) => {
       user.statusReason = null;
     }
 
-    const { accessToken, refreshToken, user: safeUser } = buildAuthPayload(user);
+    const { accessToken, refreshToken } = buildAuthPayload(user);
     user.refreshTokenHash = hashToken(refreshToken);
     user.lastLoginAt = new Date();
     user.riskMetadata = {
@@ -388,11 +394,14 @@ const login = async (req, res, next) => {
     };
     await user.save();
 
-    await AuditLog.create({
+    await logSecurityAudit({
+      req,
       userId: user._id,
+      role: user.role,
       action: "auth.login",
+      resourceId: user._id,
       metadata: {
-        role: user.role
+        loginAt: new Date().toISOString()
       }
     });
 
@@ -401,11 +410,7 @@ const login = async (req, res, next) => {
     return res.status(StatusCodes.OK).json(
       successResponse({
         message: AUTH_MESSAGES.LOGIN_SUCCESS,
-        data: {
-          accessToken,
-          refreshToken,
-          user: safeUser
-        }
+        data: buildAuthResponsePayload(user, accessToken)
       })
     );
   } catch (error) {
@@ -416,16 +421,13 @@ const login = async (req, res, next) => {
 const refresh = async (req, res, next) => {
   try {
     const cookieToken = req.cookies?.[env.refreshCookieName];
-    const bodyToken = req.body.refreshToken;
-    const providedToken = cookieToken || bodyToken;
 
     logger.info("Refresh token source check", {
       hasCookieToken: Boolean(cookieToken),
-      hasBodyToken: Boolean(bodyToken),
       refreshCookieName: env.refreshCookieName
     });
 
-    if (!providedToken) {
+    if (!cookieToken) {
       return res
         .status(StatusCodes.UNAUTHORIZED)
         .json(errorResponse({ message: AUTH_MESSAGES.REFRESH_TOKEN_REQUIRED }));
@@ -433,7 +435,7 @@ const refresh = async (req, res, next) => {
 
     let decoded;
     try {
-      decoded = verifyRefreshToken(providedToken);
+      decoded = verifyRefreshToken(cookieToken);
     } catch (error) {
       return res
         .status(StatusCodes.UNAUTHORIZED)
@@ -447,7 +449,7 @@ const refresh = async (req, res, next) => {
         .json(errorResponse({ message: AUTH_MESSAGES.REFRESH_SESSION_INVALID }));
     }
 
-    if (user.refreshTokenHash !== hashToken(providedToken)) {
+    if (user.refreshTokenHash !== hashToken(cookieToken)) {
       logger.warn("Refresh token mismatch detected", {
         userId: user._id.toString(),
         email: user.email
@@ -459,7 +461,7 @@ const refresh = async (req, res, next) => {
         .json(errorResponse({ message: AUTH_MESSAGES.REFRESH_TOKEN_MISMATCH }));
     }
 
-    const { accessToken, refreshToken, user: safeUser } = buildAuthPayload(user);
+    const { accessToken, refreshToken } = buildAuthPayload(user);
     user.refreshTokenHash = hashToken(refreshToken);
     await user.save();
 
@@ -468,11 +470,7 @@ const refresh = async (req, res, next) => {
     return res.status(StatusCodes.OK).json(
       successResponse({
         message: AUTH_MESSAGES.TOKEN_REFRESHED,
-        data: {
-          accessToken,
-          refreshToken,
-          user: safeUser
-        }
+        data: buildAuthResponsePayload(user, accessToken)
       })
     );
   } catch (error) {
@@ -482,21 +480,24 @@ const refresh = async (req, res, next) => {
 
 const logout = async (req, res, next) => {
   try {
-    const providedToken = req.body.refreshToken || req.cookies?.[env.refreshCookieName];
+    const cookieToken = req.cookies?.[env.refreshCookieName];
 
-    if (providedToken) {
+    if (cookieToken) {
       try {
-        const decoded = verifyRefreshToken(providedToken);
+        const decoded = verifyRefreshToken(cookieToken);
         const user = await User.findById(decoded.sub).select("+refreshTokenHash");
         if (user) {
           user.refreshTokenHash = null;
           await user.save();
 
-          await AuditLog.create({
+          await logSecurityAudit({
+            req,
             userId: user._id,
+            role: user.role,
             action: "auth.logout",
+            resourceId: user._id,
             metadata: {
-              role: user.role
+              logoutAt: new Date().toISOString()
             }
           });
         }

@@ -126,9 +126,7 @@ const resetPasswordSchema = z.object({
     .max(72, AUTH_MESSAGES.PASSWORD_TOO_LONG)
 });
 
-const refreshSchema = z.object({
-  refreshToken: z.string().min(20).optional()
-});
+const refreshSchema = z.object({}).strict();
 
 module.exports = {
   registerSchema,

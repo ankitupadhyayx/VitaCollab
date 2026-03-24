@@ -24,18 +24,7 @@ export function RecordCard({ record, onApprove, onReject, onPreview, onAudit, sh
           </div>
           <div className="flex items-center gap-2">
             <FileText className="h-4 w-4 text-primary" />
-            {record.fileLink ? (
-              <a
-                href={record.fileLink}
-                target="_blank"
-                rel="noreferrer"
-                className="break-all font-medium text-primary hover:underline"
-              >
-                {record.fileName}
-              </a>
-            ) : (
-              <span className="break-all">{record.fileName}</span>
-            )}
+            <span className="break-all font-medium text-primary">{record.fileName}</span>
           </div>
           <div className="flex items-center gap-2">
             <CalendarDays className="h-4 w-4 text-primary" />

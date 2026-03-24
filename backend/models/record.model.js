@@ -36,7 +36,7 @@ const recordSchema = new mongoose.Schema(
     },
     fileUrl: {
       type: String,
-      required: true
+      default: null
     },
     // Legacy local-storage path retained for backward compatibility during migration.
     filePath: {

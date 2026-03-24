@@ -397,6 +397,8 @@ const getAuditLogs = async (req, res, next) => {
     const limit = Math.min(Number(req.query.limit) || 20, 100);
     const userId = req.query.user;
     const action = req.query.action;
+    const role = req.query.role;
+    const resourceId = req.query.resourceId;
     const startDate = req.query.startDate;
     const endDate = req.query.endDate;
 
@@ -408,6 +410,14 @@ const getAuditLogs = async (req, res, next) => {
 
     if (action) {
       filter.action = { $regex: action, $options: "i" };
+    }
+
+    if (role) {
+      filter.role = role;
+    }
+
+    if (resourceId) {
+      filter.resourceId = { $regex: resourceId, $options: "i" };
     }
 
     if (startDate || endDate) {
@@ -426,8 +436,10 @@ const getAuditLogs = async (req, res, next) => {
           logs: logs.map((log) => ({
             id: log._id,
             userId: log.userId,
+            role: log.role,
             performedBy: log.performedBy,
             action: log.action,
+            resourceId: log.resourceId,
             actionType: log.actionType,
             targetType: log.targetType,
             targetId: log.targetId,

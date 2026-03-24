@@ -30,9 +30,16 @@ const API_MESSAGES = {
     RECORD_ACTION_COMPLETED: "Record action completed successfully.",
     RECORD_BULK_ACTION_COMPLETED: "Bulk record action completed successfully.",
     BATCH_REASON_RECORD_NOT_FOUND: "Record not found.",
+    FILE_UNAVAILABLE: "This file is currently unavailable.",
+    FILE_ACCESS_GRANTED: "Secure file access granted.",
     SHARE_TOKEN_INVALID_OR_EXPIRED: "Invalid or expired share token.",
     SHARE_TOKEN_PAYLOAD_INVALID: "Invalid share token payload.",
+    SHARE_TOKEN_ALREADY_USED: "This share link has already been used.",
+    SHARE_TOKEN_REVOKED: "This share link has been revoked.",
+    SHARE_RECIPIENT_MISMATCH: "This share link is not valid for this recipient.",
+    SHARE_RECIPIENT_REQUIRED: "Recipient user ID is required for recipient-bound sharing.",
     SHARE_LINK_GENERATED: "Secure share link generated successfully.",
+    SHARE_LINK_REVOKED: "Share link revoked successfully.",
     SHARED_RECORD_FETCHED: "Shared record fetched successfully."
   },
   HOSPITAL: {

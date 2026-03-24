@@ -1,17 +1,46 @@
 const mongoose = require("mongoose");
 const { StatusCodes } = require("http-status-codes");
 const { Record } = require("../models/record.model");
-const { User, Notification, AuditLog } = require("../models");
+const { User, Notification, RecordShareToken } = require("../models");
 const { successResponse, errorResponse } = require("../utils/apiResponse");
-const { uploadBufferToCloudinary } = require("../utils/cloudinary");
+const { uploadBufferToCloudinary, createSignedCloudinaryUrl, cloudinaryEnabled } = require("../utils/cloudinary");
 const { encryptText, decryptText } = require("../utils/encryption");
-const { signRecordShareToken, verifyRecordShareToken } = require("../utils/authTokens");
+const { hashToken } = require("../utils/authTokens");
+const { createTokenWithHash } = require("../utils/cryptoTokens");
 const { withRequestTiming } = require("../utils/requestTiming");
 const { API_MESSAGES } = require("../utils/apiMessages");
-const { logAdminAudit } = require("../services/audit.service");
+const { logAdminAudit, logSecurityAudit } = require("../services/audit.service");
 const { ADMIN_EVENTS, realtimeBroker } = require("../services/realtime.service");
+const { canAccessRecord } = require("../services/recordAccess.service");
 
 const isValidObjectId = (value) => mongoose.Types.ObjectId.isValid(value);
+const DEFAULT_SHARE_EXPIRY_MINUTES = Math.min(
+  30,
+  Math.max(15, Number(process.env.RECORD_SHARE_DEFAULT_EXPIRY_MINUTES || 20))
+);
+
+const buildFileAccessLinks = (recordId) => ({
+  fileAccessUrl: `/api/v1/files/${recordId}`,
+  fileDownloadUrl: `/api/v1/files/${recordId}?download=true`
+});
+
+const auditShareAccess = async ({ share, req, outcome, reason }) => {
+  await logSecurityAudit({
+    req,
+    userId: share?.createdBy || req.user?.id || null,
+    role: req.user?.role || "anonymous",
+    action: outcome === "success" ? "share_accessed" : "share_access_denied",
+    resourceId: share?.recordId || null,
+    metadata: {
+      shareId: share?._id || null,
+      recordId: share?.recordId || null,
+      outcome,
+      reason,
+      usedCount: share?.usedCount ?? null,
+      maxUses: share?.maxUses ?? null
+    }
+  });
+};
 
 const buildVisibilityFilter = (user) => {
   if (user.role === "admin") {
@@ -31,6 +60,7 @@ const buildVisibilityFilter = (user) => {
 };
 
 const sanitizeRecord = (record, includeReason = false) => {
+  const fileLinks = buildFileAccessLinks(record._id);
   const payload = {
     id: record._id,
     patientId: record.patientId,
@@ -38,10 +68,7 @@ const sanitizeRecord = (record, includeReason = false) => {
     hospitalName: record.hospitalName,
     type: record.type,
     description: record.description,
-    fileUrl: record.fileUrl,
-    filePath: record.filePath,
-    cloudinaryPublicId: record.cloudinaryPublicId,
-    fileResourceType: record.fileResourceType,
+    ...fileLinks,
     fileMimeType: record.fileMimeType,
     fileSize: record.fileSize,
     status: record.status,
@@ -111,10 +138,10 @@ const uploadRecord = async (req, res, next) => {
       hospitalName: hospital.name,
       type,
       description,
-      fileUrl: cloudinaryFile.url,
+      fileUrl: null,
       cloudinaryPublicId: cloudinaryFile.publicId,
       fileResourceType: cloudinaryFile.resourceType,
-      fileMimeType: req.file.mimetype,
+      fileMimeType: req.file.validatedMimeType || req.file.mimetype,
       fileSize: req.file.size,
       status: "pending",
       recordDate: recordDate ? new Date(recordDate) : new Date()
@@ -129,9 +156,12 @@ const uploadRecord = async (req, res, next) => {
           type
         })
       }),
-      AuditLog.create({
+      logSecurityAudit({
+        req,
         userId: req.user.id,
-        action: "record.uploaded",
+        role: req.user.role,
+        action: "record.create",
+        resourceId: record._id,
         metadata: {
           recordId: record._id,
           patientId: patient._id,
@@ -311,6 +341,18 @@ const getRecordById = async (req, res, next) => {
 
     const includeRejectionReason = req.user.role !== "hospital" || String(record.hospitalId) === req.user.id;
 
+    await logSecurityAudit({
+      req,
+      userId: req.user.id,
+      role: req.user.role,
+      action: "record.view",
+      resourceId: record._id,
+      metadata: {
+        recordId: record._id,
+        status: record.status
+      }
+    });
+
     return res.status(StatusCodes.OK).json(
       successResponse({
         message: API_MESSAGES.RECORDS.RECORD_FETCHED,
@@ -378,10 +420,14 @@ const decideRecord = async (req, res, next) => {
             ? API_MESSAGES.NOTIFICATIONS.RECORD_APPROVED({ recordId: record._id })
             : API_MESSAGES.NOTIFICATIONS.RECORD_REJECTED({ recordId: record._id })
       }),
-      AuditLog.create({
+      logSecurityAudit({
+        req,
         userId: req.user.id,
-        action: `record.${decision}`,
+        role: req.user.role,
+        action: "record.update",
+        resourceId: record._id,
         metadata: {
+          decision,
           recordId: record._id,
           hospitalId: record.hospitalId,
           patientId: record.patientId
@@ -433,6 +479,19 @@ const deleteRecord = async (req, res, next) => {
         .status(StatusCodes.BAD_REQUEST)
         .json(errorResponse({ message: API_MESSAGES.RECORDS.RECORD_DELETE_APPROVED_BLOCKED }));
     }
+
+    await logSecurityAudit({
+      req,
+      userId: req.user.id,
+      role: req.user.role,
+      action: "record.delete",
+      resourceId: record._id,
+      metadata: {
+        recordId: record._id,
+        hospitalId: record.hospitalId,
+        patientId: record.patientId
+      }
+    });
 
     await record.deleteOne();
 
@@ -619,6 +678,14 @@ const adminBulkRecordAction = async (req, res, next) => {
 const createRecordShareLink = async (req, res, next) => {
   try {
     const { id } = req.params;
+    const {
+      expiresInMinutes = DEFAULT_SHARE_EXPIRY_MINUTES,
+      recipientBound = false,
+      oneTimeUse = false,
+      maxUses,
+      recipientEmail,
+      recipientUserId
+    } = req.body || {};
 
     if (!isValidObjectId(id)) {
       return res
@@ -635,21 +702,54 @@ const createRecordShareLink = async (req, res, next) => {
         .json(errorResponse({ message: API_MESSAGES.RECORDS.RECORD_NOT_FOUND }));
     }
 
-    const token = signRecordShareToken({
-      rid: record._id.toString(),
-      uid: req.user.id,
-      type: "record-share"
+    const { token, tokenHash } = createTokenWithHash();
+    const isRecipientBound = recipientBound === true || Boolean(recipientUserId);
+    if (isRecipientBound && !recipientUserId) {
+      return res
+        .status(StatusCodes.BAD_REQUEST)
+        .json(errorResponse({ message: API_MESSAGES.RECORDS.SHARE_RECIPIENT_REQUIRED }));
+    }
+
+    const resolvedMaxUses = oneTimeUse ? 1 : Math.min(3, Math.max(1, Number(maxUses || 3)));
+    const resolvedExpiryMinutes = Math.min(30, Math.max(15, Number(expiresInMinutes || DEFAULT_SHARE_EXPIRY_MINUTES)));
+    const expiry = new Date(Date.now() + resolvedExpiryMinutes * 60 * 1000);
+
+    const share = await RecordShareToken.create({
+      recordId: record._id,
+      createdBy: req.user.id,
+      tokenHash,
+      expiresAt: expiry,
+      maxUses: resolvedMaxUses,
+      recipientEmail: recipientEmail ? String(recipientEmail).toLowerCase().trim() : null,
+      recipientUserId: isRecipientBound ? recipientUserId : null
     });
 
-    const shareUrl = `${req.protocol}://${req.get("host")}/api/v1/records/shared/${encodeURIComponent(token)}`;
+    await logSecurityAudit({
+      req,
+      userId: req.user.id,
+      role: req.user.role,
+      action: "share_created",
+      resourceId: record._id,
+      metadata: {
+        shareId: share._id,
+        recordId: record._id,
+        expiresAt: expiry,
+        maxUses: resolvedMaxUses
+      }
+    });
+
+    const shareUrl = `${req.protocol}://${req.get("host")}/api/v1/share/${encodeURIComponent(token)}`;
 
     return res.status(StatusCodes.OK).json(
       successResponse({
         message: API_MESSAGES.RECORDS.SHARE_LINK_GENERATED,
         data: {
-          token,
+          shareId: share._id,
           shareUrl,
-          expiresIn: process.env.RECORD_SHARE_EXPIRES_IN || "24h"
+          expiresAt: expiry,
+          maxUses: resolvedMaxUses,
+          oneTimeUse: resolvedMaxUses === 1,
+          recipientBound: Boolean(share.recipientUserId)
         }
       })
     );
@@ -661,34 +761,218 @@ const createRecordShareLink = async (req, res, next) => {
 const getSharedRecordByToken = async (req, res, next) => {
   try {
     const { token } = req.params;
+    const tokenHash = hashToken(token);
+    const share = await RecordShareToken.findOne({ tokenHash });
 
-    let decoded;
-    try {
-      decoded = verifyRecordShareToken(token);
-    } catch (error) {
+    if (!share) {
+      await auditShareAccess({
+        share: null,
+        req,
+        outcome: "denied",
+        reason: "invalid_or_unknown_token"
+      });
       return res
         .status(StatusCodes.UNAUTHORIZED)
         .json(errorResponse({ message: API_MESSAGES.RECORDS.SHARE_TOKEN_INVALID_OR_EXPIRED }));
     }
 
-    if (!decoded?.rid || decoded?.type !== "record-share") {
+    if (share.revokedAt) {
+      await auditShareAccess({
+        share,
+        req,
+        outcome: "denied",
+        reason: "revoked"
+      });
       return res
-        .status(StatusCodes.BAD_REQUEST)
-        .json(errorResponse({ message: API_MESSAGES.RECORDS.SHARE_TOKEN_PAYLOAD_INVALID }));
+        .status(StatusCodes.FORBIDDEN)
+        .json(errorResponse({ message: API_MESSAGES.RECORDS.SHARE_TOKEN_REVOKED }));
     }
 
-    const record = await Record.findById(decoded.rid);
+    if (new Date(share.expiresAt).getTime() <= Date.now()) {
+      await auditShareAccess({
+        share,
+        req,
+        outcome: "denied",
+        reason: "expired"
+      });
+      return res
+        .status(StatusCodes.UNAUTHORIZED)
+        .json(errorResponse({ message: API_MESSAGES.RECORDS.SHARE_TOKEN_INVALID_OR_EXPIRED }));
+    }
+
+    if (share.usedCount >= share.maxUses) {
+      await auditShareAccess({
+        share,
+        req,
+        outcome: "denied",
+        reason: "usage_limit_exceeded"
+      });
+      return res
+        .status(StatusCodes.FORBIDDEN)
+        .json(errorResponse({ message: API_MESSAGES.RECORDS.SHARE_TOKEN_ALREADY_USED }));
+    }
+
+    if (share.recipientUserId) {
+      if (!req.user || String(share.recipientUserId) !== String(req.user.id)) {
+        await auditShareAccess({
+          share,
+          req,
+          outcome: "denied",
+          reason: "recipient_user_mismatch"
+        });
+        return res
+          .status(StatusCodes.FORBIDDEN)
+          .json(errorResponse({ message: API_MESSAGES.RECORDS.SHARE_RECIPIENT_MISMATCH }));
+      }
+    }
+
+    if (share.recipientEmail) {
+      const requestedEmail = String(req.query.email || req.user?.email || "").toLowerCase().trim();
+      if (!requestedEmail || requestedEmail !== share.recipientEmail) {
+        await auditShareAccess({
+          share,
+          req,
+          outcome: "denied",
+          reason: "recipient_email_mismatch"
+        });
+        return res
+          .status(StatusCodes.FORBIDDEN)
+          .json(errorResponse({ message: API_MESSAGES.RECORDS.SHARE_RECIPIENT_MISMATCH }));
+      }
+    }
+
+    const record = await Record.findById(share.recordId);
+    if (!record) {
+      await auditShareAccess({
+        share,
+        req,
+        outcome: "denied",
+        reason: "record_not_found"
+      });
+      return res
+        .status(StatusCodes.NOT_FOUND)
+        .json(errorResponse({ message: API_MESSAGES.RECORDS.RECORD_NOT_FOUND }));
+    }
+
+    let sharedFileUrl = null;
+    let sharedFileUrlExpiresAt = null;
+    if (record.cloudinaryPublicId && cloudinaryEnabled) {
+      const signed = createSignedCloudinaryUrl({
+        publicId: record.cloudinaryPublicId,
+        resourceType: record.fileResourceType || "auto",
+        expiresInSeconds: 180,
+        asAttachment: false
+      });
+      sharedFileUrl = signed.signedUrl;
+      sharedFileUrlExpiresAt = signed.expiresAt;
+    }
+
+    share.usedCount += 1;
+    share.lastUsedAt = new Date();
+    await share.save();
+
+    await auditShareAccess({
+      share,
+      req,
+      outcome: "success",
+      reason: "granted"
+    });
+
+    return res.status(StatusCodes.OK).json(
+      successResponse({
+        message: API_MESSAGES.RECORDS.SHARED_RECORD_FETCHED,
+        data: {
+          share: {
+            id: share._id,
+            expiresAt: share.expiresAt,
+            remainingUses: Math.max(share.maxUses - share.usedCount, 0),
+            oneTimeUse: share.maxUses === 1
+          },
+          record: {
+            id: record._id,
+            type: record.type,
+            description: record.description,
+            hospitalName: record.hospitalName,
+            recordDate: record.recordDate,
+            status: record.status,
+            fileMimeType: record.fileMimeType,
+            fileSize: record.fileSize,
+            fileUrl: sharedFileUrl,
+            fileUrlExpiresAt: sharedFileUrlExpiresAt
+          }
+        }
+      })
+    );
+  } catch (error) {
+    return next(error);
+  }
+};
+
+const revokeRecordShareLink = async (req, res, next) => {
+  try {
+    const { shareId } = req.params;
+
+    const share = await RecordShareToken.findById(shareId).select(
+      "recordId createdBy revokedAt"
+    );
+    if (!share) {
+      return res
+        .status(StatusCodes.NOT_FOUND)
+        .json(errorResponse({ message: API_MESSAGES.RECORDS.SHARE_TOKEN_INVALID_OR_EXPIRED }));
+    }
+
+    if (share.revokedAt) {
+      return res.status(StatusCodes.OK).json(
+        successResponse({
+          message: API_MESSAGES.RECORDS.SHARE_LINK_REVOKED,
+          data: {
+            shareId: share._id,
+            revokedAt: share.revokedAt
+          }
+        })
+      );
+    }
+
+    const record = await Record.findById(share.recordId).select("patientId hospitalId");
     if (!record) {
       return res
         .status(StatusCodes.NOT_FOUND)
         .json(errorResponse({ message: API_MESSAGES.RECORDS.RECORD_NOT_FOUND }));
     }
 
+    const canManage = req.user.role === "admin"
+      || String(share.createdBy) === String(req.user.id)
+      || String(record.patientId) === String(req.user.id)
+      || String(record.hospitalId) === String(req.user.id);
+
+    if (!canManage) {
+      return res
+        .status(StatusCodes.FORBIDDEN)
+        .json(errorResponse({ message: API_MESSAGES.COMMON.ACCESS_DENIED }));
+    }
+
+    share.revokedAt = new Date();
+    share.revokedBy = req.user.id;
+    await share.save();
+
+    await logSecurityAudit({
+      req,
+      userId: req.user.id,
+      role: req.user.role,
+      action: "share_revoked",
+      resourceId: share.recordId,
+      metadata: {
+        shareId: share._id,
+        recordId: share.recordId
+      }
+    });
+
     return res.status(StatusCodes.OK).json(
       successResponse({
-        message: API_MESSAGES.RECORDS.SHARED_RECORD_FETCHED,
+        message: API_MESSAGES.RECORDS.SHARE_LINK_REVOKED,
         data: {
-          record: sanitizeRecord(record, false)
+          shareId: share._id,
+          revokedAt: share.revokedAt
         }
       })
     );
@@ -707,5 +991,6 @@ module.exports = {
   adminForceRecordAction,
   adminBulkRecordAction,
   createRecordShareLink,
-  getSharedRecordByToken
+  getSharedRecordByToken,
+  revokeRecordShareLink
 };

@@ -1,7 +1,7 @@
 import axios from "axios";
 import { API_BASE_URL } from "@/lib/api";
 import { logger } from "@/lib/logger";
-import { getStoredAccessToken, setStoredAccessToken } from "@/lib/session-store";
+import { getAccessTokenInMemory, setAccessTokenInMemory } from "@/lib/session-store";
 
 export const getApiBaseUrl = () => {
   return API_BASE_URL;
@@ -42,7 +42,7 @@ const onRefreshed = (token) => {
 };
 
 api.interceptors.request.use((config) => {
-  const token = getStoredAccessToken();
+  const token = getAccessTokenInMemory();
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;
   }
@@ -121,13 +121,13 @@ api.interceptors.response.use(
         throw new Error("Unable to refresh token");
       }
 
-      setStoredAccessToken(newToken);
+      setAccessTokenInMemory(newToken);
       onRefreshed(newToken);
       originalRequest.headers.Authorization = `Bearer ${newToken}`;
 
       return api(originalRequest);
     } catch (refreshError) {
-      setStoredAccessToken(null);
+      setAccessTokenInMemory(null);
       logger.warn("Token refresh failed", {
         message: refreshError?.message,
         status: refreshError?.response?.status || 0

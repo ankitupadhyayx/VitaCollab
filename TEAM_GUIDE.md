@@ -5,65 +5,80 @@ Operational handbook for developers, designers, marketers, and product managers 
 ## 1. Project Overview
 
 ### What VitaCollab Is
+
 VitaCollab is a privacy-first healthcare SaaS platform where patients control access to medical records while hospitals and providers collaborate through secure, auditable workflows.
 
 ### Current Stage
+
 Early Access / Beta with production-oriented architecture and active feature iteration.
 
 ### Core Mission
+
 1. Build patient-owned healthcare data workflows.
-2. Enable secure, consent-driven collaboration between hospitals and patients.
-3. Deliver a trustworthy, scalable healthcare product with strong engineering discipline.
+1. Enable secure, consent-driven collaboration between hospitals and patients.
+1. Deliver a trustworthy, scalable healthcare product with strong engineering discipline.
 
 ## 2. Project Structure
 
 Repository root contains major runtime units:
 
 1. frontend
-2. backend
-3. shared
-4. deployment files (docker-compose, environment examples, deployment notes)
+1. backend
+1. shared
+1. deployment files (docker-compose, environment examples, deployment notes)
 
 ### Frontend Structure
 
 1. frontend/app
+
 - Next.js App Router pages and route segments.
 - Primary location for page-level UI and routing behavior.
 
-2. frontend/components
+1. frontend/components
+
 - Reusable building blocks and domain-oriented component groups.
 
-3. frontend/components/ui
+1. frontend/components/ui
+
 - Primitive UI layer: buttons, cards, shared section patterns.
 - Use this layer to enforce consistency and avoid duplicated styles.
 
-4. frontend/lib
+1. frontend/lib
+
 - Helpers, utility functions, contracts, and cross-feature utilities.
 
-5. frontend/services
+1. frontend/services
+
 - API service clients and integration wrappers.
 
-6. frontend/hooks
+1. frontend/hooks
+
 - Reusable React hooks for shared behaviors.
 
 ### Backend Structure
 
 1. backend/controllers
+
 - API controller logic and request orchestration.
 
-2. backend/routes
+1. backend/routes
+
 - Route declarations and endpoint mapping.
 
-3. backend/models
+1. backend/models
+
 - Data schemas and persistence model definitions.
 
-4. backend/middleware
+1. backend/middleware
+
 - Authentication, authorization, validation, request guards.
 
-5. backend/services
+1. backend/services
+
 - Business logic layer.
 
-6. backend/repositories
+1. backend/repositories
+
 - Data access abstraction layer.
 
 ## 3. Where to Update What
@@ -71,20 +86,25 @@ Repository root contains major runtime units:
 Use this mapping to avoid changing the wrong layer.
 
 1. UI changes
+
 - Update frontend/components and route views under frontend/app.
 
-2. New pages/routes
-- Add new route segment under frontend/app/<route>/page.js.
+1. New pages/routes
 
-3. API changes
+- Add new route segment under frontend/app/route-name/page.js.
+
+1. API changes
+
 - Update backend/routes and backend/controllers.
 - If logic grows, move reusable parts into backend/services.
 
-4. Database changes
+1. Database changes
+
 - Update backend/models and related repository logic.
 - Add migration/seed scripts if required.
 
-5. Auth changes
+1. Auth changes
+
 - Update backend/middleware auth and authorization guards.
 - Validate token flow impact across frontend service clients.
 
@@ -93,189 +113,212 @@ Use this mapping to avoid changing the wrong layer.
 ### Standard Delivery Flow
 
 1. Create a feature branch
-- Naming convention: feature/<scope>-<short-description>.
 
-2. Implement feature
+- Naming convention: feature/scope-short-description.
+
+1. Implement feature
+
 - Keep changes scoped and layered (UI/API/DB).
 
-3. Test locally
+1. Test locally
+
 - Validate both frontend and backend behavior.
 - Run lint/build/tests relevant to touched areas.
 
-4. Push branch to GitHub
+1. Push branch to GitHub
+
 - Open PR with problem statement, changes, and test proof.
 
-5. Deploy
+1. Deploy
+
 - Frontend auto-deploy via Vercel.
 - Backend deploy via Render/Railway pipeline.
 
 ### Recommended PR Checklist
 
 1. Problem solved is clear.
-2. No unrelated files changed.
-3. API contracts documented.
-4. Environment variables updated if needed.
-5. Rollback approach identified for risky changes.
+1. No unrelated files changed.
+1. API contracts documented.
+1. Environment variables updated if needed.
+1. Rollback approach identified for risky changes.
+1. For release-bound changes, security evidence checklist scope is identified.
 
 ## 5. Feature Development Roadmap
 
 ### Phase 1: Core Stability
 
 1. Fix UI inconsistencies and interaction bugs.
-2. Improve dark mode contrast and component parity.
-3. Standardize error handling and empty states.
-4. Strengthen API validation and edge-case handling.
+1. Improve dark mode contrast and component parity.
+1. Standardize error handling and empty states.
+1. Strengthen API validation and edge-case handling.
 
 ### Phase 2: User Features
 
 1. Expand dashboard insights.
-2. Improve record history and filtering.
-3. Add robust notifications workflow.
-4. Improve patient approval timeline clarity.
+1. Improve record history and filtering.
+1. Add robust notifications workflow.
+1. Improve patient approval timeline clarity.
 
 ### Phase 3: Advanced Platform
 
 1. AI integrations for intelligent assistance.
-2. Analytics and operational observability dashboards.
-3. Hospital API connectors/integration adapters.
-4. Advanced admin controls and risk intelligence.
+1. Analytics and operational observability dashboards.
+1. Hospital API connectors/integration adapters.
+1. Advanced admin controls and risk intelligence.
 
 ## 6. User Experience Improvements
 
 Immediate UX backlog:
 
 1. Expand testimonials and social proof blocks.
-2. Continue landing page conversion improvements.
-3. Add first-run onboarding flow and guided tooltips.
-4. Improve skeleton/loading states across key views.
-5. Add consistent success/failure feedback patterns.
+1. Continue landing page conversion improvements.
+1. Add first-run onboarding flow and guided tooltips.
+1. Improve skeleton/loading states across key views.
+1. Add consistent success/failure feedback patterns.
 
 ## 7. Security and Performance
+
+### Security Documentation Sources
+
+Use these as the canonical security references:
+
+1. docs/security/SECURITY_POSTURE_SUMMARY.md
+1. docs/security/TECHNICAL_CONTROL_MATRIX.md
+1. docs/security/SECURITY_EVIDENCE_CHECKLIST.md
 
 ### Security Priorities
 
 1. Harden JWT lifecycle and token rotation policies.
-2. Add route-level rate limiting.
-3. Enforce request validation on all mutation endpoints.
-4. Expand audit logging for critical actions.
+1. Add route-level rate limiting.
+1. Enforce request validation on all mutation endpoints.
+1. Expand audit logging for critical actions.
 
 ### Performance Priorities
 
 1. Add/verify DB indexes for frequent queries.
-2. Optimize API response payload sizes.
-3. Improve frontend bundle hygiene and lazy loading.
-4. Add caching strategy for safe read-heavy endpoints.
+1. Optimize API response payload sizes.
+1. Improve frontend bundle hygiene and lazy loading.
+1. Add caching strategy for safe read-heavy endpoints.
 
 ## 8. Promotion and Growth Playbook
 
 ### SEO Foundation
 
 1. Ensure metadata on all public pages.
-2. Add sitemap and robots configuration.
-3. Improve semantic structure and internal linking.
-4. Add schema markup where applicable.
+1. Add sitemap and robots configuration.
+1. Improve semantic structure and internal linking.
+1. Add schema markup where applicable.
 
 ### Launch and Distribution Strategy
 
 1. Social launch sequence (LinkedIn, Instagram, product demos).
-2. Publish product explainers and use-case threads.
-3. Use landing page CTAs aligned to one primary conversion goal.
+1. Publish product explainers and use-case threads.
+1. Use landing page CTAs aligned to one primary conversion goal.
 
 ### Growth Systems to Build
 
 1. Waitlist system with segmented capture.
-2. Email onboarding and lifecycle campaigns.
-3. Landing page A/B tests for conversion uplift.
-4. Partner onboarding kits for hospitals.
+1. Email onboarding and lifecycle campaigns.
+1. Landing page A/B tests for conversion uplift.
+1. Partner onboarding kits for hospitals.
 
 ## 9. Deployment and Environment Operations
 
 ### Hosting Targets
 
 1. Frontend: Vercel
-2. Backend: Render (or Railway)
-3. Domain: GoDaddy
+1. Backend: Render (or Railway)
+1. Domain: GoDaddy
 
 ### Environment Management
 
 1. Keep separate development and production environment variables.
-2. Never commit real secrets.
-3. Use environment examples as templates.
-4. Document any newly added variable in deployment notes.
+1. Never commit real secrets.
+1. Use environment examples as templates.
+1. Document any newly added variable in deployment notes.
 
 ### Runtime Separation
 
 1. Dev: local backend + local frontend + local/managed DB.
-2. Prod: managed backend/frontend with secure secrets and HTTPS-only endpoints.
+1. Prod: managed backend/frontend with secure secrets and HTTPS-only endpoints.
+
+### Release Security Gate (Mandatory)
+
+Before each production deployment:
+
+1. Complete docs/security/SECURITY_EVIDENCE_CHECKLIST.md.
+1. Attach evidence links for tests, logs, and configuration checks.
+1. Obtain sign-off from engineering, security, compliance, and release owner.
+1. Block release if any required checklist item is FAIL.
 
 ## 10. Team Roles and Ownership
 
 ### Frontend Developer
 
 1. UI implementation and UX consistency.
-2. Route development and client-side state behavior.
-3. Responsive and accessibility quality.
+1. Route development and client-side state behavior.
+1. Responsive and accessibility quality.
 
 ### Backend Developer
 
 1. API design and controller/service logic.
-2. Data model and query optimization.
-3. Auth, validation, security enforcement.
+1. Data model and query optimization.
+1. Auth, validation, security enforcement.
 
 ### ML Engineer
 
 1. AI feature prototyping and model integration.
-2. Inference pipeline and quality monitoring.
-3. Safe fallback behavior for model-dependent features.
+1. Inference pipeline and quality monitoring.
+1. Safe fallback behavior for model-dependent features.
 
 ### Designer
 
 1. Design system refinement.
-2. Interaction and visual hierarchy consistency.
-3. Usability improvements and flow simplification.
+1. Interaction and visual hierarchy consistency.
+1. Usability improvements and flow simplification.
 
 ### Marketing and Growth
 
 1. SEO, content, and campaign execution.
-2. Funnel analytics and conversion optimization.
-3. Waitlist/email and social channel operations.
+1. Funnel analytics and conversion optimization.
+1. Waitlist/email and social channel operations.
 
 ## 11. New Team Member: Getting Started Checklist
 
 1. Clone repository.
-2. Install dependencies for frontend and backend.
-3. Configure environment variables from example files.
-4. Run both apps locally and verify baseline startup.
-5. Read roadmap section and pick a scoped issue.
-6. Confirm acceptance criteria before coding.
-7. Open PR with test evidence and change summary.
+1. Install dependencies for frontend and backend.
+1. Configure environment variables from example files.
+1. Run both apps locally and verify baseline startup.
+1. Read roadmap section and pick a scoped issue.
+1. Confirm acceptance criteria before coding.
+1. Open PR with test evidence and change summary.
 
 ## 12. Coding Standards
 
 ### Engineering Rules
 
 1. Prefer clean, readable, maintainable code over clever shortcuts.
-2. Build reusable components before duplicating UI patterns.
-3. Use clear naming aligned with business meaning.
-4. Add concise comments only where intent is not obvious.
-5. Keep business logic out of presentation components.
-6. Validate and sanitize all external input.
+1. Build reusable components before duplicating UI patterns.
+1. Use clear naming aligned with business meaning.
+1. Add concise comments only where intent is not obvious.
+1. Keep business logic out of presentation components.
+1. Validate and sanitize all external input.
 
 ### Pull Request Standards
 
 1. Small, focused diffs.
-2. Include rationale for architecture-impacting decisions.
-3. Include local test/build verification notes.
-4. Flag backward-incompatible changes explicitly.
+1. Include rationale for architecture-impacting decisions.
+1. Include local test/build verification notes.
+1. Flag backward-incompatible changes explicitly.
 
 ## 13. Future Vision
 
 VitaCollab long-term direction:
 
 1. Become India’s leading patient-owned healthcare data platform.
-2. Build a trusted ecosystem where patients control interoperable records.
-3. Deliver AI-driven healthcare insights without compromising privacy.
-4. Enable hospital-grade collaboration at national scale.
+1. Build a trusted ecosystem where patients control interoperable records.
+1. Deliver AI-driven healthcare insights without compromising privacy.
+1. Enable hospital-grade collaboration at national scale.
 
 ---
 

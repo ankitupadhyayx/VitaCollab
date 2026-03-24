@@ -161,7 +161,7 @@ export default function AdminPage() {
   const [usersFilter, setUsersFilter] = useState({ search: "", role: "all", status: "all" });
   const [recordsFilter, setRecordsFilter] = useState({ status: "all", search: "" });
   const [activityFilter, setActivityFilter] = useState("all");
-  const [auditFilter, setAuditFilter] = useState({ user: "", action: "", startDate: "", endDate: "" });
+  const [auditFilter, setAuditFilter] = useState({ user: "", action: "", role: "", resourceId: "", startDate: "", endDate: "" });
   const [reviewsFilter, setReviewsFilter] = useState("all");
 
   const [broadcastMessage, setBroadcastMessage] = useState("");
@@ -266,14 +266,17 @@ export default function AdminPage() {
     }
   }, [reviewsFilter]);
 
-  const loadAudit = useCallback(async () => {
+  const loadAudit = useCallback(async (overrideFilter = null) => {
     setTableBusy("audit", true);
     try {
+      const effectiveFilter = overrideFilter || auditFilter;
       const params = {
-        ...(auditFilter.user ? { user: auditFilter.user } : {}),
-        ...(auditFilter.action ? { action: auditFilter.action } : {}),
-        ...(auditFilter.startDate ? { startDate: new Date(auditFilter.startDate).toISOString() } : {}),
-        ...(auditFilter.endDate ? { endDate: new Date(auditFilter.endDate).toISOString() } : {}),
+        ...(effectiveFilter.user ? { user: effectiveFilter.user } : {}),
+        ...(effectiveFilter.action ? { action: effectiveFilter.action } : {}),
+        ...(effectiveFilter.role ? { role: effectiveFilter.role } : {}),
+        ...(effectiveFilter.resourceId ? { resourceId: effectiveFilter.resourceId } : {}),
+        ...(effectiveFilter.startDate ? { startDate: new Date(effectiveFilter.startDate).toISOString() } : {}),
+        ...(effectiveFilter.endDate ? { endDate: new Date(effectiveFilter.endDate).toISOString() } : {}),
         limit: 100
       };
       const response = await fetchAuditLogs(params);
@@ -1761,12 +1764,24 @@ export default function AdminPage() {
               <Card>
                 <CardHeader>
                   <CardTitle>Audit & Logs</CardTitle>
-                  <CardDescription>Filter logs by user, action, and date range.</CardDescription>
+                  <CardDescription>Filter logs by action, role, resource ID, and date range.</CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4">
-                  <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-5">
+                  <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-7">
                     <Input placeholder="User ID" value={auditFilter.user} onChange={(event) => setAuditFilter((prev) => ({ ...prev, user: event.target.value }))} />
                     <Input placeholder="Action" value={auditFilter.action} onChange={(event) => setAuditFilter((prev) => ({ ...prev, action: event.target.value }))} />
+                    <select
+                      className="h-10 rounded-lg border border-border bg-background px-3 text-sm"
+                      value={auditFilter.role}
+                      onChange={(event) => setAuditFilter((prev) => ({ ...prev, role: event.target.value }))}
+                    >
+                      <option value="">All Roles</option>
+                      <option value="admin">admin</option>
+                      <option value="hospital">hospital</option>
+                      <option value="patient">patient</option>
+                      <option value="anonymous">anonymous</option>
+                    </select>
+                    <Input placeholder="Resource ID" value={auditFilter.resourceId} onChange={(event) => setAuditFilter((prev) => ({ ...prev, resourceId: event.target.value }))} />
                     <Input type="date" value={auditFilter.startDate} onChange={(event) => setAuditFilter((prev) => ({ ...prev, startDate: event.target.value }))} />
                     <Input type="date" value={auditFilter.endDate} onChange={(event) => setAuditFilter((prev) => ({ ...prev, endDate: event.target.value }))} />
                     <Button
@@ -1777,6 +1792,17 @@ export default function AdminPage() {
                       }}
                     >
                       Apply
+                    </Button>
+                    <Button
+                      variant="outline"
+                      onClick={() => {
+                        const clearedFilter = { user: "", action: "", role: "", resourceId: "", startDate: "", endDate: "" };
+                        setAuditFilter(clearedFilter);
+                        setAuditPage(1);
+                        loadAudit(clearedFilter);
+                      }}
+                    >
+                      Clear Filters
                     </Button>
                   </div>
 
@@ -1825,7 +1851,9 @@ export default function AdminPage() {
                         onClick={async () => {
                           const filters = {
                             ...(auditFilter.user ? { userId: auditFilter.user } : {}),
-                            ...(auditFilter.action ? { action: auditFilter.action } : {})
+                            ...(auditFilter.action ? { action: auditFilter.action } : {}),
+                            ...(auditFilter.role ? { role: auditFilter.role } : {}),
+                            ...(auditFilter.resourceId ? { resourceId: auditFilter.resourceId } : {})
                           };
                           const blob = await exportAdminDataset({ type: "audit", mode: "filtered", filters: JSON.stringify(filters) });
                           downloadBlob("admin-audit-filtered.csv", blob);
@@ -1857,7 +1885,8 @@ export default function AdminPage() {
                             <p className="font-semibold text-foreground">{log.action}</p>
                             <p className="text-xs text-muted-foreground">{new Date(log.timestamp).toLocaleString()}</p>
                           </div>
-                          <p className="text-xs text-muted-foreground">User: {String(log.userId || "system")}</p>
+                          <p className="text-xs text-muted-foreground">User: {String(log.userId || "system")} • Role: {String(log.role || "anonymous")}</p>
+                          {log.resourceId ? <p className="text-xs text-muted-foreground">Resource: {log.resourceId}</p> : null}
                           {log.metadata ? <p className="mt-1 text-xs text-muted-foreground">{JSON.stringify(log.metadata)}</p> : null}
                         </div>
                       ))}

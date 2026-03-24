@@ -55,7 +55,13 @@ export default function DashboardPage() {
   } = useDashboardState({ toast });
 
   const [recordDetail, setRecordDetail] = useState({ open: false, record: null });
-  const [shareState, setShareState] = useState({ loading: false, link: "" });
+  const [shareState, setShareState] = useState({
+    loading: false,
+    link: "",
+    mode: "default",
+    expiresAt: null,
+    maxUses: null
+  });
   const [showOnboarding, setShowOnboarding] = useState(false);
 
   useEffect(() => {
@@ -120,16 +126,23 @@ export default function DashboardPage() {
 
   const openRecordDetail = useCallback((record) => {
     setRecordDetail({ open: true, record });
-    setShareState({ loading: false, link: "" });
+    setShareState({ loading: false, link: "", mode: "default", expiresAt: null, maxUses: null });
   }, []);
 
-  const createShareLink = useCallback(async (record) => {
+  const createShareLink = useCallback(async (record, options = {}) => {
     try {
-      setShareState({ loading: true, link: "" });
-      const response = await generateRecordShareLink(record.id);
-      setShareState({ loading: false, link: response?.data?.shareUrl || "" });
+      setShareState((prev) => ({ ...prev, loading: true, link: "" }));
+      const response = await generateRecordShareLink(record.id, options);
+      const payload = response?.data || {};
+      setShareState({
+        loading: false,
+        link: payload.shareUrl || "",
+        mode: payload.recipientBound ? "recipient-bound" : "default",
+        expiresAt: payload.expiresAt || null,
+        maxUses: Number.isFinite(Number(payload.maxUses)) ? Number(payload.maxUses) : null
+      });
     } catch (error) {
-      setShareState({ loading: false, link: "" });
+      setShareState({ loading: false, link: "", mode: "default", expiresAt: null, maxUses: null });
       toast.error(error?.response?.data?.message || "Unable to generate secure share link");
     }
   }, [toast]);

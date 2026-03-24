@@ -9,11 +9,13 @@ const {
   adminForceRecordAction,
   adminBulkRecordAction,
   createRecordShareLink,
-  getSharedRecordByToken
+  getSharedRecordByToken,
+  revokeRecordShareLink
 } = require("../controllers/record.controller");
-const { authenticate, requireHospitalVerified } = require("../middleware/auth.middleware");
+const { authenticate, optionalAuthenticate, requireHospitalVerified } = require("../middleware/auth.middleware");
 const { authorize, requirePermission } = require("../middleware/role.middleware");
 const { validate } = require("../middleware/validate.middleware");
+const { shareCreateLimiter, shareAccessLimiter } = require("../middleware/rateLimit.middleware");
 const { uploadSingleRecordFile } = require("../middleware/upload");
 const {
   createRecordSchema,
@@ -22,10 +24,21 @@ const {
   adminRecordActionSchema,
   adminBulkRecordActionSchema
 } = require("../utils/validators/record.validator");
+const {
+  createShareLinkSchema,
+  shareTokenParamSchema,
+  revokeShareLinkParamSchema
+} = require("../utils/validators/share.validator");
 
 const router = express.Router();
 
-router.get("/shared/:token", getSharedRecordByToken);
+router.get(
+  "/shared/:token",
+  shareAccessLimiter,
+  optionalAuthenticate,
+  validate(shareTokenParamSchema, "params"),
+  getSharedRecordByToken
+);
 
 router.use(authenticate);
 
@@ -40,7 +53,19 @@ router.post(
 
 router.get("/", validate(listRecordQuerySchema, "query"), listRecords);
 router.get("/timeline/me", authorize("patient"), getMyTimeline);
-router.post("/:id/share-link", authorize("patient", "admin"), createRecordShareLink);
+router.post(
+  "/:id/share-link",
+  authorize("patient", "admin"),
+  shareCreateLimiter,
+  validate(createShareLinkSchema),
+  createRecordShareLink
+);
+router.delete(
+  "/share-links/:shareId",
+  authorize("patient", "hospital", "admin"),
+  validate(revokeShareLinkParamSchema, "params"),
+  revokeRecordShareLink
+);
 router.get("/:id", getRecordById);
 router.patch(
   "/:id/decision",

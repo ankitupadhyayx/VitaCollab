@@ -17,6 +17,9 @@ services:
       - ./backend/.env
     environment:
       - MONGO_URI=mongodb://mongo:27017/vitacollab
+      - CLAMAV_ENABLED=false
+      - CLAMAV_HOST=127.0.0.1
+      - CLAMAV_PORT=3310
     depends_on:
       - mongo
     ports:
@@ -32,6 +35,14 @@ services:
       - backend
     ports:
       - "3000:3000"
+
+  clamav:
+    image: clamav/clamav:latest
+    restart: unless-stopped
+    profiles:
+      - clamav
+    ports:
+      - "3310:3310"
 
 volumes:
   mongo_data:

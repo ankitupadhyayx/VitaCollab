@@ -51,11 +51,25 @@ const reviewSubmitLimiter = rateLimit({
   ...withRetryAfter("Too many feedback submissions. Please try again later.")
 });
 
+const shareCreateLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 25,
+  ...withRetryAfter("Too many share-link creation attempts. Please try again later.")
+});
+
+const shareAccessLimiter = rateLimit({
+  windowMs: 10 * 60 * 1000,
+  max: 60,
+  ...withRetryAfter("Too many share-link access attempts. Please try again later.")
+});
+
 module.exports = {
   apiLimiter,
   loginLimiter,
   forgotPasswordLimiter,
   resendVerificationLimiter,
   resetPasswordLimiter,
-  reviewSubmitLimiter
+  reviewSubmitLimiter,
+  shareCreateLimiter,
+  shareAccessLimiter
 };

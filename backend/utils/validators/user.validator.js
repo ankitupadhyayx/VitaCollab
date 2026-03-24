@@ -39,6 +39,8 @@ const adminAuditQuerySchema = z.object({
   limit: z.coerce.number().int().min(1).max(100).optional(),
   user: z.string().regex(objectIdRegex, "Please provide a valid user ID.").optional(),
   action: z.string().min(2).max(100).optional(),
+  role: z.enum(["patient", "hospital", "admin", "anonymous"]).optional(),
+  resourceId: z.string().min(2).max(300).optional(),
   startDate: z.string().datetime().optional(),
   endDate: z.string().datetime().optional()
 });

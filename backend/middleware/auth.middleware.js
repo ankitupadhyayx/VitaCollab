@@ -75,6 +75,62 @@ const authenticate = async (req, res, next) => {
   }
 };
 
+const optionalAuthenticate = async (req, res, next) => {
+  try {
+    const authHeader = req.headers.authorization;
+
+    if (!authHeader || !authHeader.startsWith("Bearer ")) {
+      return next();
+    }
+
+    const token = authHeader.split(" ")[1];
+    if (!token) {
+      return next();
+    }
+
+    let decoded;
+    try {
+      decoded = verifyAccessToken(token);
+    } catch (error) {
+      return next();
+    }
+
+    const user = await User.findById(decoded.sub);
+    if (!user) {
+      return next();
+    }
+
+    if (user.accountStatus === "blocked") {
+      return next();
+    }
+
+    if (user.accountStatus === "suspended") {
+      const suspensionExpired = user.suspendedUntil && new Date(user.suspendedUntil).getTime() <= Date.now();
+      if (!suspensionExpired) {
+        return next();
+      }
+
+      user.accountStatus = "active";
+      user.suspendedUntil = null;
+      user.statusReason = null;
+      await user.save();
+    }
+
+    req.user = {
+      id: user._id.toString(),
+      role: user.role,
+      adminRole: user.adminRole || null,
+      email: user.email,
+      verified: user.verified,
+      isHospitalVerified: user.isHospitalVerified === true
+    };
+
+    return next();
+  } catch (error) {
+    return next();
+  }
+};
+
 const requireHospitalVerified = async (req, res, next) => {
   try {
     if (req.user?.role !== "hospital") {
@@ -100,5 +156,6 @@ const requireHospitalVerified = async (req, res, next) => {
 
 module.exports = {
   authenticate,
+  optionalAuthenticate,
   requireHospitalVerified
 };
