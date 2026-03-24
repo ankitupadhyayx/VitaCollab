@@ -102,34 +102,38 @@ export default function LoginPage() {
         <CardContent>
           <form className="space-y-5" onSubmit={onSubmit} noValidate>
             <div className="space-y-2.5">
-              <label htmlFor="email" className="text-sm font-medium text-slate-700 dark:text-neutral-200">Email</label>
+              <label htmlFor="email" className="text-sm font-medium text-slate-700 dark:text-neutral-200">Email <span className="ml-1 text-xs text-red-400">*</span></label>
               <div className="relative">
                 <Input
                   id="email"
                   type="email"
-                  placeholder="you@example.com"
+                  placeholder="Enter your email"
                   value={email}
                   onChange={(event) => setEmail(event.target.value)}
                   autoFocus
                   autoComplete="email"
+                  required
+                  aria-required="true"
                   aria-invalid={!hasValidEmail && email.length > 0}
-                  className="pr-10 bg-white/80 border-slate-300 text-slate-900 placeholder:text-slate-400 focus:ring-2 focus:ring-blue-500 dark:bg-white/10 dark:border-neutral-600 dark:text-white dark:placeholder:text-neutral-400"
+                  className="h-11 pr-10 bg-white/80 border-slate-300 text-slate-900 placeholder:text-slate-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-500 dark:bg-white/10 dark:border-neutral-600 dark:text-white dark:placeholder:text-neutral-400"
                 />
                 {hasValidEmail ? <CheckCircle2 className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-emerald-500" /> : null}
               </div>
             </div>
 
             <div className="space-y-2.5">
-              <label htmlFor="password" className="text-sm font-medium text-slate-700 dark:text-neutral-200">Password</label>
+              <label htmlFor="password" className="text-sm font-medium text-slate-700 dark:text-neutral-200">Password <span className="ml-1 text-xs text-red-400">*</span></label>
               <div className="relative">
                 <Input
                   id="password"
                   type={showPassword ? "text" : "password"}
-                  placeholder="Password"
+                  placeholder="Enter your password"
                   value={password}
                   onChange={(event) => setPassword(event.target.value)}
                   autoComplete="current-password"
-                  className="pr-10 bg-white/80 border-slate-300 text-slate-900 placeholder:text-slate-400 focus:ring-2 focus:ring-blue-500 dark:bg-white/10 dark:border-neutral-600 dark:text-white dark:placeholder:text-neutral-400"
+                  required
+                  aria-required="true"
+                  className="h-11 pr-10 bg-white/80 border-slate-300 text-slate-900 placeholder:text-slate-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-500 dark:bg-white/10 dark:border-neutral-600 dark:text-white dark:placeholder:text-neutral-400"
                 />
                 <button
                   type="button"
@@ -194,6 +198,9 @@ export default function LoginPage() {
           </p>
           <p className="mt-4 text-center text-sm text-slate-600 dark:text-neutral-300">
             New to VitaCollab? <Link className="font-semibold text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300" href="/signup">Create account</Link>
+          </p>
+          <p className="mt-3 text-center text-xs text-slate-500 dark:text-neutral-400">
+            By continuing, you agree to our <Link href="/terms" className="font-medium text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300">Terms</Link>, <Link href="/privacy" className="font-medium text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300">Privacy Policy</Link>, and <Link href="/disclaimer" className="font-medium text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300">Medical Disclaimer</Link>.
           </p>
         </CardContent>
       </Card>

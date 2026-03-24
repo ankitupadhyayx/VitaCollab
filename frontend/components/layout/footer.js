@@ -17,19 +17,14 @@ const companyLinks = [
 ];
 
 const resourceLinks = [
-  { href: "/help", label: "Help Center" },
-  { href: "/docs", label: "Documentation" },
   { href: "/privacy", label: "Privacy Policy" },
-  { href: "/terms", label: "Terms of Service" }
+  { href: "/terms", label: "Terms of Service" },
+  { href: "/docs", label: "Documentation" },
+  { href: "/contact", label: "Help Center" },
+  { href: "/disclaimer", label: "Medical Disclaimer" }
 ];
 
 const socialLinks = [
-  {
-    href: "https://www.instagram.com/ankitupadhya.y/",
-    label: "Instagram",
-    subtitle: "Personal",
-    icon: Instagram
-  },
   {
     href: "https://www.instagram.com/vitacollab/",
     label: "Instagram",
@@ -40,6 +35,12 @@ const socialLinks = [
     href: "https://www.linkedin.com/in/ankit-upadhyay-3a6b66288/",
     label: "LinkedIn",
     subtitle: "Founder",
+    icon: Linkedin
+  },
+  {
+    href: "https://www.linkedin.com/company/vitacollab/",
+    label: "LinkedIn",
+    subtitle: "VitaCollab",
     icon: Linkedin
   }
 ];
@@ -57,7 +58,7 @@ const navLinkClass =
 
 export function Footer() {
   return (
-    <footer className="mt-20 bg-gray-50 px-6 py-16 dark:bg-gradient-to-b dark:from-slate-900 dark:to-slate-800">
+    <footer className="mt-20 border-t border-slate-200 bg-gray-50 px-6 py-16 dark:border-white/10 dark:bg-gradient-to-b dark:from-slate-900 dark:to-slate-800">
       <div className="mx-auto max-w-7xl">
         <div className="mb-10 flex flex-wrap items-center gap-3 border-b border-slate-200 pb-8 dark:border-white/10">
           {trustBadges.map((badge) => (
@@ -79,10 +80,14 @@ export function Footer() {
               <span className="text-lg font-bold tracking-tight text-gray-900 dark:text-white">VitaCollab</span>
             </Link>
 
-            <p className="mt-4 text-sm font-medium text-slate-600 dark:text-gray-400">Privacy-first healthcare platform</p>
             <p className="mt-3 text-sm leading-relaxed text-slate-600 dark:text-gray-400">
-              Secure, patient-controlled healthcare data platform enabling seamless collaboration between hospitals and patients.
+              VitaCollab is a secure, patient-controlled healthcare data platform enabling seamless collaboration between hospitals and patients.
             </p>
+            <ul className="mt-4 space-y-1 text-xs text-slate-600 dark:text-gray-400">
+              <li>Data encrypted end-to-end</li>
+              <li>No data shared without consent</li>
+              <li>Access anytime, anywhere</li>
+            </ul>
             <p className="mt-4 inline-flex rounded-full border border-blue-500/20 bg-blue-500/10 px-3 py-1 text-xs font-semibold text-blue-400">
               Trusted by hospitals & patients
             </p>
@@ -130,6 +135,7 @@ export function Footer() {
               <a href="mailto:support@vitacollab.in" className="block transition-all duration-200 hover:text-blue-500">
                 support@vitacollab.in
               </a>
+              <p className="text-xs text-slate-500 dark:text-gray-500">Response within 24 hours</p>
             </div>
 
             <a
@@ -166,10 +172,10 @@ export function Footer() {
         </div>
 
         <div className="mt-10 border-t border-slate-200 pt-6 dark:border-white/10">
-          <div className="flex flex-col items-center justify-between gap-2 text-sm text-slate-600 dark:text-gray-400 sm:flex-row">
-            <p>© 2026 VitaCollab. All rights reserved.</p>
-            <p>Built in India 🇮🇳</p>
-          </div>
+          <p className="mb-3 text-center text-xs text-gray-400">
+            VitaCollab is a technology platform and does not provide medical advice. Always consult a qualified healthcare professional.
+          </p>
+          <p className="text-center text-sm text-slate-600 dark:text-gray-400">© 2026 VitaCollab. All rights reserved. Built in India 🇮🇳</p>
         </div>
       </div>
     </footer>

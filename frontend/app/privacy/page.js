@@ -31,6 +31,9 @@ export default function PrivacyPage() {
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-3 text-sm text-muted-foreground">
+            <p>VitaCollab is a patient-controlled healthcare data platform.</p>
+            <p>We collect personal and medical information to provide secure storage and sharing of healthcare records.</p>
+            <p>We do not sell or misuse user data.</p>
             <p className="flex items-start gap-2">
               <EyeOff className="mt-0.5 h-4 w-4 text-primary" />
               Access to records is permission-based and visible through consent workflows.
