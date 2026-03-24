@@ -66,43 +66,45 @@ export default function NotificationsPage() {
     <ProtectedRoute>
       <div className="min-h-screen">
         <Navbar />
-        <div className="mx-auto flex max-w-7xl gap-6 px-4 py-6 sm:px-6">
+        <div className="app-page-shell">
           <Sidebar />
-          <main className="w-full space-y-4">
+          <main className="w-full space-y-4 pb-28 lg:pb-0">
             <header>
-              <h1 className="text-3xl font-bold tracking-tight">Notifications</h1>
+              <h1 className="text-2xl font-bold tracking-tight sm:text-3xl">Notifications</h1>
               <p className="text-sm text-muted-foreground">Approval requests and care reminders.</p>
             </header>
 
-            <section className="flex items-center justify-between rounded-2xl border border-border bg-card/70 p-3">
-              <div className="flex gap-2">
+            <section className="rounded-2xl border border-border bg-card/70 p-3">
+              <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                <div className="flex flex-wrap gap-2">
                 <button
                   type="button"
-                  className={`rounded-full px-3 py-1 text-xs font-semibold ${activeTab === "unread" ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground"}`}
+                  className={`rounded-full px-3 py-2 text-xs font-semibold ${activeTab === "unread" ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground"}`}
                   onClick={() => setActiveTab("unread")}
                 >
                   Unread ({unreadCount})
                 </button>
                 <button
                   type="button"
-                  className={`rounded-full px-3 py-1 text-xs font-semibold ${activeTab === "all" ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground"}`}
+                  className={`rounded-full px-3 py-2 text-xs font-semibold ${activeTab === "all" ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground"}`}
                   onClick={() => setActiveTab("all")}
                 >
                   All ({notifications.length})
                 </button>
-              </div>
-              <div className="flex items-center gap-2">
-                <select
-                  value={category}
-                  onChange={(event) => setCategory(event.target.value)}
-                  className="rounded-lg border border-border bg-background px-2 py-1 text-xs"
-                >
-                  <option value="all">All categories</option>
-                  <option value="system">System</option>
-                  <option value="record">Records</option>
-                  <option value="approval">Approvals</option>
-                </select>
-                <button type="button" className="text-xs font-semibold text-primary" onClick={handleMarkAllRead}>Mark all read</button>
+                </div>
+                <div className="flex w-full items-center gap-2 sm:w-auto">
+                  <select
+                    value={category}
+                    onChange={(event) => setCategory(event.target.value)}
+                    className="h-11 w-full rounded-lg border border-border bg-background px-3 text-sm sm:w-auto"
+                  >
+                    <option value="all">All categories</option>
+                    <option value="system">System</option>
+                    <option value="record">Records</option>
+                    <option value="approval">Approvals</option>
+                  </select>
+                  <button type="button" className="min-h-[44px] whitespace-nowrap px-2 text-xs font-semibold text-primary" onClick={handleMarkAllRead}>Mark all read</button>
+                </div>
               </div>
             </section>
 

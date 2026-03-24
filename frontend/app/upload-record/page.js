@@ -16,6 +16,13 @@ import { useAuth } from "@/components/providers/auth-provider";
 import { useToast } from "@/hooks/use-toast";
 import { uploadRecord } from "@/services/record.service";
 
+const patientSuggestions = [
+  "patient1@vitacollab.in",
+  "patient2@vitacollab.in",
+  "pihu.mehta@vitacollab.in",
+  "rahul.sharma@vitacollab.in"
+];
+
 export default function UploadRecordPage() {
   const { user } = useAuth();
   const searchParams = useSearchParams();
@@ -28,12 +35,6 @@ export default function UploadRecordPage() {
   const [submitting, setSubmitting] = useState(false);
   const toast = useToast();
   const recordTypes = ["report", "prescription", "bill", "lab", "imaging"];
-  const patientSuggestions = [
-    "patient1@vitacollab.in",
-    "patient2@vitacollab.in",
-    "pihu.mehta@vitacollab.in",
-    "rahul.sharma@vitacollab.in"
-  ];
 
   const update = (key, value) => setForm((prev) => ({ ...prev, [key]: value }));
   const hospitalPendingVerification = user?.role === "hospital" && user?.isHospitalVerified !== true;
@@ -49,7 +50,7 @@ export default function UploadRecordPage() {
 
   const filteredPatients = useMemo(
     () => patientSuggestions.filter((item) => item.toLowerCase().includes(form.patientId.toLowerCase())).slice(0, 5),
-    [form.patientId, patientSuggestions]
+    [form.patientId]
   );
 
   const visibleUploads = useMemo(() => {
@@ -110,9 +111,9 @@ export default function UploadRecordPage() {
     <ProtectedRoute roles={["hospital", "admin"]}>
       <div className="min-h-screen">
         <Navbar />
-        <div className="mx-auto flex max-w-7xl gap-6 px-4 py-6 sm:px-6">
+        <div className="app-page-shell">
           <Sidebar />
-          <main className="grid w-full gap-4 pb-24 lg:grid-cols-3 lg:pb-0">
+          <main className="grid w-full gap-4 pb-28 lg:grid-cols-3 lg:pb-0">
             <Card className="animate-rise lg:col-span-2">
               <CardHeader>
                 <CardTitle>Upload Medical Record</CardTitle>
@@ -159,7 +160,7 @@ export default function UploadRecordPage() {
                           key={type}
                           type="button"
                           onClick={() => update("type", type)}
-                          className={`rounded-full border px-3 py-1 text-xs font-medium capitalize transition ${
+                          className={`rounded-full border px-3 py-2 text-xs font-medium capitalize transition ${
                             form.type === type
                               ? "border-primary bg-primary/10 text-primary"
                               : "border-border/80 bg-background/70 text-foreground hover:border-primary/60"
@@ -179,7 +180,7 @@ export default function UploadRecordPage() {
 
                   <UploadZone file={file} onFileChange={setFile} />
 
-                  <Button type="submit" className="w-full sm:w-fit" disabled={submitting || hospitalPendingVerification}>
+                  <Button type="submit" className="h-11 w-full sm:w-fit" disabled={submitting || hospitalPendingVerification}>
                     {submitting ? "Uploading..." : "Upload Record"}
                   </Button>
                 </form>
@@ -207,7 +208,7 @@ export default function UploadRecordPage() {
               <CardContent className="space-y-3">
                 <div className="flex flex-col gap-2 sm:flex-row">
                   <Input placeholder="Search uploads" value={query} onChange={(event) => setQuery(event.target.value)} />
-                  <div className="flex gap-2">
+                  <div className="grid grid-cols-2 gap-2 sm:flex">
                     {["all", "pending", "approved", "rejected"].map((status) => (
                       <button
                         key={status}
@@ -245,7 +246,7 @@ export default function UploadRecordPage() {
                       </div>
                     ))}
 
-                    <div className="flex items-center justify-end gap-2">
+                    <div className="flex flex-wrap items-center justify-end gap-2">
                       <Button variant="secondary" size="sm" disabled={page <= 1} onClick={() => setPage((p) => Math.max(1, p - 1))}>Previous</Button>
                       <p className="text-xs text-muted-foreground">Page {page} / {visibleUploads.pages}</p>
                       <Button variant="secondary" size="sm" disabled={page >= visibleUploads.pages} onClick={() => setPage((p) => Math.min(visibleUploads.pages, p + 1))}>Next</Button>

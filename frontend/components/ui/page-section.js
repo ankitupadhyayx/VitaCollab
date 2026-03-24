@@ -6,8 +6,8 @@ export function PageIntro({ badge, title, description, className = "" }) {
           {badge}
         </p>
       ) : null}
-      <h1 className="heading-font text-4xl font-bold tracking-tight sm:text-5xl">{title}</h1>
-      {description ? <p className="max-w-3xl text-muted-foreground">{description}</p> : null}
+      <h1 className="heading-font text-3xl font-bold tracking-tight sm:text-5xl">{title}</h1>
+      {description ? <p className="max-w-3xl text-sm leading-relaxed text-muted-foreground sm:text-base">{description}</p> : null}
     </section>
   );
 }

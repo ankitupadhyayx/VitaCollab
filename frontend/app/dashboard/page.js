@@ -76,7 +76,7 @@ export default function DashboardPage() {
 
 
   const renderMetricCards = () => (
-    <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+    <section className="grid gap-3 sm:gap-4 sm:grid-cols-2 xl:grid-cols-4">
       {cards.map((item, index) => {
         const Icon = item.icon;
         return (
@@ -103,7 +103,7 @@ export default function DashboardPage() {
   );
 
   const renderSkeletonCards = () => (
-    <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+    <section className="grid gap-3 sm:gap-4 sm:grid-cols-2 xl:grid-cols-4">
       {Array.from({ length: 4 }).map((_, index) => (
         <Card key={index} hover={false}>
           <CardHeader>
@@ -208,14 +208,14 @@ export default function DashboardPage() {
     <ProtectedRoute>
       <div className="min-h-screen">
         <Navbar />
-        <div className="mx-auto flex max-w-7xl gap-6 px-4 py-6 sm:px-6">
+        <div className="app-page-shell">
           <Sidebar />
-          <main className="w-full space-y-6 pb-24 lg:pb-0">
+          <main className="w-full space-y-5 pb-28 sm:space-y-6 lg:pb-0">
             <motion.section className="animate-rise" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}>
-              <h1 className="text-3xl font-bold tracking-tight">
+              <h1 className="text-2xl font-bold tracking-tight sm:text-3xl">
                 {role === "hospital" ? "Hospital Command Center" : role === "admin" ? "Admin Intelligence Board" : "Patient Dashboard"}
               </h1>
-              <p className="text-sm text-muted-foreground">
+              <p className="mt-1 text-sm leading-relaxed text-muted-foreground">
                 {role === "hospital"
                   ? "Manage uploads, track approvals, and optimize care workflows."
                   : role === "admin"
@@ -231,7 +231,7 @@ export default function DashboardPage() {
                     <p className="text-sm font-semibold">Welcome to VitaCollab</p>
                     <p className="text-xs text-muted-foreground">Your dashboard is ready. Complete your profile and upload your first record to unlock full collaboration.</p>
                   </div>
-                  <button type="button" onClick={completeOnboarding} className="rounded-xl bg-primary px-4 py-2 text-xs font-semibold text-primary-foreground">
+                  <button type="button" onClick={completeOnboarding} className="w-full rounded-xl bg-primary px-4 py-2 text-xs font-semibold text-primary-foreground sm:w-auto">
                     Continue
                   </button>
                 </CardContent>

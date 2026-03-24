@@ -36,7 +36,7 @@ export default function AboutPage() {
     <div className="min-h-screen">
       <Navbar />
 
-      <main className="mx-auto max-w-7xl space-y-10 px-4 pb-20 pt-16 sm:px-6">
+      <main className="mx-auto max-w-7xl space-y-8 px-4 pb-28 pt-12 sm:space-y-10 sm:px-6 sm:pt-16 lg:pb-20">
         <PageIntro
           badge="About VitaCollab"
           title="Building patient-owned digital health records for trusted care collaboration"

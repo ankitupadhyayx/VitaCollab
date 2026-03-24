@@ -348,11 +348,11 @@ export default function ProfilePage() {
     <ProtectedRoute>
       <div className="min-h-screen">
         <Navbar />
-        <div className="mx-auto flex max-w-7xl gap-6 px-4 py-6 sm:px-6">
+        <div className="app-page-shell">
           <Sidebar />
-          <main className="w-full space-y-5 pb-24 lg:pb-0">
+          <main className="w-full space-y-5 pb-28 lg:pb-0">
             <header>
-              <h1 className="text-3xl font-bold tracking-tight">{isHospital ? "Hospital Profile" : "Patient Profile"}</h1>
+              <h1 className="text-2xl font-bold tracking-tight sm:text-3xl">{isHospital ? "Hospital Profile" : "Patient Profile"}</h1>
               <p className="text-sm text-muted-foreground">Manage your core identity and collaboration readiness.</p>
             </header>
 
@@ -410,7 +410,7 @@ export default function ProfilePage() {
                   ) : null}
 
                   {!isHospital ? (
-                    <Button type="button" variant="secondary" onClick={openQr}>
+                    <Button type="button" variant="secondary" className="w-full sm:w-auto" onClick={openQr}>
                       Show My QR
                     </Button>
                   ) : null}

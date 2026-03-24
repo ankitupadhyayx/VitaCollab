@@ -5,7 +5,7 @@ import { cva } from "class-variance-authority";
 import { cn } from "@/lib/utils";
 
 const buttonVariants = cva(
-  "relative inline-flex items-center justify-center overflow-hidden whitespace-nowrap rounded-xl text-sm font-semibold transition duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 disabled:pointer-events-none disabled:opacity-50 active:scale-[0.97] dark:focus-visible:ring-blue-400/40",
+  "relative inline-flex min-h-[44px] items-center justify-center overflow-hidden whitespace-nowrap rounded-xl text-[15px] font-semibold transition duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 disabled:pointer-events-none disabled:opacity-50 active:scale-[0.97] dark:focus-visible:ring-blue-400/40 sm:text-sm",
   {
     variants: {
       variant: {
@@ -15,8 +15,8 @@ const buttonVariants = cva(
         danger: "bg-danger text-danger-foreground hover:-translate-y-0.5 hover:bg-danger/90"
       },
       size: {
-        default: "h-10 px-4 py-2",
-        sm: "h-9 rounded-lg px-3",
+        default: "h-11 px-4 py-2",
+        sm: "h-10 rounded-lg px-3",
         lg: "h-11 px-6"
       }
     },

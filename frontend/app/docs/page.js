@@ -35,7 +35,7 @@ export default function DocsPage() {
   return (
     <div className="min-h-screen">
       <Navbar />
-      <main className="mx-auto max-w-7xl space-y-10 px-4 pb-20 pt-16 sm:px-6">
+      <main className="mx-auto max-w-7xl space-y-8 px-4 pb-28 pt-12 sm:space-y-10 sm:px-6 sm:pt-16 lg:pb-20">
         <PageIntro
           badge="Documentation"
           title="Product and developer documentation"
@@ -64,7 +64,7 @@ export default function DocsPage() {
             {apiRefs.map((item) => (
               <Card key={item.endpoint}>
                 <CardContent className="space-y-2 p-4">
-                  <p className="font-mono text-sm text-foreground">{item.endpoint}</p>
+                  <p className="break-all font-mono text-xs text-foreground sm:text-sm">{item.endpoint}</p>
                   <p className="text-sm text-muted-foreground">{item.purpose}</p>
                 </CardContent>
               </Card>

@@ -69,9 +69,9 @@ export default function ChatPage() {
     <ProtectedRoute>
       <div className="min-h-screen">
         <Navbar />
-        <div className="mx-auto flex max-w-7xl gap-6 px-4 py-6 sm:px-6">
+        <div className="app-page-shell">
           <Sidebar />
-          <main className="grid w-full gap-4 pb-24 lg:grid-cols-4 lg:pb-0">
+          <main className="grid w-full gap-4 pb-28 lg:grid-cols-4 lg:pb-0">
             <Card className="lg:col-span-1">
               <CardHeader>
                 <CardTitle>Chats</CardTitle>
@@ -83,7 +83,7 @@ export default function ChatPage() {
                     key={item.id}
                     type="button"
                     onClick={() => setActiveConversation(item.id)}
-                    className={`w-full rounded-2xl px-3 py-2 text-left ${activeConversation === item.id ? "bg-primary text-primary-foreground" : "bg-background/70"}`}
+                    className={`w-full rounded-2xl px-3 py-3 text-left ${activeConversation === item.id ? "bg-primary text-primary-foreground" : "bg-background/70"}`}
                   >
                     <p className="text-sm font-semibold">{item.name}</p>
                     <p className={`text-xs ${activeConversation === item.id ? "text-primary-foreground/80" : "text-muted-foreground"}`}>{item.status}</p>
@@ -100,10 +100,10 @@ export default function ChatPage() {
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-3">
-                <div className="h-[420px] space-y-3 overflow-auto rounded-2xl bg-background/65 p-3">
+                <div className="h-[58vh] min-h-[360px] space-y-3 overflow-auto rounded-2xl bg-background/65 p-3 sm:h-[420px]">
                   {messages.map((message) => (
                     <div key={message.id} className={`flex ${message.from === "me" ? "justify-end" : "justify-start"}`}>
-                      <div className={`max-w-[75%] rounded-2xl px-3 py-2 text-sm ${message.from === "me" ? "bg-primary text-primary-foreground" : "bg-muted text-foreground"}`}>
+                      <div className={`max-w-[88%] rounded-2xl px-3 py-2 text-sm sm:max-w-[75%] ${message.from === "me" ? "bg-primary text-primary-foreground" : "bg-muted text-foreground"}`}>
                         <p>{message.text}</p>
                         <p className={`mt-1 text-[11px] ${message.from === "me" ? "text-primary-foreground/80" : "text-muted-foreground"}`}>
                           {new Date(message.at).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
@@ -116,7 +116,7 @@ export default function ChatPage() {
                   <div ref={bottomRef} />
                 </div>
 
-                <div className="flex gap-2">
+                <div className="flex flex-col gap-2 sm:flex-row">
                   <input
                     value={draft}
                     onChange={(event) => setDraft(event.target.value)}
@@ -127,9 +127,9 @@ export default function ChatPage() {
                       }
                     }}
                     placeholder="Write a secure message..."
-                    className="h-10 flex-1 rounded-xl border border-border bg-background px-3 text-sm"
+                    className="h-11 flex-1 rounded-xl border border-border bg-background px-3 text-sm"
                   />
-                  <Button type="button" onClick={sendMessage}>
+                  <Button type="button" onClick={sendMessage} className="h-11 w-full sm:w-auto">
                     <SendHorizontal className="h-4 w-4" /> Send
                   </Button>
                 </div>

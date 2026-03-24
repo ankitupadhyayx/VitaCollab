@@ -80,15 +80,15 @@ export default function LandingPage() {
               <p className="body-font max-w-xl text-base leading-relaxed text-slate-600 dark:text-gray-400 sm:text-lg">
                 VitaCollab helps patients and hospitals manage medical records with strong security, transparent approvals, and reliable real-time coordination.
               </p>
-              <div className="flex flex-wrap items-center gap-3">
-                <Link href="/signup">
-                  <Button size="lg" className="min-w-[150px] dark:bg-blue-600 dark:text-white dark:hover:bg-blue-700 dark:shadow-lg dark:shadow-blue-500/20">
+              <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center">
+                <Link href="/signup" className="w-full sm:w-auto">
+                  <Button size="lg" className="h-11 w-full min-w-[150px] dark:bg-blue-600 dark:text-white dark:hover:bg-blue-700 dark:shadow-lg dark:shadow-blue-500/20">
                     Get Started
                     <ArrowRight className="ml-2 h-4 w-4" />
                   </Button>
                 </Link>
-                <Link href="/dashboard">
-                  <Button variant="secondary" size="lg" className="min-w-[150px] dark:border-white/10 dark:bg-white/10 dark:text-gray-200 dark:hover:bg-white/20">
+                <Link href="/dashboard" className="w-full sm:w-auto">
+                  <Button variant="secondary" size="lg" className="h-11 w-full min-w-[150px] dark:border-white/10 dark:bg-white/10 dark:text-gray-200 dark:hover:bg-white/20">
                     View Demo
                   </Button>
                 </Link>

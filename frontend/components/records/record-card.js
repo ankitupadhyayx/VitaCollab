@@ -20,7 +20,7 @@ export function RecordCard({ record, onApprove, onReject, onPreview, onAudit, sh
         <div className="grid gap-2 text-xs text-muted-foreground sm:grid-cols-3">
           <div className="flex items-center gap-2">
             <Hospital className="h-4 w-4 text-primary" />
-            <span>{record.hospital}</span>
+            <span className="break-all">{record.hospital}</span>
           </div>
           <div className="flex items-center gap-2">
             <FileText className="h-4 w-4 text-primary" />
@@ -29,12 +29,12 @@ export function RecordCard({ record, onApprove, onReject, onPreview, onAudit, sh
                 href={record.fileLink}
                 target="_blank"
                 rel="noreferrer"
-                className="font-medium text-primary hover:underline"
+                className="break-all font-medium text-primary hover:underline"
               >
                 {record.fileName}
               </a>
             ) : (
-              <span>{record.fileName}</span>
+              <span className="break-all">{record.fileName}</span>
             )}
           </div>
           <div className="flex items-center gap-2">
@@ -43,9 +43,9 @@ export function RecordCard({ record, onApprove, onReject, onPreview, onAudit, sh
           </div>
         </div>
 
-        <div className="flex flex-wrap items-center justify-between gap-2 text-xs">
+        <div className="flex flex-col gap-2 text-xs sm:flex-row sm:items-center sm:justify-between">
           <span className="rounded-full bg-muted px-2 py-1 font-semibold text-muted-foreground">Updated report v{record.version || 1}</span>
-          <div className="flex items-center gap-3">
+          <div className="flex flex-wrap items-center gap-3">
             <button type="button" className="font-semibold text-primary" onClick={() => onAudit?.(record)}>
               Audit Trail
             </button>
@@ -72,11 +72,11 @@ export function RecordCard({ record, onApprove, onReject, onPreview, onAudit, sh
         ) : null}
 
         {showActions && record.status === "pending" ? (
-          <div className="flex gap-2">
-            <Button className="flex-1" onClick={() => onApprove?.(record)}>
+          <div className="flex flex-col gap-2 sm:flex-row">
+            <Button className="w-full flex-1" onClick={() => onApprove?.(record)}>
               {actionPending ? "Approving..." : "Approve"}
             </Button>
-            <Button variant="danger" className="flex-1" onClick={() => onReject?.(record)} disabled={actionPending}>
+            <Button variant="danger" className="w-full flex-1" onClick={() => onReject?.(record)} disabled={actionPending}>
               {actionPending ? "Updating..." : "Reject"}
             </Button>
           </div>

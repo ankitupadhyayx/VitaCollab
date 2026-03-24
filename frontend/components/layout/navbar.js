@@ -1,9 +1,9 @@
 "use client";
 
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
-import { Bell, CircleDot, Menu, Search, ShieldCheck } from "lucide-react";
+import { Bell, CircleDot, Menu, Search, ShieldCheck, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { MobileBottomNav } from "@/components/layout/mobile-bottom-nav";
 import { ThemeToggle } from "@/components/layout/theme-toggle";
@@ -15,6 +15,7 @@ import { fetchRecords } from "@/services/record.service";
 
 export function Navbar() {
   const router = useRouter();
+  const pathname = usePathname();
   const [mobileOpen, setMobileOpen] = useState(false);
   const [panelOpen, setPanelOpen] = useState(false);
   const [searchPanelOpen, setSearchPanelOpen] = useState(false);
@@ -80,6 +81,10 @@ export function Navbar() {
     };
   }, [debouncedSearch, isAuthenticated]);
 
+  useEffect(() => {
+    setMobileOpen(false);
+  }, [pathname]);
+
   const handleLogout = async () => {
     await logout();
     toast.success("Logged out");
@@ -128,7 +133,7 @@ export function Navbar() {
 
   return (
     <header className="sticky top-0 z-30 border-b border-border/70 bg-background/85 backdrop-blur">
-      <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-3 sm:px-6">
+      <div className="mx-auto flex max-w-7xl items-center justify-between px-3 py-3 sm:px-6">
         <Link href="/" className="flex items-center gap-2">
           <span className="grid h-9 w-9 place-items-center rounded-xl bg-primary text-primary-foreground">
             <ShieldCheck className="h-5 w-5" />
@@ -248,7 +253,7 @@ export function Navbar() {
           {isAuthenticated ? (
             <>
               <span className="hidden rounded-full bg-muted px-2 py-1 text-xs capitalize text-muted-foreground sm:inline">{user?.role}</span>
-              <Button variant="secondary" size="sm" onClick={handleLogout}>Sign Out</Button>
+              <Button variant="secondary" size="sm" onClick={handleLogout} className="hidden sm:inline-flex">Sign Out</Button>
             </>
           ) : (
             <>
@@ -256,8 +261,8 @@ export function Navbar() {
               <Link href="/signup"><Button size="sm">Get Started</Button></Link>
             </>
           )}
-          <Button variant="ghost" size="sm" className="md:hidden" aria-label="Open menu" onClick={() => setMobileOpen((value) => !value)}>
-            <Menu className="h-4 w-4" />
+          <Button variant="ghost" size="sm" className="md:hidden" aria-label={mobileOpen ? "Close menu" : "Open menu"} onClick={() => setMobileOpen((value) => !value)}>
+            {mobileOpen ? <X className="h-4 w-4" /> : <Menu className="h-4 w-4" />}
           </Button>
         </div>
       </div>
@@ -271,12 +276,22 @@ export function Navbar() {
               connected
             </span>
           </div>
+          {isAuthenticated ? (
+            <div className="mb-3 w-full">
+              <input
+                value={searchInput}
+                onChange={(event) => setSearchInput(event.target.value)}
+                placeholder="Search records, hospitals, type"
+                className="h-11 w-full rounded-xl border border-border bg-background px-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary/35"
+              />
+            </div>
+          ) : null}
           <nav className="space-y-1">
             {marketingLinks.map((link) => (
               <Link
                 key={link.href}
                 href={link.href}
-                className="block rounded-lg px-3 py-2 text-sm text-muted-foreground hover:bg-muted hover:text-foreground"
+                className="block rounded-lg px-3 py-3 text-sm font-medium text-muted-foreground hover:bg-muted hover:text-foreground"
                 onClick={() => setMobileOpen(false)}
               >
                 {link.label}
@@ -286,13 +301,26 @@ export function Navbar() {
               <Link
                 key={link.href}
                 href={link.href}
-                className="block rounded-lg px-3 py-2 text-sm text-muted-foreground hover:bg-muted hover:text-foreground"
+                className="block rounded-lg px-3 py-3 text-sm font-medium text-muted-foreground hover:bg-muted hover:text-foreground"
                 onClick={() => setMobileOpen(false)}
               >
                 {link.label}
               </Link>
             ))}
           </nav>
+          <div className="mt-3 flex items-center gap-2">
+            <div className="sm:hidden">
+              <ThemeToggle />
+            </div>
+            {isAuthenticated ? (
+              <Button variant="secondary" className="h-11 flex-1" onClick={handleLogout}>Sign Out</Button>
+            ) : (
+              <>
+                <Link href="/login" className="flex-1"><Button variant="secondary" className="h-11 w-full">Sign In</Button></Link>
+                <Link href="/signup" className="flex-1"><Button className="h-11 w-full">Get Started</Button></Link>
+              </>
+            )}
+          </div>
         </div>
       ) : null}
 

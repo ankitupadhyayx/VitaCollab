@@ -37,7 +37,7 @@ export function MobileBottomNav() {
   });
 
   return (
-    <nav className="fixed inset-x-0 bottom-0 z-30 border-t border-border/70 bg-background/95 px-2 py-2 backdrop-blur lg:hidden">
+    <nav className="fixed inset-x-0 bottom-0 z-30 border-t border-border/70 bg-background/95 px-2 pb-[calc(0.5rem+env(safe-area-inset-bottom))] pt-2 backdrop-blur lg:hidden">
       <ul className="grid grid-cols-5 gap-1">
         {visible.slice(0, 5).map((item) => {
           const Icon = item.icon;
@@ -47,7 +47,7 @@ export function MobileBottomNav() {
               <Link
                 href={item.href}
                 className={cn(
-                  "flex flex-col items-center justify-center rounded-xl px-2 py-2 text-[11px] font-medium transition",
+                  "flex min-h-[52px] flex-col items-center justify-center rounded-xl px-2 py-2 text-[11px] font-medium transition",
                   active ? "bg-primary text-primary-foreground" : "text-muted-foreground"
                 )}
               >

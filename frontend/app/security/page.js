@@ -15,13 +15,13 @@ export default function SecurityPage() {
   return (
     <div className="min-h-screen">
       <Navbar />
-      <main className="mx-auto max-w-7xl space-y-10 px-4 pb-20 pt-16 sm:px-6">
+      <main className="mx-auto max-w-7xl space-y-8 px-4 pb-28 pt-12 sm:space-y-10 sm:px-6 sm:pt-16 lg:pb-20">
         <section className="space-y-5 animate-rise">
           <p className="inline-flex rounded-full border border-primary/35 bg-primary/10 px-3 py-1 text-xs font-semibold uppercase tracking-[0.16em] text-primary">
             Security
           </p>
-          <h1 className="heading-font text-4xl font-bold tracking-tight sm:text-5xl">Security-first by design</h1>
-          <p className="max-w-3xl text-muted-foreground">
+          <h1 className="heading-font text-3xl font-bold tracking-tight sm:text-5xl">Security-first by design</h1>
+          <p className="max-w-3xl text-sm leading-relaxed text-muted-foreground sm:text-base">
             VitaCollab is built around encrypted data transfer, consent-aware access controls, and audit-ready workflows.
           </p>
         </section>

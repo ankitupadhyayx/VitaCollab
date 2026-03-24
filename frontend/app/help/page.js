@@ -35,7 +35,7 @@ export default function HelpPage() {
   return (
     <div className="min-h-screen">
       <Navbar />
-      <main className="mx-auto max-w-7xl space-y-10 px-4 pb-20 pt-16 sm:px-6">
+      <main className="mx-auto max-w-7xl space-y-8 px-4 pb-28 pt-12 sm:space-y-10 sm:px-6 sm:pt-16 lg:pb-20">
         <PageIntro
           badge="Help Center"
           title="Support for patients, hospitals, and admins"
@@ -63,7 +63,7 @@ export default function HelpPage() {
           <div className="grid gap-3">
             {faqs.map((faq) => (
               <details key={faq.q} className="rounded-xl border border-border/70 bg-background/50 p-4">
-                <summary className="cursor-pointer list-none font-semibold text-foreground">{faq.q}</summary>
+                <summary className="cursor-pointer list-none py-1 text-base font-semibold text-foreground">{faq.q}</summary>
                 <p className="mt-2 text-sm text-muted-foreground">{faq.a}</p>
               </details>
             ))}

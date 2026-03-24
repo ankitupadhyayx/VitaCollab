@@ -36,7 +36,7 @@ export default function PricingPage() {
   return (
     <div className="min-h-screen">
       <Navbar />
-      <main className="mx-auto max-w-7xl space-y-10 px-4 pb-20 pt-16 sm:px-6">
+      <main className="mx-auto max-w-7xl space-y-8 px-4 pb-28 pt-12 sm:space-y-10 sm:px-6 sm:pt-16 lg:pb-20">
         <PageIntro
           badge="Pricing"
           title="Simple, Transparent Pricing"
@@ -65,8 +65,8 @@ export default function PricingPage() {
               </p>
             ))}
 
-            <Link href="/signup" className="inline-flex pt-1">
-              <Button>Get Started Free</Button>
+            <Link href="/signup" className="block pt-1 sm:inline-flex">
+              <Button className="h-11 w-full sm:w-auto">Get Started Free</Button>
             </Link>
           </CardContent>
         </Card>

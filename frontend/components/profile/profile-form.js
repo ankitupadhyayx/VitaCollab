@@ -9,7 +9,7 @@ const departments = ["Cardiology", "Neurology", "Orthopedics", "Pediatrics", "Em
 
 export function ProfileForm({ isHospital, patientForm, setPatientForm, hospitalForm, setHospitalForm, onSave, locked = false }) {
   return (
-    <div className="grid gap-4 sm:grid-cols-2">
+    <div className="grid gap-4 md:grid-cols-2">
       {!isHospital ? (
         <>
           <FormField label="Name" required>
@@ -30,19 +30,19 @@ export function ProfileForm({ isHospital, patientForm, setPatientForm, hospitalF
           <FormField label="DOB">
             <Input disabled={locked} type="date" value={patientForm.dob} onChange={(event) => setPatientForm((prev) => ({ ...prev, dob: event.target.value }))} />
           </FormField>
-          <FormField label="Emergency Contact" className="sm:col-span-2">
+          <FormField label="Emergency Contact" className="md:col-span-2">
             <Input disabled={locked} value={patientForm.emergencyContact} onChange={(event) => setPatientForm((prev) => ({ ...prev, emergencyContact: event.target.value }))} />
           </FormField>
-          <FormField label="Address" className="sm:col-span-2">
+          <FormField label="Address" className="md:col-span-2">
             <Textarea disabled={locked} rows={3} value={patientForm.address} onChange={(event) => setPatientForm((prev) => ({ ...prev, address: event.target.value }))} />
           </FormField>
-          <FormField label="Allergies (comma separated)" className="sm:col-span-2">
+          <FormField label="Allergies (comma separated)" className="md:col-span-2">
             <Input disabled={locked} value={patientForm.allergies} onChange={(event) => setPatientForm((prev) => ({ ...prev, allergies: event.target.value }))} placeholder="e.g. Penicillin, Pollen" />
           </FormField>
-          <FormField label="Medical Conditions (comma separated)" className="sm:col-span-2">
+          <FormField label="Medical Conditions (comma separated)" className="md:col-span-2">
             <Input disabled={locked} value={patientForm.medicalConditions} onChange={(event) => setPatientForm((prev) => ({ ...prev, medicalConditions: event.target.value }))} placeholder="e.g. Hypertension, Asthma" />
           </FormField>
-          <FormField label="Medications (comma separated)" className="sm:col-span-2">
+          <FormField label="Medications (comma separated)" className="md:col-span-2">
             <Input disabled={locked} value={patientForm.medications} onChange={(event) => setPatientForm((prev) => ({ ...prev, medications: event.target.value }))} placeholder="e.g. Metformin, Aspirin" />
           </FormField>
         </>
@@ -60,7 +60,7 @@ export function ProfileForm({ isHospital, patientForm, setPatientForm, hospitalF
           <FormField label="Contact Phone" required>
             <Input disabled={locked} value={hospitalForm.contactPhone} onChange={(event) => setHospitalForm((prev) => ({ ...prev, contactPhone: event.target.value }))} />
           </FormField>
-          <FormField label="Departments" className="sm:col-span-2">
+          <FormField label="Departments" className="md:col-span-2">
             <div className="flex flex-wrap gap-2">
               {departments.map((item) => {
                 const active = hospitalForm.departments.includes(item);
@@ -85,15 +85,15 @@ export function ProfileForm({ isHospital, patientForm, setPatientForm, hospitalF
               })}
             </div>
           </FormField>
-          <FormField label="Hospital Address" className="sm:col-span-2">
+          <FormField label="Hospital Address" className="md:col-span-2">
             <Textarea disabled={locked} rows={3} value={hospitalForm.address} onChange={(event) => setHospitalForm((prev) => ({ ...prev, address: event.target.value }))} />
           </FormField>
         </>
       )}
 
-      <div className="sm:col-span-2 flex justify-end gap-2">
-        <Button variant="secondary" disabled={locked}>Edit Profile</Button>
-        <Button onClick={onSave} disabled={locked}>Save Profile</Button>
+      <div className="flex flex-col gap-2 md:col-span-2 md:flex-row md:justify-end">
+        <Button variant="secondary" className="w-full md:w-auto" disabled={locked}>Edit Profile</Button>
+        <Button onClick={onSave} className="w-full md:w-auto" disabled={locked}>Save Profile</Button>
       </div>
     </div>
   );

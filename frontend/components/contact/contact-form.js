@@ -54,30 +54,42 @@ export function ContactForm() {
 
   return (
     <form className="space-y-4" onSubmit={onSubmit}>
-      <Input
-        name="name"
-        placeholder="Your name"
-        value={name}
-        onChange={(event) => setName(event.target.value)}
-        required
-      />
-      <Input
-        type="email"
-        name="email"
-        placeholder="Your email"
-        value={email}
-        onChange={(event) => setEmail(event.target.value)}
-        required
-      />
-      <Textarea
-        name="message"
-        placeholder="Write your message"
-        rows={6}
-        value={message}
-        onChange={(event) => setMessage(event.target.value)}
-        required
-      />
-      <Button type="submit" disabled={isSubmitting}>
+      <label className="block space-y-2">
+        <span className="text-sm font-medium text-foreground">Full Name <span className="ml-1 text-xs text-danger">*</span></span>
+        <Input
+          name="name"
+          placeholder="Enter your full name"
+          value={name}
+          onChange={(event) => setName(event.target.value)}
+          required
+          aria-required="true"
+        />
+      </label>
+      <label className="block space-y-2">
+        <span className="text-sm font-medium text-foreground">Email <span className="ml-1 text-xs text-danger">*</span></span>
+        <Input
+          type="email"
+          name="email"
+          placeholder="Enter your email"
+          value={email}
+          onChange={(event) => setEmail(event.target.value)}
+          required
+          aria-required="true"
+        />
+      </label>
+      <label className="block space-y-2">
+        <span className="text-sm font-medium text-foreground">Message <span className="ml-1 text-xs text-danger">*</span></span>
+        <Textarea
+          name="message"
+          placeholder="Write your message"
+          rows={6}
+          value={message}
+          onChange={(event) => setMessage(event.target.value)}
+          required
+          aria-required="true"
+        />
+      </label>
+      <Button type="submit" className="h-11 w-full sm:w-auto" disabled={isSubmitting}>
         <span className="inline-flex items-center gap-2">
           {isSubmitting ? (
             <span className="inline-block h-4 w-4 animate-spin rounded-full border-2 border-current border-r-transparent" aria-hidden="true" />

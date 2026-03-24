@@ -17,13 +17,13 @@ export default function ContactPage() {
     <div className="min-h-screen">
       <Navbar />
 
-      <main className="mx-auto max-w-4xl space-y-8 px-4 pb-16 pt-14 sm:px-6">
+      <main className="mx-auto max-w-4xl space-y-7 px-4 pb-28 pt-12 sm:space-y-8 sm:px-6 sm:pt-14 lg:pb-16">
         <section className="space-y-4 animate-rise">
           <p className="inline-flex rounded-full border border-primary/35 bg-primary/10 px-3 py-1 text-xs font-semibold uppercase tracking-[0.16em] text-primary">
             Contact VitaCollab
           </p>
-          <h1 className="heading-font text-4xl font-bold tracking-tight sm:text-5xl">Let us help your care team move faster</h1>
-          <p className="body-font text-muted-foreground">
+          <h1 className="heading-font text-3xl font-bold tracking-tight sm:text-5xl">Let us help your care team move faster</h1>
+          <p className="body-font text-sm leading-relaxed text-muted-foreground sm:text-base">
             Share your question and the VitaCollab team will get back to you.
           </p>
         </section>
