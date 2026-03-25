@@ -424,7 +424,15 @@ const refresh = async (req, res, next) => {
 
     logger.info("Refresh token source check", {
       hasCookieToken: Boolean(cookieToken),
-      refreshCookieName: env.refreshCookieName
+      refreshCookieName: env.refreshCookieName,
+      origin: req.get("origin") || null,
+      referer: req.get("referer") || null,
+      host: req.get("host") || null,
+      xForwardedHost: req.get("x-forwarded-host") || null,
+      xForwardedProto: req.get("x-forwarded-proto") || null,
+      secFetchSite: req.get("sec-fetch-site") || null,
+      userAgent: req.get("user-agent") || null,
+      hasCookieHeader: Boolean(req.get("cookie"))
     });
 
     if (!cookieToken) {

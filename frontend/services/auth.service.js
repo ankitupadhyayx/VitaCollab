@@ -23,7 +23,7 @@ export const loginUser = async (payload) => {
 };
 
 export const refreshAuth = async () => {
-  const response = await api.post("/auth/refresh", {});
+  const response = await api.post("/auth/refresh", {}, { withCredentials: true });
   return response.data;
 };
 

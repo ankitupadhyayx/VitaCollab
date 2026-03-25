@@ -114,7 +114,7 @@ api.interceptors.response.use(
     isRefreshing = true;
 
     try {
-      const refreshResponse = await api.post("/auth/refresh", {});
+      const refreshResponse = await api.post("/auth/refresh", {}, { withCredentials: true });
       const newToken = refreshResponse?.data?.data?.accessToken;
 
       if (!newToken) {

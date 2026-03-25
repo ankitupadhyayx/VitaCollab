@@ -15,6 +15,7 @@ export function AuthProvider({ children }) {
   const [accessToken, setAccessToken] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [sessionExpired, setSessionExpired] = useState(false);
+  const [hasBootstrapped, setHasBootstrapped] = useState(false);
 
   const updateSession = useCallback((session) => {
     const token = session?.accessToken || null;
@@ -24,8 +25,22 @@ export function AuthProvider({ children }) {
   }, []);
 
   const bootstrapSession = useCallback(async () => {
+    const runRefreshAttempt = async (attempt = 0) => {
+      try {
+        return await refreshAuth();
+      } catch (error) {
+        const status = Number(error?.response?.status || 0);
+        const isRetryable = !status || status >= 500;
+        if (attempt < 1 && isRetryable) {
+          await new Promise((resolve) => setTimeout(resolve, 350));
+          return runRefreshAttempt(attempt + 1);
+        }
+        throw error;
+      }
+    };
+
     try {
-      const refreshed = await refreshAuth();
+      const refreshed = await runRefreshAttempt();
       updateSession(refreshed?.data);
 
       const profile = await getCurrentUser();
@@ -35,6 +50,7 @@ export function AuthProvider({ children }) {
       setAccessToken(null);
       setUser(null);
     } finally {
+      setHasBootstrapped(true);
       setIsLoading(false);
     }
   }, [updateSession]);
@@ -45,7 +61,9 @@ export function AuthProvider({ children }) {
 
   useEffect(() => {
     const onSessionExpired = () => {
-      setSessionExpired(true);
+      if (hasBootstrapped) {
+        setSessionExpired(true);
+      }
       updateSession(null);
     };
 
@@ -58,7 +76,7 @@ export function AuthProvider({ children }) {
         window.removeEventListener("vitacollab:session-expired", onSessionExpired);
       }
     };
-  }, [updateSession]);
+  }, [hasBootstrapped, updateSession]);
 
   const login = useCallback(async (payload) => {
     const response = await loginUser(payload);
