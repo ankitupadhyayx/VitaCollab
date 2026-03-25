@@ -17,19 +17,13 @@ export const ensureVersionedApiBaseUrl = (url) => {
 const defaultProductionApiBaseUrl = ensureVersionedApiBaseUrl(PRODUCTION_API_ORIGIN);
 
 export const resolvePublicApiBaseUrl = () => {
-  const fromEnv =
-    normalizeApiBaseUrl(process.env.NEXT_PUBLIC_API_BASE_URL) ||
-    normalizeApiBaseUrl(process.env.NEXT_PUBLIC_API_URL);
+  const fromEnv = normalizeApiBaseUrl(process.env.NEXT_PUBLIC_API_BASE_URL);
 
   return ensureVersionedApiBaseUrl(fromEnv || defaultProductionApiBaseUrl);
 };
 
 export const resolveServerApiBaseUrl = () => {
-  const fromEnv =
-    normalizeApiBaseUrl(process.env.NEXT_PUBLIC_API_BASE_URL) ||
-    normalizeApiBaseUrl(process.env.API_BASE_URL) ||
-    normalizeApiBaseUrl(process.env.NEXT_PUBLIC_API_URL) ||
-    normalizeApiBaseUrl(process.env.API_URL);
+  const fromEnv = normalizeApiBaseUrl(process.env.NEXT_PUBLIC_API_BASE_URL);
 
   return ensureVersionedApiBaseUrl(fromEnv || defaultProductionApiBaseUrl);
 };
