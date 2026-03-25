@@ -16,10 +16,14 @@ const app = express();
 app.set("trust proxy", 1);
 const isProd = env.nodeEnv === "production";
 
+const defaultOrigins = isProd
+  ? ["https://vitacollab.in", "https://www.vitacollab.in"]
+  : ["http://localhost:3000", "https://vitacollab.in", "https://www.vitacollab.in"];
+
 const allowedOrigins = new Set(
-  isProd
-    ? env.corsOrigins || ["https://vitacollab.in", "https://www.vitacollab.in"]
-    : env.corsOrigins || ["http://localhost:3000"]
+  [...defaultOrigins, ...(env.corsOrigins || []), env.clientUrl, env.appUrl]
+    .filter(Boolean)
+    .map((origin) => String(origin).replace(/\/+$/, ""))
 );
 
 app.disable("x-powered-by");

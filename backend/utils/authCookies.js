@@ -1,10 +1,32 @@
 const env = require("./env");
 
+const resolveSameSite = () => {
+  const candidate = String(env.refreshCookieSameSite || "").toLowerCase();
+  if (["lax", "strict", "none"].includes(candidate)) {
+    return candidate;
+  }
+  return "none";
+};
+
+const resolveSecure = (sameSite) => {
+  if (typeof env.refreshCookieSecure === "boolean") {
+    if (sameSite === "none" && env.refreshCookieSecure !== true) {
+      return true;
+    }
+    return env.refreshCookieSecure;
+  }
+
+  return sameSite === "none" ? true : env.isProd;
+};
+
 const buildCookieBaseOptions = () => {
+  const sameSite = resolveSameSite();
+  const secure = resolveSecure(sameSite);
+
   return {
     httpOnly: true,
-    secure: true,
-    sameSite: "none",
+    secure,
+    sameSite,
     path: "/",
     ...(env.refreshCookieDomain ? { domain: env.refreshCookieDomain } : {})
   };
