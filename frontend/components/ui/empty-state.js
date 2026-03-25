@@ -6,7 +6,7 @@ const variantConfig = {
   records: {
     icon: FileSearch,
     title: "No medical records yet",
-    description: "Upload your first report to start building your secure timeline.",
+    description: "Upload your first secure report to start building your patient-authorized timeline.",
     actionLabel: "Upload record"
   },
   notifications: {
@@ -40,7 +40,7 @@ export function EmptyState({ title, description, action, variant = "records", on
         <CardContent>{action}</CardContent>
       ) : (
         <CardContent>
-          <Button size="sm" variant="secondary" onClick={onAction}>{config.actionLabel}</Button>
+          <Button size="sm" variant="secondary" className="w-full sm:w-auto" onClick={onAction}>{config.actionLabel}</Button>
         </CardContent>
       )}
     </Card>

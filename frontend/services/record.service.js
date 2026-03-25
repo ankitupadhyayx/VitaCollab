@@ -58,8 +58,8 @@ export const generateRecordShareLink = async (id, options = {}) => {
   return response.data;
 };
 
-export const fetchSharedRecord = async (token) => {
-  const response = await api.get(`/share/${token}`);
+export const fetchSharedRecord = async (token, params = {}) => {
+  const response = await api.get(`/share/${token}`, { params });
   return response.data;
 };
 

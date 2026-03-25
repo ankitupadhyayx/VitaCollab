@@ -12,6 +12,7 @@ const { API_MESSAGES } = require("../utils/apiMessages");
 const { logAdminAudit, logSecurityAudit } = require("../services/audit.service");
 const { ADMIN_EVENTS, realtimeBroker } = require("../services/realtime.service");
 const { canAccessRecord } = require("../services/recordAccess.service");
+const env = require("../utils/env");
 
 const isValidObjectId = (value) => mongoose.Types.ObjectId.isValid(value);
 const DEFAULT_SHARE_EXPIRY_MINUTES = Math.min(
@@ -738,7 +739,8 @@ const createRecordShareLink = async (req, res, next) => {
       }
     });
 
-    const shareUrl = `${req.protocol}://${req.get("host")}/api/v1/share/${encodeURIComponent(token)}`;
+    const sharePageBaseUrl = env.clientUrl || `${req.protocol}://${req.get("host")}`;
+    const shareUrl = `${sharePageBaseUrl}/share/${encodeURIComponent(token)}`;
 
     return res.status(StatusCodes.OK).json(
       successResponse({

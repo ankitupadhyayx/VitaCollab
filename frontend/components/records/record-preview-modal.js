@@ -107,8 +107,12 @@ export function RecordPreviewModal({ open, record, onClose }) {
   }
 
   return (
-    <Modal open={open} onClose={onClose} title="Record Preview" description={`${record.type} • version ${record.version || 1}`} className="max-w-3xl">
+    <Modal open={open} onClose={onClose} title="Secure Record Preview" description={`${record.type} • version ${record.version || 1}`} className="max-w-3xl">
       <div className="space-y-4">
+        <p className="rounded-xl border border-primary/20 bg-primary/10 px-3 py-2 text-xs font-medium text-primary">
+          This is a secure, patient-authorized medical record preview.
+        </p>
+
         {expiryBadgeText ? (
           <div className="flex justify-end">
             <span className={`inline-flex items-center rounded-full px-2.5 py-1 text-xs font-semibold ${
@@ -119,7 +123,7 @@ export function RecordPreviewModal({ open, record, onClose }) {
           </div>
         ) : null}
 
-        <div className="h-[420px] overflow-hidden rounded-2xl border border-border/70 bg-background/60">
+        <div className="h-[55vh] min-h-[320px] overflow-hidden rounded-2xl border border-border/70 bg-background/60 sm:h-[420px]">
           {isLoadingFile ? (
             <div className="grid h-full place-items-center text-sm text-muted-foreground">Loading secure preview...</div>
           ) : fileUrl ? (
@@ -138,8 +142,8 @@ export function RecordPreviewModal({ open, record, onClose }) {
           )}
         </div>
 
-        <div className="flex flex-wrap justify-end gap-2">
-          <Button onClick={downloadFile} disabled={isDownloading}>
+        <div className="flex flex-col gap-2 sm:flex-row sm:justify-end">
+          <Button className="w-full sm:w-auto" onClick={downloadFile} disabled={isDownloading}>
             <Download className="h-4 w-4" /> {isDownloading ? "Preparing..." : "Download"}
           </Button>
         </div>

@@ -201,6 +201,7 @@ export default function RecordDetailModal({ open, record, shareState, onClose, o
 
           <div className="rounded-2xl border border-border/70 bg-background/55 p-3">
             <p className="text-xs text-muted-foreground">Sharing mode</p>
+            <p className="mt-1 text-xs text-primary">This is a secure, patient-authorized medical record share flow.</p>
             <div className="mt-2 flex flex-wrap gap-2">
               <button
                 type="button"
@@ -282,26 +283,27 @@ export default function RecordDetailModal({ open, record, shareState, onClose, o
             ) : null}
           </div>
 
-          <div className="flex flex-wrap gap-2">
+          <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-4">
             <Button
               size="sm"
               variant="secondary"
+              className="w-full"
               onClick={generateShareLink}
               disabled={shareState.loading}
             >
               <Link2 className="h-4 w-4" /> {shareState.loading ? "Generating..." : "Generate secure link"}
             </Button>
-            <Button size="sm" variant="secondary" onClick={onCopyLink} disabled={!shareState.link}>
+            <Button size="sm" variant="secondary" className="w-full" onClick={onCopyLink} disabled={!shareState.link}>
               <Copy className="h-4 w-4" /> Copy link
             </Button>
             {shareState.link ? (
-              <a href={`mailto:?subject=${encodeURIComponent("Medical record share")}&body=${encodeURIComponent(shareState.link)}`}>
-                <Button size="sm" variant="secondary"><Mail className="h-4 w-4" /> Email</Button>
+              <a href={`mailto:?subject=${encodeURIComponent("Medical record share")}&body=${encodeURIComponent(shareState.link)}`} className="w-full">
+                <Button size="sm" variant="secondary" className="w-full"><Mail className="h-4 w-4" /> Email</Button>
               </a>
             ) : null}
             {shareState.link ? (
-              <a href={`https://wa.me/?text=${encodeURIComponent(shareState.link)}`} target="_blank" rel="noreferrer">
-                <Button size="sm" variant="secondary"><MessageCircle className="h-4 w-4" /> WhatsApp</Button>
+              <a href={`https://wa.me/?text=${encodeURIComponent(shareState.link)}`} target="_blank" rel="noreferrer" className="w-full">
+                <Button size="sm" variant="secondary" className="w-full"><MessageCircle className="h-4 w-4" /> WhatsApp</Button>
               </a>
             ) : null}
           </div>

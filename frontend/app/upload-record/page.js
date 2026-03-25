@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "next/navigation";
-import { Search } from "lucide-react";
+import { Lock, Search, ShieldCheck } from "lucide-react";
 import { ProtectedRoute } from "@/components/guards/protected-route";
 import { Navbar } from "@/components/layout/navbar";
 import { Sidebar } from "@/components/layout/sidebar";
@@ -117,17 +117,22 @@ export default function UploadRecordPage() {
             <Card className="animate-rise lg:col-span-2">
               <CardHeader>
                 <CardTitle>Upload Medical Record</CardTitle>
-                <CardDescription>Drag and drop files into a consent-driven approval workflow.</CardDescription>
+                <CardDescription>Upload encrypted files into a patient-consent approval workflow.</CardDescription>
               </CardHeader>
               <CardContent>
                 <form className="grid gap-4" onSubmit={submit}>
+                  <div className="rounded-2xl border border-primary/25 bg-primary/10 p-3 text-sm text-primary">
+                    <p className="inline-flex items-center gap-2 font-semibold"><ShieldCheck className="h-4 w-4" /> Secure medical upload</p>
+                    <p className="mt-1 text-xs text-primary/90">Only patient-authorized users can access this record after approval.</p>
+                  </div>
+
                   {hospitalPendingVerification ? (
                     <div className="rounded-2xl border border-warning/35 bg-warning/10 p-3 text-sm text-warning-foreground">
                       Hospital verification is pending admin approval. Record upload is disabled until approval.
                     </div>
                   ) : null}
 
-                  <FormField label="Patient Search" required hint="Start typing patient email for autocomplete">
+                  <FormField label="Patient Identifier" required hint="Use patient email to ensure record delivery to the correct patient">
                     <div className="relative">
                       <Input
                         placeholder="Patient ID or Email"
@@ -173,7 +178,7 @@ export default function UploadRecordPage() {
                   </div>
 
                   <Textarea
-                    placeholder="Clinical summary"
+                    placeholder="Doctor notes for patient review"
                     value={form.description}
                     onChange={(event) => update("description", event.target.value)}
                   />
@@ -181,7 +186,7 @@ export default function UploadRecordPage() {
                   <UploadZone file={file} onFileChange={setFile} />
 
                   <Button type="submit" className="h-11 w-full sm:w-fit" disabled={submitting || hospitalPendingVerification}>
-                    {submitting ? "Uploading..." : "Upload Record"}
+                    <Lock className="h-4 w-4" /> {submitting ? "Uploading securely..." : "Upload Secure Record"}
                   </Button>
                 </form>
               </CardContent>

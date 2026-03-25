@@ -13,7 +13,7 @@ export function Modal({ open, title, description, children, onClose, className }
       <section
         role="dialog"
         aria-modal="true"
-        className={cn("w-full max-w-lg rounded-3xl border border-border/70 bg-card/95 p-6 shadow-soft", className)}
+        className={cn("max-h-[92vh] w-full max-w-lg overflow-y-auto rounded-3xl border border-border/70 bg-card/95 p-4 shadow-soft sm:p-6", className)}
         onClick={(event) => event.stopPropagation()}
       >
         <div className="mb-4 flex items-start justify-between gap-4">
@@ -24,7 +24,7 @@ export function Modal({ open, title, description, children, onClose, className }
           <button
             type="button"
             onClick={onClose}
-            className="rounded-xl p-2 text-muted-foreground transition hover:bg-muted hover:text-foreground"
+            className="rounded-xl p-2.5 text-muted-foreground transition hover:bg-muted hover:text-foreground"
             aria-label="Close dialog"
           >
             <X className="h-4 w-4" />
