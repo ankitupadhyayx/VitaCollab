@@ -28,7 +28,20 @@ const listPublicReviewsQuerySchema = z.object({
   target: z.enum(["hospital", "platform"]).optional(),
   hospitalId: z.string().regex(objectIdRegex, "Please provide a valid hospital ID.").optional(),
   page: z.coerce.number().int().min(1).default(1),
-  limit: z.coerce.number().int().min(1).max(50).default(10)
+  limit: z.coerce.number().int().min(1).max(50).default(10),
+  random: z
+    .union([z.boolean(), z.string()])
+    .optional()
+    .transform((value) => {
+      if (typeof value === "undefined") {
+        return false;
+      }
+      if (typeof value === "boolean") {
+        return value;
+      }
+      return ["1", "true", "yes", "on"].includes(String(value).toLowerCase());
+    }),
+  count: z.coerce.number().int().min(1).max(12).default(6)
 });
 
 const adminListReviewsQuerySchema = z.object({

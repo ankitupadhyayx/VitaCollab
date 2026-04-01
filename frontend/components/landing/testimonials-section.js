@@ -5,31 +5,8 @@ import { ChevronLeft, ChevronRight, Star } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 
-const DEFAULT_TESTIMONIALS = [
-  {
-    name: "Amar Tiwari",
-    location: "Agra",
-    text: "VitaCollab made it incredibly easy to manage my medical records securely. I finally feel in control of my health data."
-  },
-  {
-    name: "Hardik",
-    location: "Jaitpur kalan",
-    text: "The approval system is amazing. I can decide who sees my reports. This is the future of healthcare."
-  },
-  {
-    name: "Abhishek Upadhyay",
-    location: "Mathura",
-    text: "Fast, secure, and very easy to use. Hospitals and patients both benefit from this platform."
-  },
-  {
-    name: "Himanshu Sharma",
-    location: "Delhi",
-    text: "I love the transparency and security. It builds trust between patients and doctors."
-  }
-];
-
 export function TestimonialsSection({
-  testimonials = DEFAULT_TESTIMONIALS,
+  testimonials = [],
   badge = "Trusted by 1000+ users",
   title = "What Patients Are Saying",
   description = "Real feedback from people using VitaCollab for secure, transparent healthcare collaboration.",
@@ -39,15 +16,26 @@ export function TestimonialsSection({
   const rowRef = useRef(null);
   const touchResumeTimeoutRef = useRef(null);
   const hasInitializedRef = useRef(false);
-  const total = testimonials.length;
+  const validTestimonials = useMemo(
+    () =>
+      (testimonials || []).filter((item) => {
+        const text = String(item?.text || "").trim();
+        const name = String(item?.name || "").trim();
+        const rating = Number(item?.rating || 0);
+        return text.length > 0 && name.length > 0 && Number.isFinite(rating) && rating >= 1 && rating <= 5;
+      }),
+    [testimonials]
+  );
+
+  const total = validTestimonials.length;
   const canLoop = infiniteLoop && total > 1;
   const slides = useMemo(() => {
     if (!canLoop) {
-      return testimonials;
+      return validTestimonials;
     }
 
-    return [...testimonials, ...testimonials, ...testimonials];
-  }, [canLoop, testimonials]);
+    return [...validTestimonials, ...validTestimonials, ...validTestimonials];
+  }, [canLoop, validTestimonials]);
   const baseStartIndex = canLoop ? total : 0;
   const [currentIndex, setCurrentIndex] = useState(baseStartIndex);
   const [isInteracting, setIsInteracting] = useState(false);
@@ -231,10 +219,25 @@ export function TestimonialsSection({
   }, []);
 
   const activeDot = total > 0 ? ((currentIndex % total) + total) % total : 0;
-  const activeItem = testimonials[activeDot];
+  const activeItem = validTestimonials[activeDot];
   const liveMessage = activeItem
-    ? `Showing testimonial ${activeDot + 1} of ${total}: ${activeItem.name} from ${activeItem.location}.`
+    ? `Showing testimonial ${activeDot + 1} of ${total}: ${activeItem.name}${activeItem.location ? ` from ${activeItem.location}` : ""}.`
     : "";
+
+  if (total === 0) {
+    return (
+      <section className="mt-16">
+        <div className="mb-8 space-y-2 text-center">
+          <p className="text-sm font-semibold uppercase tracking-[0.14em] text-primary">{badge}</p>
+          <h2 className="heading-font text-3xl font-bold tracking-tight text-slate-900 dark:text-white sm:text-4xl">{title}</h2>
+          <p className="mx-auto max-w-2xl text-muted-foreground dark:text-gray-400">{description}</p>
+        </div>
+        <Card className="mx-auto max-w-2xl border-dashed">
+          <CardContent className="py-8 text-center text-sm text-muted-foreground">No reviews yet</CardContent>
+        </Card>
+      </section>
+    );
+  }
 
   return (
     <section className="mt-16">
@@ -261,25 +264,33 @@ export function TestimonialsSection({
       >
         {slides.map((item, index) => (
           <Card
-            key={`${item.name}-${item.location}-${index}`}
+            key={`${item.name}-${item.location || "unknown"}-${index}`}
             data-testimonial-card
             className="w-[260px] flex-none snap-start group transition-all duration-300 hover:scale-[1.02] hover:shadow-2xl hover:shadow-blue-500/20 sm:w-[320px] xl:w-[24%] dark:border-white/10 dark:bg-white/5 dark:backdrop-blur-md"
           >
             <CardHeader>
               <div className="flex items-center gap-3">
-                <span className="grid h-11 w-11 place-items-center rounded-full bg-primary/15 text-sm font-bold text-primary dark:bg-blue-500/20 dark:text-blue-300">
-                  {item.name.charAt(0)}
-                </span>
+                {item.photo ? (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img src={item.photo} alt={item.name} className="h-11 w-11 rounded-full object-cover" />
+                ) : (
+                  <span className="grid h-11 w-11 place-items-center rounded-full bg-primary/15 text-sm font-bold text-primary dark:bg-blue-500/20 dark:text-blue-300">
+                    {item.name.charAt(0)}
+                  </span>
+                )}
                 <div>
                   <CardTitle className="text-base dark:text-white">{item.name}</CardTitle>
-                  <CardDescription className="dark:text-gray-400">{item.location}</CardDescription>
+                  <CardDescription className="dark:text-gray-400">{item.location || "Verified VitaCollab user"}</CardDescription>
                 </div>
               </div>
             </CardHeader>
             <CardContent className="space-y-3">
               <div className="flex items-center gap-1">
                 {Array.from({ length: 5 }).map((_, index) => (
-                  <Star key={`${item.name}-${index}`} className="h-4 w-4 fill-amber-400 text-amber-400" />
+                  <Star
+                    key={`${item.name}-${index}`}
+                    className={`h-4 w-4 ${index < Number(item.rating || 0) ? "fill-amber-400 text-amber-400" : "text-slate-300 dark:text-slate-600"}`}
+                  />
                 ))}
               </div>
               <p className="text-sm leading-relaxed text-slate-600 dark:text-gray-400">&ldquo;{item.text}&rdquo;</p>
@@ -311,7 +322,7 @@ export function TestimonialsSection({
           </Button>
 
           <div className="flex items-center gap-2">
-            {testimonials.map((item, dotIndex) => (
+            {validTestimonials.map((item, dotIndex) => (
               <button
                 key={`dot-${item.name}-${dotIndex}`}
                 type="button"

@@ -15,6 +15,7 @@ import { Footer } from "@/components/layout/footer";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { TestimonialsSection } from "@/components/landing/testimonials-section";
+import { resolveServerApiBaseUrl } from "@/lib/api";
 
 const features = [
   {
@@ -59,7 +60,36 @@ const securityHighlights = [
   }
 ];
 
-export default function LandingPage() {
+const loadLandingTestimonials = async () => {
+  try {
+    const response = await fetch(`${resolveServerApiBaseUrl()}/reviews/public?random=true&count=6`, {
+      cache: "no-store"
+    });
+
+    if (!response.ok) {
+      return [];
+    }
+
+    const payload = await response.json();
+    const reviews = payload?.data?.reviews || [];
+
+    return reviews
+      .filter((item) => String(item?.comment || "").trim().length > 0)
+      .map((item) => ({
+        name: item.userName || "Anonymous",
+        photo: item.userProfileImageUrl || null,
+        rating: Number(item.rating || 0),
+        text: item.comment,
+        location: item.userLocation || null
+      }));
+  } catch (error) {
+    return [];
+  }
+};
+
+export default async function LandingPage() {
+  const testimonials = await loadLandingTestimonials();
+
   return (
     <div className="min-h-screen main-shell">
       <Navbar />
@@ -218,7 +248,7 @@ export default function LandingPage() {
           </div>
         </section>
 
-        <TestimonialsSection autoScroll />
+        <TestimonialsSection testimonials={testimonials} autoScroll />
 
         <section className="mt-16 rounded-3xl border border-slate-200 bg-white px-6 py-10 shadow-sm dark:border-white/10 dark:bg-slate-800 sm:px-10">
           <div className="flex flex-col gap-4 text-sm text-slate-600 dark:text-gray-400 sm:flex-row sm:items-center sm:justify-between">

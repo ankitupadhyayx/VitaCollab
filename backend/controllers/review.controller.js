@@ -26,11 +26,43 @@ const isReviewPublished = (review) => {
 
 const normalizedReviewStatus = (review) => (isReviewDeleted(review) ? "deleted" : "active");
 
+const toCompactLocation = (value) => {
+  if (!value) {
+    return null;
+  }
+
+  const raw = String(value).trim();
+  if (!raw) {
+    return null;
+  }
+
+  const [firstPart] = raw.split(",");
+  return (firstPart || raw).trim() || null;
+};
+
+const isReviewDisplayable = (review) => {
+  const comment = String(review?.comment || "").trim();
+  const rating = Number(review?.rating || 0);
+
+  return comment.length > 0 && Number.isFinite(rating) && rating >= 1 && rating <= 5;
+};
+
+const pickRandomItems = (items, count) => {
+  const cloned = [...items];
+  for (let index = cloned.length - 1; index > 0; index -= 1) {
+    const randomIndex = Math.floor(Math.random() * (index + 1));
+    [cloned[index], cloned[randomIndex]] = [cloned[randomIndex], cloned[index]];
+  }
+
+  return cloned.slice(0, Math.max(0, count));
+};
+
 const toReviewPayload = (review) => ({
   id: review._id,
   userId: review.userId?._id || review.userId,
   userName: review.userId?.name || "Anonymous",
   userProfileImageUrl: review.userId?.profileImageUrl || null,
+  userLocation: toCompactLocation(review.userId?.patientProfile?.address || review.userId?.hospitalProfile?.address),
   role: review.role,
   target: review.target,
   targetHospitalId: review.targetHospitalId || null,
@@ -119,7 +151,7 @@ const createReview = async (req, res, next) => {
 
 const listApprovedReviews = async (req, res, next) => {
   try {
-    const { target, hospitalId } = req.query;
+    const { target, hospitalId, random, count } = req.query;
     const page = Number(req.query.page) || 1;
     const limit = Number(req.query.limit) || 10;
     const skip = (page - 1) * limit;
@@ -136,20 +168,48 @@ const listApprovedReviews = async (req, res, next) => {
       filter.targetHospitalId = hospitalId;
     }
 
+    if (random) {
+      const poolSize = Math.max(24, Number(count || 6) * 6);
+      const reviewsPool = await Review.find(filter)
+        .sort({ createdAt: -1 })
+        .limit(poolSize)
+        .populate("userId", "name role profileImageUrl patientProfile.address hospitalProfile.address");
+
+      const displayable = reviewsPool.filter(isReviewDisplayable);
+      const selected = pickRandomItems(displayable, Number(count || 6));
+
+      return res.status(StatusCodes.OK).json(
+        successResponse({
+          message: API_MESSAGES.REVIEWS.APPROVED_FETCHED,
+          data: {
+            reviews: selected.map(toReviewPayload),
+            pagination: {
+              page: 1,
+              limit: selected.length,
+              total: displayable.length,
+              totalPages: 1
+            }
+          }
+        })
+      );
+    }
+
     const [reviews, total] = await Promise.all([
       Review.find(filter)
         .sort({ createdAt: -1 })
         .skip(skip)
         .limit(limit)
-        .populate("userId", "name role profileImageUrl"),
+        .populate("userId", "name role profileImageUrl patientProfile.address hospitalProfile.address"),
       Review.countDocuments(filter)
     ]);
+
+    const displayable = reviews.filter(isReviewDisplayable);
 
     return res.status(StatusCodes.OK).json(
       successResponse({
         message: API_MESSAGES.REVIEWS.APPROVED_FETCHED,
         data: {
-          reviews: reviews.map(toReviewPayload),
+          reviews: displayable.map(toReviewPayload),
           pagination: {
             page,
             limit,
