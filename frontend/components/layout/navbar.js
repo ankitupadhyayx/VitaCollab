@@ -1,9 +1,10 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
-import { Bell, CircleDot, Menu, Search, ShieldCheck, X } from "lucide-react";
+import { Bell, CircleDot, Menu, Search, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { MobileBottomNav } from "@/components/layout/mobile-bottom-nav";
 import { ThemeToggle } from "@/components/layout/theme-toggle";
@@ -135,8 +136,8 @@ export function Navbar() {
     <header className="sticky top-0 z-30 border-b border-border/70 bg-background/85 backdrop-blur">
       <div className="mx-auto flex max-w-7xl items-center justify-between px-3 py-3 sm:px-6">
         <Link href="/" className="flex items-center gap-2">
-          <span className="grid h-9 w-9 place-items-center rounded-xl bg-primary text-primary-foreground">
-            <ShieldCheck className="h-5 w-5" />
+          <span className="grid h-9 w-9 place-items-center overflow-hidden rounded-xl border border-border/60 bg-card/80">
+            <Image src="/logo.png" alt="VitaCollab logo" width={32} height={32} className="h-8 w-8 object-contain" priority />
           </span>
           <span className="text-lg font-bold tracking-tight">VitaCollab</span>
         </Link>

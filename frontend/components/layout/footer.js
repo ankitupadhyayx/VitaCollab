@@ -1,5 +1,6 @@
+import Image from "next/image";
 import Link from "next/link";
-import { Instagram, Linkedin, ShieldCheck } from "lucide-react";
+import { Instagram, Linkedin } from "lucide-react";
 
 const productLinks = [
   { href: "/features", label: "Features" },
@@ -74,8 +75,8 @@ export function Footer() {
         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-5">
           <div className="rounded-2xl border border-slate-200 bg-white p-5 backdrop-blur-md dark:border-white/10 dark:bg-white/5">
             <Link href="/" className="flex items-center gap-2">
-              <span className="grid h-9 w-9 place-items-center rounded-xl bg-primary text-primary-foreground">
-                <ShieldCheck className="h-5 w-5" />
+              <span className="grid h-9 w-9 place-items-center overflow-hidden rounded-xl border border-slate-200 bg-white dark:border-white/15 dark:bg-slate-900/70">
+                <Image src="/logo.png" alt="VitaCollab logo" width={32} height={32} className="h-8 w-8 object-contain" />
               </span>
               <span className="text-lg font-bold tracking-tight text-gray-900 dark:text-white">VitaCollab</span>
             </Link>

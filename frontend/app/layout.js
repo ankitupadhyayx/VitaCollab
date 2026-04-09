@@ -27,11 +27,15 @@ const bodyFont = Inter({
   weight: ["400", "500", "600", "700"]
 });
 
+const defaultMetaTitle = "VitaCollab – Transparent Digital Health Records Platform for Hospitals & Patients";
+const defaultMetaDescription =
+  "VitaCollab is a secure, patient-owned digital health record platform that offers a transparent and consent-driven workflow. Unlike traditional systems, patients have full control over their medical data, enabling seamless and trusted collaboration between hospitals, doctors, and patients.";
+const defaultSocialPreviewImage = "https://vitacollab.in/og-image.png";
+
 export const metadata = {
   metadataBase: new URL("https://vitacollab.in"),
-  title: "VitaCollab – Transparent Digital Health Records Platform for Hospitals & Patients",
-  description:
-    "VitaCollab is a secure, patient-owned digital health record platform that offers a transparent and consent-driven workflow. Unlike traditional systems, patients have full control over their medical data, enabling seamless and trusted collaboration between hospitals, doctors, and patients.",
+  title: defaultMetaTitle,
+  description: defaultMetaDescription,
   keywords: [
     "VitaCollab",
     "digital health records",
@@ -41,18 +45,26 @@ export const metadata = {
     "privacy-first healthcare"
   ],
   openGraph: {
-    title: "VitaCollab – Transparent Digital Health Records Platform for Hospitals & Patients",
-    description:
-      "VitaCollab is a secure, patient-owned digital health record platform that offers a transparent and consent-driven workflow. Unlike traditional systems, patients have full control over their medical data, enabling seamless and trusted collaboration between hospitals, doctors, and patients.",
+    title: defaultMetaTitle,
+    description: defaultMetaDescription,
     url: "https://vitacollab.in",
     siteName: "VitaCollab",
-    type: "website"
+    type: "website",
+    images: [
+      {
+        url: defaultSocialPreviewImage,
+        width: 1200,
+        height: 630,
+        type: "image/png",
+        alt: "VitaCollab logo"
+      }
+    ]
   },
   twitter: {
     card: "summary_large_image",
-    title: "VitaCollab – Transparent Digital Health Records Platform for Hospitals & Patients",
-    description:
-      "VitaCollab is a secure, patient-owned digital health record platform that offers a transparent and consent-driven workflow. Unlike traditional systems, patients have full control over their medical data, enabling seamless and trusted collaboration between hospitals, doctors, and patients."
+    title: defaultMetaTitle,
+    description: defaultMetaDescription,
+    images: [defaultSocialPreviewImage]
   },
   manifest: "/site.webmanifest",
   icons: {
