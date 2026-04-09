@@ -7,7 +7,7 @@ import { formatRecordShortDate, getRecordStatusMeta } from "@/lib/record-formatt
 export default function RecentReportsPreview({ records }) {
   return (
     <section className="grid gap-4 lg:grid-cols-3">
-      <Card className="lg:col-span-2 health-grid">
+      <Card className="lg:col-span-2 health-grid bg-gradient-to-br from-card/95 via-card/88 to-primary/6 ring-1 ring-white/25 dark:ring-emerald-300/10">
         <CardHeader>
           <CardTitle>Recent Reports Preview</CardTitle>
           <CardDescription>Your last uploaded or received documents.</CardDescription>
@@ -16,7 +16,7 @@ export default function RecentReportsPreview({ records }) {
           {records.slice(0, 5).map((item) => {
             const statusMeta = getRecordStatusMeta(item.status);
             return (
-              <div key={item.id} className="flex items-center justify-between rounded-2xl bg-background/65 px-3 py-2">
+              <div key={item.id} className="flex items-center justify-between rounded-2xl border border-border/60 bg-gradient-to-r from-background/72 to-primary/6 px-3 py-2 shadow-[0_8px_22px_rgba(5,20,34,0.12)]">
                 <div>
                   <p className="text-sm font-semibold capitalize">{item.type}</p>
                   <p className="text-xs text-muted-foreground">{formatRecordShortDate(item.createdAt)}</p>
@@ -28,7 +28,7 @@ export default function RecentReportsPreview({ records }) {
         </CardContent>
       </Card>
 
-      <Card>
+      <Card className="bg-gradient-to-br from-card/95 via-card/88 to-accent/8 ring-1 ring-white/25 dark:ring-emerald-300/10">
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Activity className="h-5 w-5 text-primary" />

@@ -102,7 +102,7 @@ export default function LoginPage() {
         <CardContent>
           <form className="space-y-5" onSubmit={onSubmit} noValidate>
             <div className="space-y-2.5">
-              <label htmlFor="email" className="text-sm font-medium text-slate-700 dark:text-neutral-200">Email <span className="ml-1 text-xs text-red-400">*</span></label>
+              <label htmlFor="email" className="text-sm font-medium text-slate-700 dark:text-neutral-200">Email <span className="ml-1 text-[11px] leading-none text-red-400">*</span></label>
               <div className="relative">
                 <Input
                   id="email"
@@ -122,7 +122,7 @@ export default function LoginPage() {
             </div>
 
             <div className="space-y-2.5">
-              <label htmlFor="password" className="text-sm font-medium text-slate-700 dark:text-neutral-200">Password <span className="ml-1 text-xs text-red-400">*</span></label>
+              <label htmlFor="password" className="text-sm font-medium text-slate-700 dark:text-neutral-200">Password <span className="ml-1 text-[11px] leading-none text-red-400">*</span></label>
               <div className="relative">
                 <Input
                   id="password"
@@ -167,7 +167,7 @@ export default function LoginPage() {
 
             <Button
               type="submit"
-              className="w-full rounded-lg bg-emerald-600 text-white font-semibold hover:bg-emerald-700 active:scale-[0.99]"
+              className="w-full"
               disabled={submitting}
             >
               {submitting ? (
@@ -178,11 +178,11 @@ export default function LoginPage() {
               ) : "Sign In"}
             </Button>
 
-            <Button type="button" variant="secondary" className="w-full rounded-lg" disabled>
+            <Button type="button" variant="secondary" className="w-full" disabled>
               Continue with Google
             </Button>
 
-            <p className="text-xs text-slate-500 dark:text-neutral-300">We never share your data.</p>
+            <p className="text-[12px] leading-5 text-slate-500 dark:text-neutral-300">We never share your data.</p>
           </form>
 
           <p className="mt-3 text-center text-sm text-slate-600 dark:text-neutral-300">
@@ -199,7 +199,7 @@ export default function LoginPage() {
           <p className="mt-4 text-center text-sm text-slate-600 dark:text-neutral-300">
             New to VitaCollab? <Link className="font-semibold text-emerald-600 hover:text-emerald-700 dark:text-emerald-300 dark:hover:text-emerald-200" href="/signup">Create account</Link>
           </p>
-          <p className="mt-3 text-center text-xs text-slate-500 dark:text-neutral-300">
+          <p className="mt-3 text-center text-[12px] leading-5 text-slate-500 dark:text-neutral-300">
             By continuing, you agree to our <Link href="/terms" className="font-medium text-emerald-600 hover:text-emerald-700 dark:text-emerald-300 dark:hover:text-emerald-200">Terms</Link>, <Link href="/privacy" className="font-medium text-emerald-600 hover:text-emerald-700 dark:text-emerald-300 dark:hover:text-emerald-200">Privacy Policy</Link>, and <Link href="/disclaimer" className="font-medium text-emerald-600 hover:text-emerald-700 dark:text-emerald-300 dark:hover:text-emerald-200">Medical Disclaimer</Link>.
           </p>
         </CardContent>

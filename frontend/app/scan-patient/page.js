@@ -98,7 +98,7 @@ export default function ScanPatientPage() {
           <Sidebar />
           <main className="w-full space-y-4 pb-24 lg:pb-0">
             <header>
-              <h1 className="text-3xl font-bold tracking-tight">Scan Patient QR</h1>
+              <h1 className="heading-font text-3xl font-bold tracking-[-0.02em]">Scan Patient QR</h1>
               <p className="text-sm text-muted-foreground">Securely resolve patient identity from hospital-side scanner.</p>
             </header>
 

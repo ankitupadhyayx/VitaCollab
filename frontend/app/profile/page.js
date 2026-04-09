@@ -352,7 +352,7 @@ export default function ProfilePage() {
           <Sidebar />
           <main className="w-full space-y-5 pb-28 lg:pb-0">
             <header>
-              <h1 className="text-2xl font-bold tracking-tight sm:text-3xl">{isHospital ? "Hospital Profile" : "Patient Profile"}</h1>
+              <h1 className="heading-font text-2xl font-bold tracking-[-0.02em] sm:text-3xl">{isHospital ? "Hospital Profile" : "Patient Profile"}</h1>
               <p className="text-sm text-muted-foreground">Manage your core identity and collaboration readiness.</p>
             </header>
 
@@ -386,17 +386,17 @@ export default function ProfilePage() {
                     </span>
                   </label>
 
-                  <div className="space-y-2">
+                  <div className="space-y-2.5">
                     <p className="text-3xl font-bold text-primary">{completion}%</p>
                     <div className="h-2 w-full rounded-full bg-muted">
                       <div className="h-2 rounded-full bg-primary" style={{ width: `${completion}%` }} />
                     </div>
-                    <p className="text-xs text-muted-foreground">Complete your details to unlock smoother care workflows.</p>
+                    <p className="text-[12px] leading-5 text-muted-foreground">Complete your details to unlock smoother care workflows.</p>
                   </div>
 
                   {saving ? (
-                    <div className="space-y-1">
-                      <p className="text-xs text-muted-foreground">Uploading image {uploadProgress}%</p>
+                    <div className="space-y-1.5">
+                      <p className="text-[12px] leading-5 text-muted-foreground">Uploading image {uploadProgress}%</p>
                       <div className="h-2 w-full rounded-full bg-muted">
                         <div className="h-2 rounded-full bg-primary" style={{ width: `${uploadProgress}%` }} />
                       </div>
@@ -404,9 +404,9 @@ export default function ProfilePage() {
                   ) : null}
 
                   {securityState.syncing ? (
-                    <p className="text-xs text-primary">Syncing profile changes...</p>
+                    <p className="text-[12px] leading-5 text-primary">Syncing profile changes...</p>
                   ) : securityState.syncedAt ? (
-                    <p className="text-xs text-success">Synced at {new Date(securityState.syncedAt).toLocaleTimeString()}</p>
+                    <p className="text-[12px] leading-5 text-success">Synced at {new Date(securityState.syncedAt).toLocaleTimeString()}</p>
                   ) : null}
 
                   {!isHospital ? (
@@ -444,7 +444,7 @@ export default function ProfilePage() {
                   ) : null}
 
                   {!loading && missingFields.length ? (
-                    <div className="mb-4 rounded-2xl border border-warning/30 bg-warning/10 p-3 text-xs text-warning-foreground">
+                    <div className="mb-4 rounded-2xl border border-warning/30 bg-warning/10 p-3 text-[12px] leading-5 text-warning-foreground">
                       Complete your profile to unlock features. Missing: {missingFields.join(", ")}
                     </div>
                   ) : null}
@@ -474,8 +474,8 @@ export default function ProfilePage() {
                   {activeSessions.map((session) => (
                     <div key={session.id} className="rounded-2xl bg-background/65 p-3 text-sm">
                       <p className="font-semibold text-foreground">{session.device}</p>
-                      <p className="text-xs text-muted-foreground">{session.location}</p>
-                      <p className="text-xs text-muted-foreground">Last active: {session.lastActive}</p>
+                      <p className="text-[12px] leading-5 text-muted-foreground">{session.location}</p>
+                      <p className="text-[12px] leading-5 text-muted-foreground">Last active: {session.lastActive}</p>
                     </div>
                   ))}
                   <Button type="button" variant="danger" onClick={logoutAllDevices} disabled={isPending("profile-save") || saving}>
@@ -493,8 +493,8 @@ export default function ProfilePage() {
                   {loginActivity.map((item) => (
                     <div key={item.id} className="rounded-2xl bg-background/65 p-3 text-sm">
                       <p className="font-semibold text-foreground">{item.event}</p>
-                      <p className="text-xs text-muted-foreground">{item.at}</p>
-                      <p className="text-xs text-muted-foreground">{item.source}</p>
+                      <p className="text-[12px] leading-5 text-muted-foreground">{item.at}</p>
+                      <p className="text-[12px] leading-5 text-muted-foreground">{item.source}</p>
                     </div>
                   ))}
                 </CardContent>

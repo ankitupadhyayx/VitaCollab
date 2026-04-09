@@ -59,13 +59,13 @@ const navLinkClass =
 
 export function Footer() {
   return (
-    <footer className="mt-20 border-t border-slate-200 bg-gray-50 px-6 py-16 dark:border-white/10 dark:bg-gradient-to-b dark:from-slate-900 dark:to-slate-800">
+    <footer className="premium-surface mt-20 border-t border-slate-200/80 bg-gradient-to-b from-gray-50 to-emerald-50/35 px-6 py-16 dark:border-white/10 dark:bg-gradient-to-b dark:from-slate-900 dark:to-teal-950/70">
       <div className="mx-auto max-w-7xl">
         <div className="mb-10 flex flex-wrap items-center gap-3 border-b border-slate-200 pb-8 dark:border-white/10">
           {trustBadges.map((badge) => (
             <span
               key={badge}
-              className="rounded-full border border-primary/25 bg-primary/10 px-3 py-1 text-xs font-semibold text-primary shadow-[0_0_22px_rgba(16,185,129,0.15)] transition-transform duration-200 hover:scale-105"
+              className="rounded-full border border-primary/25 bg-primary/10 px-3 py-1 text-xs font-semibold tracking-[0.01em] text-primary shadow-[0_0_22px_rgba(16,185,129,0.15)] transition-transform duration-200 hover:scale-105"
             >
               {badge}
             </span>
@@ -73,28 +73,28 @@ export function Footer() {
         </div>
 
         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-5">
-          <div className="rounded-2xl border border-slate-200 bg-white p-5 backdrop-blur-md dark:border-white/10 dark:bg-white/5">
+          <div className="rounded-2xl border border-slate-200/90 bg-white/90 p-5 shadow-[0_14px_36px_rgba(8,47,73,0.12)] ring-1 ring-white/50 backdrop-blur-md dark:border-white/10 dark:bg-white/5 dark:ring-emerald-300/10">
             <Link href="/" className="flex items-center gap-2">
               <span className="grid h-9 w-9 place-items-center overflow-hidden rounded-xl border border-slate-200 bg-white dark:border-white/15 dark:bg-slate-900/70">
                 <Image src="/logo.png" alt="VitaCollab logo" width={32} height={32} className="h-8 w-8 object-contain" />
               </span>
-              <span className="text-lg font-bold tracking-tight text-gray-900 dark:text-white">VitaCollab</span>
+              <span className="text-lg font-bold tracking-[-0.02em] text-gray-900 dark:text-white">VitaCollab</span>
             </Link>
 
             <p className="mt-3 text-sm leading-relaxed text-slate-600 dark:text-gray-400">
               VitaCollab is a secure, patient-controlled healthcare data platform enabling seamless collaboration between hospitals and patients.
             </p>
-            <ul className="mt-4 space-y-1 text-xs text-slate-600 dark:text-gray-300">
+            <ul className="mt-4 space-y-1.5 text-[12px] leading-5 text-slate-600 dark:text-gray-300">
               <li>Data encrypted end-to-end</li>
               <li>No data shared without consent</li>
               <li>Access anytime, anywhere</li>
             </ul>
-            <p className="mt-4 inline-flex rounded-full border border-primary/25 bg-primary/10 px-3 py-1 text-xs font-semibold text-primary">
+            <p className="mt-4 inline-flex rounded-full border border-primary/25 bg-primary/10 px-3 py-1 text-[12px] font-semibold leading-none text-primary">
               Trusted by hospitals & patients
             </p>
           </div>
 
-          <div className="rounded-2xl border border-slate-200 bg-white p-5 backdrop-blur-md dark:border-white/10 dark:bg-white/5">
+          <div className="rounded-2xl border border-slate-200/90 bg-white/90 p-5 shadow-[0_14px_36px_rgba(8,47,73,0.12)] ring-1 ring-white/50 backdrop-blur-md dark:border-white/10 dark:bg-white/5 dark:ring-emerald-300/10">
             <h3 className="mb-3 text-sm font-semibold uppercase tracking-wide text-gray-900 dark:text-white">Product</h3>
             <nav className="space-y-2">
               {productLinks.map((link) => (
@@ -105,7 +105,7 @@ export function Footer() {
             </nav>
           </div>
 
-          <div className="rounded-2xl border border-slate-200 bg-white p-5 backdrop-blur-md dark:border-white/10 dark:bg-white/5">
+          <div className="rounded-2xl border border-slate-200/90 bg-white/90 p-5 shadow-[0_14px_36px_rgba(8,47,73,0.12)] ring-1 ring-white/50 backdrop-blur-md dark:border-white/10 dark:bg-white/5 dark:ring-emerald-300/10">
             <h3 className="mb-3 text-sm font-semibold uppercase tracking-wide text-gray-900 dark:text-white">Company</h3>
             <nav className="space-y-2">
               {companyLinks.map((link) => (
@@ -116,7 +116,7 @@ export function Footer() {
             </nav>
           </div>
 
-          <div className="rounded-2xl border border-slate-200 bg-white p-5 backdrop-blur-md dark:border-white/10 dark:bg-white/5">
+          <div className="rounded-2xl border border-slate-200/90 bg-white/90 p-5 shadow-[0_14px_36px_rgba(8,47,73,0.12)] ring-1 ring-white/50 backdrop-blur-md dark:border-white/10 dark:bg-white/5 dark:ring-emerald-300/10">
             <h3 className="mb-3 text-sm font-semibold uppercase tracking-wide text-gray-900 dark:text-white">Resources</h3>
             <nav className="space-y-2">
               {resourceLinks.map((link) => (
@@ -127,7 +127,7 @@ export function Footer() {
             </nav>
           </div>
 
-          <div className="rounded-2xl border border-slate-200 bg-white p-5 backdrop-blur-md dark:border-white/10 dark:bg-white/5">
+          <div className="rounded-2xl border border-slate-200/90 bg-white/90 p-5 shadow-[0_14px_36px_rgba(8,47,73,0.12)] ring-1 ring-white/50 backdrop-blur-md dark:border-white/10 dark:bg-white/5 dark:ring-emerald-300/10">
             <h3 className="mb-3 text-sm font-semibold uppercase tracking-wide text-gray-900 dark:text-white">Contact</h3>
             <div className="space-y-2 text-sm text-slate-600 dark:text-gray-400">
               <a href="mailto:contact@vitacollab.in" className="block transition-all duration-200 hover:text-primary">
@@ -136,14 +136,14 @@ export function Footer() {
               <a href="mailto:support@vitacollab.in" className="block transition-all duration-200 hover:text-primary">
                 support@vitacollab.in
               </a>
-              <p className="text-xs text-slate-500 dark:text-gray-300">Response within 24 hours</p>
+              <p className="text-[12px] leading-5 text-slate-500 dark:text-gray-300">Response within 24 hours</p>
             </div>
 
             <a
               href="https://wa.me/918938076782"
               target="_blank"
               rel="noreferrer"
-              className="mt-4 inline-flex items-center rounded-lg bg-green-500 px-4 py-2 text-sm font-semibold text-white transition-all duration-200 hover:bg-green-600"
+              className="mt-4 inline-flex items-center rounded-lg bg-gradient-to-r from-emerald-600 to-teal-600 px-4 py-2 text-sm font-semibold text-white shadow-[0_12px_24px_rgba(5,150,105,0.3)] transition-all duration-200 hover:-translate-y-0.5 hover:from-emerald-500 hover:to-teal-500"
             >
               Chat on WhatsApp
             </a>
@@ -163,7 +163,7 @@ export function Footer() {
                     >
                       <Icon className="h-4 w-4" />
                       <span>{link.label}</span>
-                      <span className="text-xs text-slate-400 dark:text-gray-300">{link.subtitle}</span>
+                      <span className="text-[12px] leading-none text-slate-400 dark:text-gray-300">{link.subtitle}</span>
                     </a>
                   );
                 })}
@@ -173,7 +173,7 @@ export function Footer() {
         </div>
 
         <div className="mt-10 border-t border-slate-200 pt-6 dark:border-white/10">
-          <p className="mb-3 text-center text-xs text-gray-400">
+          <p className="mb-3 text-center text-[12px] leading-5 text-gray-400">
             VitaCollab is a technology platform and does not provide medical advice. Always consult a qualified healthcare professional.
           </p>
           <p className="text-center text-sm text-slate-600 dark:text-gray-400">© 2026 VitaCollab. All rights reserved. Built in India 🇮🇳</p>

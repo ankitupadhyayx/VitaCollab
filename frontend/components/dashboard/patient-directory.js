@@ -23,8 +23,8 @@ const PatientDirectoryRow = memo(function PatientDirectoryRow({ patient, isSelec
       onClick={() => onSelect(patient.id)}
       className={`grid w-full grid-cols-[auto_1fr_auto] items-center gap-3 rounded-2xl border p-3 text-left transition ${
         isSelected
-          ? "border-primary bg-primary/10"
-          : "border-border/70 bg-background/45 hover:border-primary/40 hover:bg-primary/5"
+          ? "border-primary bg-gradient-to-r from-primary/14 to-accent/10 shadow-[0_10px_24px_rgba(5,150,105,0.2)]"
+          : "border-border/70 bg-gradient-to-r from-background/72 to-primary/6 hover:border-primary/40 hover:bg-primary/8"
       }`}
     >
       {patient.profileImageUrl ? (
@@ -145,7 +145,7 @@ export function PatientDirectory({ currentHospitalId }) {
 
   return (
     <section className="grid gap-4 lg:grid-cols-3">
-      <Card className="lg:col-span-2">
+      <Card className="lg:col-span-2 bg-gradient-to-br from-card/95 via-card/88 to-primary/6 ring-1 ring-white/25 dark:ring-emerald-300/10">
         <CardHeader>
           <CardTitle>Patient Directory</CardTitle>
           <CardDescription>View, search, and track your patients in one place.</CardDescription>
@@ -217,7 +217,7 @@ export function PatientDirectory({ currentHospitalId }) {
           {!patientsLoading && !patients.length ? (
             <div className="space-y-3">
               <EmptyState title="No patients found" description="Try a different name/email or search an external patient." />
-              <div className="rounded-2xl border border-dashed border-border/70 bg-background/55 p-3">
+              <div className="rounded-2xl border border-dashed border-border/70 bg-gradient-to-r from-background/72 to-primary/6 p-3">
                 <p className="text-sm font-semibold">Search external patient by email</p>
                 <p className="mb-2 text-xs text-muted-foreground">
                   If the patient is not in your directory yet, enter an email to upload a new record manually.
@@ -240,7 +240,7 @@ export function PatientDirectory({ currentHospitalId }) {
           ) : null}
 
           {!patientsLoading && patients.length ? (
-            <div className="flex flex-wrap items-center justify-between gap-2 rounded-xl border border-border/70 bg-background/40 px-3 py-2">
+            <div className="flex flex-wrap items-center justify-between gap-2 rounded-xl border border-border/70 bg-gradient-to-r from-background/68 to-primary/6 px-3 py-2">
               <p className="text-xs text-muted-foreground">
                 Showing {(pagination.page - 1) * pagination.limit + 1}-
                 {Math.min(pagination.page * pagination.limit, pagination.total)} of {pagination.total}
@@ -269,7 +269,7 @@ export function PatientDirectory({ currentHospitalId }) {
         </CardContent>
       </Card>
 
-      <Card>
+      <Card className="bg-gradient-to-br from-card/95 via-card/88 to-accent/6 ring-1 ring-white/25 dark:ring-emerald-300/10">
         <CardHeader>
           <CardTitle>Selected Patient</CardTitle>
           <CardDescription>Patient details and latest record visibility.</CardDescription>
@@ -279,7 +279,7 @@ export function PatientDirectory({ currentHospitalId }) {
             <p className="text-sm text-muted-foreground">Select a patient to view details.</p>
           ) : (
             <>
-              <div className="flex items-center gap-3 rounded-2xl bg-background/55 p-3">
+              <div className="flex items-center gap-3 rounded-2xl border border-border/60 bg-gradient-to-r from-background/72 to-primary/6 p-3 shadow-[0_8px_22px_rgba(5,20,34,0.12)]">
                 {selectedPatient.profileImageUrl ? (
                   // eslint-disable-next-line @next/next/no-img-element
                   <img
@@ -298,7 +298,7 @@ export function PatientDirectory({ currentHospitalId }) {
                 </div>
               </div>
 
-              <div className="grid gap-2 rounded-2xl border border-border/70 bg-background/40 p-3 text-sm">
+              <div className="grid gap-2 rounded-2xl border border-border/70 bg-gradient-to-r from-background/68 to-primary/6 p-3 text-sm">
                 <p>
                   <span className="text-muted-foreground">Record count:</span> {selectedPatient.recordCount || 0}
                 </p>
@@ -317,7 +317,7 @@ export function PatientDirectory({ currentHospitalId }) {
               {recordsLoading ? <Skeleton className="h-16 w-full" /> : null}
 
               {!recordsLoading && latestRecord ? (
-                <div className="rounded-2xl border border-border/70 bg-background/50 p-3 text-xs text-muted-foreground">
+                <div className="rounded-2xl border border-border/70 bg-gradient-to-r from-background/68 to-primary/6 p-3 text-xs text-muted-foreground">
                   Latest: <span className="font-semibold capitalize text-foreground">{latestRecord.type}</span> on {formatRecordDate(latestRecord.createdAt)}
                 </div>
               ) : null}

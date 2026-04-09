@@ -17,6 +17,7 @@ import {
   ShieldCheck
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Skeleton } from "@/components/ui/skeleton";
 import { useToast } from "@/hooks/use-toast";
 import { fetchSharedRecord } from "@/services/record.service";
 import { formatRecordDate, getRecordStatusMeta } from "@/lib/record-formatters";
@@ -78,13 +79,18 @@ const formatMinutesRemaining = (expiresAt, nowTick) => {
 const LoadingSkeleton = () => {
   return (
     <div className="mx-auto w-full max-w-3xl rounded-3xl border border-border/70 bg-card/80 p-4 shadow-xl shadow-slate-900/5 sm:p-6">
-      <div className="animate-pulse space-y-4">
-        <div className="h-5 w-48 rounded bg-muted" />
-        <div className="h-4 w-64 rounded bg-muted" />
+      <div className="space-y-4">
+        <div className="flex items-center justify-between gap-4">
+          <div className="space-y-2">
+            <Skeleton className="h-5 w-48" />
+            <Skeleton className="h-4 w-64" />
+          </div>
+          <p className="text-xs font-medium text-muted-foreground">Encrypting records...</p>
+        </div>
         <div className="grid gap-3">
-          <div className="h-20 rounded-2xl bg-muted" />
-          <div className="h-20 rounded-2xl bg-muted" />
-          <div className="h-64 rounded-2xl bg-muted" />
+          <Skeleton className="h-20 rounded-2xl" />
+          <Skeleton className="h-20 rounded-2xl" />
+          <Skeleton className="h-64 rounded-2xl" />
         </div>
       </div>
     </div>

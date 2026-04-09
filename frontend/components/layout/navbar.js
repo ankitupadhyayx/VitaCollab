@@ -133,23 +133,31 @@ export function Navbar() {
   };
 
   return (
-    <header className="sticky top-0 z-30 border-b border-border/70 bg-background/85 backdrop-blur">
+    <header className="sticky top-0 z-30 border-b border-border/70 bg-gradient-to-r from-background/95 via-background/92 to-background/95 shadow-[0_10px_30px_rgba(5,20,34,0.16)] backdrop-blur-xl">
       <div className="mx-auto flex max-w-7xl items-center justify-between px-3 py-3 sm:px-6">
         <Link href="/" className="flex items-center gap-2">
-          <span className="grid h-9 w-9 place-items-center overflow-hidden rounded-xl border border-border/60 bg-card/80">
+          <span className="grid h-9 w-9 place-items-center overflow-hidden rounded-xl border border-border/65 bg-card/80 shadow-[0_8px_18px_rgba(15,23,42,0.14)] ring-1 ring-white/45 dark:ring-emerald-300/12">
             <Image src="/logo.png" alt="VitaCollab logo" width={32} height={32} className="h-8 w-8 object-contain" priority />
           </span>
-          <span className="text-lg font-bold tracking-tight">VitaCollab</span>
+          <span className="text-lg font-bold tracking-[-0.02em]">VitaCollab</span>
         </Link>
 
         <nav className="hidden items-center gap-1 md:flex">
           {marketingLinks.map((link) => (
-            <Link key={link.href} href={link.href} className="rounded-lg px-3 py-2 text-sm text-muted-foreground hover:bg-muted hover:text-foreground">
+            <Link
+              key={link.href}
+              href={link.href}
+              className={`rounded-lg px-3 py-2 text-sm font-medium transition ${pathname === link.href ? "bg-primary/12 text-primary" : "text-muted-foreground hover:bg-muted/75 hover:text-foreground"}`}
+            >
               {link.label}
             </Link>
           ))}
           {visibleLinks.map((link) => (
-            <Link key={link.href} href={link.href} className="rounded-lg px-3 py-2 text-sm text-muted-foreground hover:bg-muted hover:text-foreground">
+            <Link
+              key={link.href}
+              href={link.href}
+              className={`rounded-lg px-3 py-2 text-sm font-medium transition ${pathname === link.href ? "bg-primary/12 text-primary" : "text-muted-foreground hover:bg-muted/75 hover:text-foreground"}`}
+            >
               {link.label}
             </Link>
           ))}
@@ -168,14 +176,14 @@ export function Navbar() {
                     }
                   }}
                   placeholder="Search records, hospitals, type, date"
-                  className="h-9 w-80 rounded-xl border border-border bg-background pl-9 pr-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary/35"
+                  className="h-9 w-80 rounded-xl border border-border/80 bg-background/90 pl-9 pr-3 text-sm shadow-inner ring-1 ring-white/20 focus:outline-none focus:ring-2 focus:ring-primary/45"
                 />
                 <Search className="pointer-events-none absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
               </div>
 
               {searchPanelOpen ? (
-                <div className="absolute right-0 top-11 z-40 w-[420px] rounded-2xl border border-border/80 bg-card/95 p-2 shadow-soft">
-                  <p className="px-2 pb-1 text-xs font-semibold uppercase tracking-[0.12em] text-muted-foreground">Global Search</p>
+                <div className="absolute right-0 top-11 z-40 w-[420px] rounded-2xl border border-border/80 bg-card/90 p-2 shadow-[0_20px_45px_rgba(5,20,34,0.2)] backdrop-blur-xl">
+                  <p className="px-2 pb-1 text-[12px] font-semibold uppercase leading-none tracking-[0.12em] text-muted-foreground">Global Search</p>
                   <div className="max-h-80 space-y-1 overflow-auto">
                     {searchResults.length ? (
                       searchResults.map((item) => (
@@ -190,8 +198,8 @@ export function Navbar() {
                           }}
                         >
                           <p className="text-xs font-semibold capitalize text-foreground">{item.type} • {item.hospitalName}</p>
-                          <p className="line-clamp-1 text-xs text-muted-foreground">{item.description}</p>
-                          <p className="text-[11px] text-muted-foreground">{new Date(item.recordDate || item.createdAt).toLocaleDateString()}</p>
+                          <p className="line-clamp-1 text-[12px] leading-5 text-muted-foreground">{item.description}</p>
+                          <p className="text-[12px] leading-5 text-muted-foreground">{new Date(item.recordDate || item.createdAt).toLocaleDateString()}</p>
                         </button>
                       ))
                     ) : (
@@ -221,7 +229,7 @@ export function Navbar() {
               </Button>
 
               {panelOpen ? (
-                <div className="absolute right-0 top-11 w-[320px] rounded-2xl border border-border/80 bg-card/95 p-2 shadow-soft">
+                <div className="absolute right-0 top-11 w-[320px] rounded-2xl border border-border/80 bg-card/90 p-2 shadow-[0_20px_45px_rgba(5,20,34,0.2)] backdrop-blur-xl">
                   <div className="mb-2 flex items-center justify-between px-2">
                     <p className="text-sm font-semibold">Notifications</p>
                     <Link href="/notifications" className="text-xs font-medium text-primary" onClick={() => setPanelOpen(false)}>
@@ -240,7 +248,7 @@ export function Navbar() {
                         <p className="line-clamp-2 text-xs text-muted-foreground">{item.message}</p>
                       </button>
                     ))}
-                    {!notifications.length ? <p className="px-2 py-4 text-xs text-muted-foreground">No updates yet</p> : null}
+                    {!notifications.length ? <p className="px-2 py-4 text-[12px] leading-5 text-muted-foreground">No updates yet</p> : null}
                   </div>
                 </div>
               ) : null}
@@ -253,7 +261,7 @@ export function Navbar() {
 
           {isAuthenticated ? (
             <>
-              <span className="hidden rounded-full bg-muted px-2 py-1 text-xs capitalize text-muted-foreground sm:inline">{user?.role}</span>
+              <span className="hidden rounded-full bg-muted px-2 py-1 text-[12px] capitalize leading-none text-muted-foreground sm:inline">{user?.role}</span>
               <Button variant="secondary" size="sm" onClick={handleLogout} className="hidden sm:inline-flex">Sign Out</Button>
             </>
           ) : (
@@ -269,9 +277,9 @@ export function Navbar() {
       </div>
 
       {mobileOpen ? (
-        <div className="border-t border-border/70 bg-background p-3 md:hidden">
+        <div className="border-t border-border/70 bg-background/95 p-3 backdrop-blur md:hidden">
           <div className="mb-3 flex items-center justify-between rounded-xl bg-card/60 p-2">
-            <span className="text-xs text-muted-foreground">Live sync</span>
+            <span className="text-[12px] leading-none text-muted-foreground">Live sync</span>
             <span className="inline-flex items-center gap-1 text-xs font-semibold text-success">
               <CircleDot className="h-3 w-3" />
               connected

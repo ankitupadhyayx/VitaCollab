@@ -42,7 +42,7 @@ export default function QuickActionBar({ onUpload, onTimeline, onShare, onReques
           <button
             key={action.id}
             type="button"
-            className="rounded-2xl border border-border/70 bg-background/50 p-3 text-left transition hover:border-primary/40 hover:bg-primary/5"
+            className="rounded-2xl border border-border/70 bg-gradient-to-br from-background/78 via-background/62 to-primary/6 p-3 text-left shadow-[0_10px_24px_rgba(5,20,34,0.12)] ring-1 ring-white/25 transition hover:-translate-y-0.5 hover:border-primary/45 hover:shadow-[0_14px_34px_rgba(5,150,105,0.2)] dark:ring-emerald-300/10"
             onClick={action.onClick}
           >
             <p className="inline-flex items-center gap-2 text-sm font-semibold">

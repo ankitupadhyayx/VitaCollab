@@ -639,7 +639,7 @@ export default function AdminPage() {
 
             <div className="space-y-6">
             <header>
-              <h1 className="text-3xl font-bold tracking-tight">Admin Control Center</h1>
+              <h1 className="heading-font text-3xl font-bold tracking-[-0.02em]">Admin Control Center</h1>
               <p className="text-sm text-muted-foreground">Full platform visibility and operational control.</p>
             </header>
 
@@ -677,8 +677,8 @@ export default function AdminPage() {
                       <CartesianGrid strokeDasharray="3 3" stroke="rgba(148, 163, 184, 0.3)" />
                       <XAxis dataKey="name" tick={{ fontSize: 12 }} />
                       <YAxis tick={{ fontSize: 12 }} />
-                      <Tooltip cursor={{ fill: "rgba(37,99,235,0.08)" }} />
-                      <Bar dataKey="value" radius={[12, 12, 0, 0]} fill="#2563eb" />
+                      <Tooltip cursor={{ fill: "rgba(16,185,129,0.12)" }} />
+                      <Bar dataKey="value" radius={[12, 12, 0, 0]} fill="#0d9488" />
                     </BarChart>
                   </ResponsiveContainer>
                 </CardContent>

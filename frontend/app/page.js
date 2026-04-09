@@ -94,31 +94,32 @@ export default async function LandingPage() {
     <div className="min-h-screen main-shell">
       <Navbar />
 
-      <main className="mx-auto max-w-7xl px-4 pb-16 pt-14 sm:px-6">
-        <section className="relative overflow-hidden rounded-3xl border border-primary/15 bg-gradient-to-br from-emerald-50 via-white to-teal-50 px-6 py-10 shadow-[0_24px_70px_rgba(6,95,70,0.12)] dark:border-white/10 dark:bg-gradient-to-br dark:from-slate-900 dark:to-slate-800 sm:px-10 lg:px-12 lg:py-14">
-          <div className="absolute -top-24 right-0 h-56 w-56 rounded-full bg-teal-200/30 blur-3xl" />
-          <div className="absolute bottom-0 left-0 h-52 w-52 rounded-full bg-emerald-200/30 blur-3xl" />
+      <main className="mx-auto max-w-7xl px-4 pb-20 pt-16 sm:px-6 lg:pb-24">
+        <section className="premium-surface relative overflow-hidden rounded-[2rem] border border-primary/20 bg-[linear-gradient(140deg,rgba(236,253,245,0.98),rgba(255,255,255,0.96)_48%,rgba(236,254,255,0.92))] px-6 py-10 shadow-[0_30px_90px_rgba(6,95,70,0.2)] ring-1 ring-white/55 dark:border-white/10 dark:bg-gradient-to-br dark:from-slate-900 dark:via-slate-900 dark:to-teal-950/70 dark:ring-emerald-300/10 sm:px-10 lg:px-12 lg:py-16">
+          <div className="absolute -top-24 right-0 h-56 w-56 rounded-full bg-teal-200/35 blur-3xl" />
+          <div className="absolute bottom-0 left-0 h-52 w-52 rounded-full bg-emerald-200/35 blur-3xl" />
+          <div className="absolute inset-x-14 -top-8 h-28 rounded-full bg-gradient-to-r from-emerald-300/15 via-teal-300/15 to-cyan-300/15 blur-2xl" />
 
           <div className="relative grid items-center gap-10 lg:grid-cols-2">
-            <div className="space-y-6 animate-rise">
-              <p className="inline-flex rounded-full border border-primary/35 bg-primary/10 px-3 py-1 text-xs font-semibold uppercase tracking-[0.16em] text-primary">
+            <div className="space-y-6 sm:space-y-7 animate-rise">
+              <p className="inline-flex rounded-full border border-primary/35 bg-primary/10 px-3 py-1 text-[11px] font-semibold uppercase leading-none tracking-[0.16em] text-primary shadow-[0_0_22px_rgba(16,185,129,0.2)]">
                 Trusted healthcare collaboration
               </p>
-              <h1 className="heading-font text-4xl font-extrabold leading-tight tracking-tight text-slate-900 dark:text-white sm:text-5xl lg:text-6xl">
+              <h1 className="heading-font text-4xl font-extrabold leading-[1.02] tracking-[-0.03em] text-slate-900 dark:text-white sm:text-5xl lg:text-6xl">
                 Your Medical Records. Secure. Verified. In Your Control.
               </h1>
-              <p className="body-font max-w-xl text-base leading-relaxed text-slate-600 dark:text-gray-400 sm:text-lg">
+              <p className="body-font max-w-xl text-base leading-relaxed text-slate-700 dark:text-gray-300 sm:text-lg">
                 VitaCollab helps patients and hospitals manage medical records with strong security, transparent approvals, and reliable real-time coordination.
               </p>
               <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center">
                 <Link href="/signup" className="w-full sm:w-auto">
-                  <Button size="lg" className="h-11 w-full min-w-[150px] dark:bg-emerald-600 dark:text-white dark:hover:bg-emerald-700 dark:shadow-lg dark:shadow-emerald-500/20">
+                  <Button size="lg" className="h-11 w-full min-w-[150px]">
                     Get Started
                     <ArrowRight className="ml-2 h-4 w-4" />
                   </Button>
                 </Link>
                 <Link href="/dashboard" className="w-full sm:w-auto">
-                  <Button variant="secondary" size="lg" className="h-11 w-full min-w-[150px] dark:border-white/10 dark:bg-white/10 dark:text-gray-200 dark:hover:bg-white/20">
+                  <Button variant="secondary" size="lg" className="h-11 w-full min-w-[150px]">
                     View Demo
                   </Button>
                 </Link>
@@ -139,14 +140,14 @@ export default async function LandingPage() {
               </div>
             </div>
 
-            <Card className="animate-rise border-emerald-100 bg-white/90 shadow-xl backdrop-blur-sm dark:border-white/10 dark:bg-slate-800/90 dark:backdrop-blur-md dark:shadow-lg dark:shadow-emerald-500/20">
+            <Card className="animate-rise border-emerald-100/90 bg-white/90 shadow-[0_24px_56px_rgba(8,47,73,0.18)] ring-1 ring-white/55 backdrop-blur-md dark:border-white/10 dark:bg-slate-800/88 dark:backdrop-blur-lg dark:shadow-lg dark:shadow-emerald-500/25">
               <CardHeader>
                 <CardTitle className="dark:text-white">Secure Health Data Flow</CardTitle>
                 <CardDescription className="dark:text-gray-400">Live records move through encrypted checkpoints with explicit patient approval.</CardDescription>
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
-                  <div className="relative overflow-hidden rounded-2xl border border-emerald-100 bg-emerald-50/60 p-4 dark:border-white/10 dark:bg-white/5 dark:backdrop-blur-md">
+                  <div className="relative overflow-hidden rounded-2xl border border-emerald-100/90 bg-emerald-50/65 p-4 shadow-inner dark:border-white/10 dark:bg-white/5 dark:backdrop-blur-md">
                     <div className="absolute -left-8 top-1/2 h-16 w-16 -translate-y-1/2 rounded-full bg-emerald-300/30 blur-xl" />
                     <div className="absolute -right-8 top-1/2 h-16 w-16 -translate-y-1/2 rounded-full bg-teal-300/30 blur-xl" />
                     <div className="space-y-3">
@@ -161,25 +162,25 @@ export default async function LandingPage() {
                       ))}
                     </div>
                   </div>
-                  <p className="text-xs text-slate-500 dark:text-gray-300">Animated preview of record movement through secure and verified checkpoints.</p>
+                  <p className="text-[12px] leading-5 text-slate-500 dark:text-gray-300">Animated preview of record movement through secure and verified checkpoints.</p>
                 </div>
               </CardContent>
             </Card>
           </div>
         </section>
 
-        <section className="mt-16 text-center">
+        <section className="mt-20 sm:mt-24 text-center">
           <p className="text-sm font-semibold uppercase tracking-[0.14em] text-slate-500 dark:text-gray-400">Trusted by hospitals and patients</p>
           <div className="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
             {logos.map((logo) => (
-              <div key={logo} className="rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm font-semibold text-slate-600 shadow-sm dark:border-white/10 dark:bg-white/5 dark:text-gray-200 dark:backdrop-blur-md">
+              <div key={logo} className="rounded-xl border border-slate-200/90 bg-white/92 px-4 py-3 text-sm font-semibold text-slate-700 shadow-[0_10px_24px_rgba(15,23,42,0.08)] dark:border-white/10 dark:bg-white/5 dark:text-gray-200 dark:backdrop-blur-md">
                 {logo}
               </div>
             ))}
           </div>
         </section>
 
-        <section className="mt-16">
+        <section className="mt-20 sm:mt-24">
           <div className="mb-8 space-y-2 text-center">
             <h2 className="heading-font text-3xl font-bold tracking-tight text-slate-900 dark:text-white sm:text-4xl">Built For Trust-Centered Care</h2>
             <p className="mx-auto max-w-2xl text-muted-foreground dark:text-gray-400">Purpose-built features that improve confidence for patients and operational clarity for hospitals.</p>
@@ -188,7 +189,7 @@ export default async function LandingPage() {
             {features.map((feature) => {
               const Icon = feature.icon;
               return (
-                <Card key={feature.title} className="animate-rise border-slate-200/80 bg-white transition-transform duration-300 hover:-translate-y-1 dark:border-white/10 dark:bg-slate-800 dark:backdrop-blur-md">
+                <Card key={feature.title} className="animate-rise border-slate-200/85 bg-white/94 transition-transform duration-300 hover:-translate-y-1 dark:border-white/10 dark:bg-slate-800 dark:backdrop-blur-md">
                   <CardHeader>
                     <span className="grid h-11 w-11 place-items-center rounded-2xl bg-primary/10 text-primary">
                       <Icon className="h-5 w-5" />
@@ -204,7 +205,7 @@ export default async function LandingPage() {
           </div>
         </section>
 
-        <section className="mt-16 rounded-3xl border border-slate-200 bg-white px-6 py-10 shadow-sm dark:border-white/10 dark:bg-gradient-to-br dark:from-slate-900 dark:to-slate-800 sm:px-10">
+        <section className="premium-surface mt-20 sm:mt-24 rounded-[2rem] border border-slate-200/90 bg-white/94 px-6 py-10 shadow-[0_24px_60px_rgba(8,47,73,0.14)] ring-1 ring-white/45 dark:border-white/10 dark:bg-gradient-to-br dark:from-slate-900 dark:to-slate-800 dark:ring-emerald-300/10 sm:px-10">
           <div className="mb-8 space-y-2 text-center">
             <h2 className="heading-font text-3xl font-bold tracking-tight text-slate-900 dark:text-white sm:text-4xl">How It Works</h2>
             <p className="mx-auto max-w-2xl text-muted-foreground dark:text-gray-400">Simple steps to start managing your records securely.</p>
@@ -226,7 +227,7 @@ export default async function LandingPage() {
           </div>
         </section>
 
-        <section className="mt-16 rounded-3xl border border-primary/15 bg-gradient-to-br from-slate-900 via-teal-900 to-emerald-900 px-6 py-10 text-white shadow-xl sm:px-10">
+        <section className="premium-surface mt-20 sm:mt-24 rounded-[2rem] border border-primary/20 bg-gradient-to-br from-slate-950 via-teal-950 to-emerald-900 px-6 py-10 text-white shadow-[0_30px_74px_rgba(3,105,86,0.38)] ring-1 ring-emerald-300/20 sm:px-10">
           <div className="mb-8 space-y-2">
             <p className="text-sm font-semibold uppercase tracking-[0.14em] text-emerald-200">Security</p>
             <h2 className="heading-font text-3xl font-bold tracking-tight text-white sm:text-4xl">Healthcare Security You Can Trust</h2>
@@ -250,7 +251,7 @@ export default async function LandingPage() {
 
         <TestimonialsSection testimonials={testimonials} autoScroll />
 
-        <section className="mt-16 rounded-3xl border border-slate-200 bg-white px-6 py-10 shadow-sm dark:border-white/10 dark:bg-slate-800 sm:px-10">
+        <section className="premium-surface mt-20 sm:mt-24 rounded-[2rem] border border-slate-200/90 bg-white/94 px-6 py-10 shadow-[0_24px_58px_rgba(8,47,73,0.14)] ring-1 ring-white/45 dark:border-white/10 dark:bg-slate-800/90 dark:ring-emerald-300/10 sm:px-10">
           <div className="flex flex-col gap-4 text-sm text-slate-600 dark:text-gray-400 sm:flex-row sm:items-center sm:justify-between">
             <p>Contact: contact@vitacollab.in</p>
             <div className="flex flex-wrap gap-4">

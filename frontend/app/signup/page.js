@@ -183,9 +183,9 @@ export default function SignupPage() {
             <section className="rounded-xl border border-slate-200/80 bg-white/70 p-4 shadow-sm dark:border-white/10 dark:bg-white/5">
               <p className="mb-3 text-sm font-semibold text-slate-800 dark:text-neutral-100">Section 1: Account</p>
 
-              <div className="space-y-3">
+              <div className="space-y-2.5">
                 <label className="text-sm font-medium text-slate-700 dark:text-neutral-200">
-                  Role <span className="ml-1 text-xs text-red-400">*</span>
+                  Role <span className="ml-1 text-[11px] leading-none text-red-400">*</span>
                 </label>
                 <div className="grid grid-cols-2 gap-3">
                 <button
@@ -217,7 +217,7 @@ export default function SignupPage() {
 
               <div className="mt-4 grid gap-4 md:grid-cols-2">
                 <div className="space-y-2.5 md:col-span-2">
-                  <label htmlFor="name" className="text-sm font-medium text-slate-700 dark:text-neutral-200">Full Name <span className="ml-1 text-xs text-red-400">*</span></label>
+                  <label htmlFor="name" className="text-sm font-medium text-slate-700 dark:text-neutral-200">Full Name <span className="ml-1 text-[11px] leading-none text-red-400">*</span></label>
                   <Input
                     id="name"
                     placeholder="Enter your full name"
@@ -231,7 +231,7 @@ export default function SignupPage() {
                 </div>
 
                 <div className="space-y-2.5 md:col-span-2">
-                  <label htmlFor="email" className="text-sm font-medium text-slate-700 dark:text-neutral-200">Email <span className="ml-1 text-xs text-red-400">*</span></label>
+                  <label htmlFor="email" className="text-sm font-medium text-slate-700 dark:text-neutral-200">Email <span className="ml-1 text-[11px] leading-none text-red-400">*</span></label>
                   <div className="relative">
                     <Input
                       id="email"
@@ -247,11 +247,11 @@ export default function SignupPage() {
                     />
                     {hasValidEmail ? <CheckCircle2 className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-emerald-500" /> : null}
                   </div>
-                  <p className="text-xs text-slate-500 dark:text-neutral-300">We never share your data.</p>
+                  <p className="text-[12px] leading-5 text-slate-500 dark:text-neutral-300">We never share your data.</p>
                 </div>
 
                 <div className="space-y-2.5 md:col-span-2">
-                  <label htmlFor="password" className="text-sm font-medium text-slate-700 dark:text-neutral-200">Password <span className="ml-1 text-xs text-red-400">*</span></label>
+                  <label htmlFor="password" className="text-sm font-medium text-slate-700 dark:text-neutral-200">Password <span className="ml-1 text-[11px] leading-none text-red-400">*</span></label>
                   <div className="relative">
                     <Input
                       id="password"
@@ -274,7 +274,7 @@ export default function SignupPage() {
                     </button>
                   </div>
 
-                  <div className="space-y-2">
+                  <div className="space-y-2.5">
                     <div className="h-2 w-full overflow-hidden rounded-full bg-slate-200 dark:bg-neutral-800">
                       <div
                         className={`h-full transition-all ${
@@ -286,8 +286,8 @@ export default function SignupPage() {
                         }`}
                       />
                     </div>
-                    <p className="text-xs text-slate-500 dark:text-neutral-300">Password strength: {passwordStrength.label}</p>
-                    <p className="text-xs text-slate-500 dark:text-neutral-300">Use 8+ characters with letters & numbers.</p>
+                    <p className="text-[12px] leading-5 text-slate-500 dark:text-neutral-300">Password strength: {passwordStrength.label}</p>
+                    <p className="text-[12px] leading-5 text-slate-500 dark:text-neutral-300">Use 8+ characters with letters & numbers.</p>
                   </div>
                 </div>
               </div>
@@ -295,7 +295,7 @@ export default function SignupPage() {
 
             <section className="rounded-xl border border-slate-200/80 bg-white/70 p-4 shadow-sm dark:border-white/10 dark:bg-white/5">
               <p className="mb-3 text-sm font-semibold text-slate-800 dark:text-neutral-100">Section 2: Profile</p>
-              <p className="mb-3 text-xs text-slate-500 dark:text-neutral-300">Optional (can be filled later)</p>
+              <p className="mb-3 text-[12px] leading-5 text-slate-500 dark:text-neutral-300">Optional (can be filled later)</p>
 
               <div className="grid gap-4 md:grid-cols-2">
                 <div className="space-y-2.5 md:col-span-2">
@@ -311,7 +311,7 @@ export default function SignupPage() {
                       )}
                     </div>
 
-                    <div className="flex-1 space-y-2">
+                    <div className="flex-1 space-y-2.5">
                       <Input
                         ref={fileInputRef}
                         id="profileImage"
@@ -389,7 +389,7 @@ export default function SignupPage() {
                     </div>
 
                     <div className="space-y-2.5">
-                      <label htmlFor="phone" className="text-sm font-medium text-slate-700 dark:text-neutral-200">Mobile <span className="ml-1 text-xs text-red-400">*</span></label>
+                      <label htmlFor="phone" className="text-sm font-medium text-slate-700 dark:text-neutral-200">Mobile <span className="ml-1 text-[11px] leading-none text-red-400">*</span></label>
                       <Input
                         id="phone"
                         placeholder="Enter mobile number"
@@ -446,7 +446,7 @@ export default function SignupPage() {
                       />
                     </div>
                     <div className="space-y-2.5">
-                      <label htmlFor="hospitalPhone" className="text-sm font-medium text-slate-700 dark:text-neutral-200">Mobile <span className="ml-1 text-xs text-red-400">*</span></label>
+                      <label htmlFor="hospitalPhone" className="text-sm font-medium text-slate-700 dark:text-neutral-200">Mobile <span className="ml-1 text-[11px] leading-none text-red-400">*</span></label>
                       <Input
                         id="hospitalPhone"
                         placeholder="Enter hospital mobile number"
@@ -488,7 +488,7 @@ export default function SignupPage() {
 
             <Button
               type="submit"
-              className="w-full rounded-lg bg-emerald-600 text-white font-semibold hover:bg-emerald-700 active:scale-[0.99]"
+              className="w-full"
               disabled={submitting || !canSubmit}
               aria-disabled={submitting || !canSubmit}
             >
@@ -500,7 +500,7 @@ export default function SignupPage() {
               ) : "Create Account"}
             </Button>
 
-            <p className="text-center text-xs text-slate-500 dark:text-neutral-300">
+            <p className="text-center text-[12px] leading-5 text-slate-500 dark:text-neutral-300">
               By continuing, you agree to our <Link href="/terms" className="font-medium text-emerald-600 hover:text-emerald-700 dark:text-emerald-300 dark:hover:text-emerald-200">Terms</Link>, <Link href="/privacy" className="font-medium text-emerald-600 hover:text-emerald-700 dark:text-emerald-300 dark:hover:text-emerald-200">Privacy Policy</Link>, and <Link href="/disclaimer" className="font-medium text-emerald-600 hover:text-emerald-700 dark:text-emerald-300 dark:hover:text-emerald-200">Medical Disclaimer</Link>.
             </p>
           </form>

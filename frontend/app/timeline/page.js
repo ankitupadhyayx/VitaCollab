@@ -170,7 +170,7 @@ export default function TimelinePage() {
           <Sidebar />
           <main className="w-full space-y-4 pb-28 lg:pb-0">
             <header className="animate-rise">
-              <h1 className="text-2xl font-bold tracking-tight sm:text-3xl">Health Timeline</h1>
+              <h1 className="heading-font text-2xl font-bold tracking-[-0.02em] sm:text-3xl">Health Timeline</h1>
               <p className="text-sm text-muted-foreground">A verified feed of your medical journey.</p>
               <p className="mt-2 inline-flex items-center gap-2 rounded-full border border-primary/20 bg-primary/10 px-3 py-1 text-xs font-semibold text-primary">
                 <ShieldCheck className="h-3.5 w-3.5" />

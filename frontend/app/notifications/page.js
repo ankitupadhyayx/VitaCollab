@@ -70,7 +70,7 @@ export default function NotificationsPage() {
           <Sidebar />
           <main className="w-full space-y-4 pb-28 lg:pb-0">
             <header>
-              <h1 className="text-2xl font-bold tracking-tight sm:text-3xl">Notifications</h1>
+              <h1 className="heading-font text-2xl font-bold tracking-[-0.02em] sm:text-3xl">Notifications</h1>
               <p className="text-sm text-muted-foreground">Approval requests and care reminders.</p>
             </header>
 

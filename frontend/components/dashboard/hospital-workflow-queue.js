@@ -9,7 +9,7 @@ export default function HospitalWorkflowQueue({ records, onDecision, isPending }
 
   return (
     <section className="grid gap-4 lg:grid-cols-3">
-      <Card className="lg:col-span-2">
+      <Card className="lg:col-span-2 bg-gradient-to-br from-card/95 via-card/88 to-primary/6 ring-1 ring-white/25 dark:ring-emerald-300/10">
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Building2 className="h-5 w-5 text-primary" />
@@ -20,7 +20,7 @@ export default function HospitalWorkflowQueue({ records, onDecision, isPending }
         <CardContent className="space-y-2">
           {pending.length ? (
             pending.map((item) => (
-              <div key={item.id} className="flex flex-wrap items-center justify-between gap-2 rounded-2xl bg-background/60 p-3">
+              <div key={item.id} className="flex flex-wrap items-center justify-between gap-2 rounded-2xl border border-border/70 bg-gradient-to-r from-background/72 to-primary/6 p-3 shadow-[0_8px_22px_rgba(5,20,34,0.12)]">
                 <div>
                   <p className="font-medium capitalize">{item.type} • {item.hospitalName || "Hospital"}</p>
                   <p className="text-xs text-muted-foreground">Patient: {item.patientName || "Assigned"}</p>
@@ -28,7 +28,7 @@ export default function HospitalWorkflowQueue({ records, onDecision, isPending }
                 <div className="flex gap-2">
                   <button
                     type="button"
-                    className="rounded-xl bg-success/15 px-3 py-1 text-xs font-semibold text-success"
+                    className="rounded-xl border border-success/30 bg-success/15 px-3 py-1 text-xs font-semibold text-success"
                     onClick={() => onDecision(item.id, "approved")}
                     disabled={isPending(`dashboard-record:${item.id}`)}
                   >
@@ -36,7 +36,7 @@ export default function HospitalWorkflowQueue({ records, onDecision, isPending }
                   </button>
                   <button
                     type="button"
-                    className="rounded-xl bg-danger/15 px-3 py-1 text-xs font-semibold text-danger"
+                    className="rounded-xl border border-danger/30 bg-danger/15 px-3 py-1 text-xs font-semibold text-danger"
                     onClick={() => onDecision(item.id, "rejected")}
                     disabled={isPending(`dashboard-record:${item.id}`)}
                   >
@@ -51,7 +51,7 @@ export default function HospitalWorkflowQueue({ records, onDecision, isPending }
         </CardContent>
       </Card>
 
-      <Card className="bg-gradient-to-br from-primary/10 to-accent/15">
+      <Card className="bg-gradient-to-br from-primary/12 via-accent/10 to-cyan-500/12 ring-1 ring-white/25 dark:ring-emerald-300/10">
         <CardHeader>
           <CardTitle>Smart Suggestions</CardTitle>
           <CardDescription>Quality nudges before uploading records.</CardDescription>

@@ -25,7 +25,13 @@ export function ProtectedRoute({ children, roles, strict = true }) {
   }, [isLoading, isAuthenticated, user, roles, strict, router]);
 
   if (isLoading) {
-    return <Loader />;
+    return (
+      <Loader
+        title="Verifying access..."
+        subtitle="Confirming identity and security permissions"
+        messages={["Verifying access...", "Securing your data...", "Encrypting records..."]}
+      />
+    );
   }
 
   if (!isAuthenticated) {

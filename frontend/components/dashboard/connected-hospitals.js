@@ -6,7 +6,7 @@ import { formatRecordShortDate } from "@/lib/record-formatters";
 
 export default function ConnectedHospitals({ hospitals }) {
   return (
-    <Card>
+    <Card className="bg-gradient-to-br from-card/95 via-card/88 to-primary/6 ring-1 ring-white/25 dark:ring-emerald-300/10">
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <Building2 className="h-5 w-5 text-primary" />
@@ -17,7 +17,7 @@ export default function ConnectedHospitals({ hospitals }) {
       <CardContent className="space-y-2 text-sm">
         {hospitals.length ? (
           hospitals.slice(0, 6).map((entry) => (
-            <div key={`${entry.name}-${entry.lastInteraction}`} className="rounded-2xl border border-border/70 bg-background/55 p-3">
+            <div key={`${entry.name}-${entry.lastInteraction}`} className="rounded-2xl border border-border/70 bg-gradient-to-r from-background/72 to-primary/6 p-3 shadow-[0_8px_22px_rgba(5,20,34,0.12)]">
               <p className="font-semibold text-foreground">{entry.name}</p>
               <p className="text-xs text-muted-foreground">Last interaction: {formatRecordShortDate(entry.lastInteraction)}</p>
               <p className={`text-xs font-semibold capitalize ${entry.status === "active" ? "text-success" : "text-muted-foreground"}`}>{entry.status}</p>

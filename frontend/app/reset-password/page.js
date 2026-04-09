@@ -116,7 +116,7 @@ export default function ResetPasswordPage() {
                 </button>
               </div>
 
-              <div className="space-y-2">
+              <div className="space-y-2.5">
                 <div className="h-2 w-full overflow-hidden rounded-full bg-slate-200 dark:bg-neutral-800">
                   <div
                     className={`h-full transition-all ${
@@ -128,13 +128,13 @@ export default function ResetPasswordPage() {
                     }`}
                   />
                 </div>
-                <p className="text-xs text-slate-500 dark:text-neutral-300">Password strength: {passwordStrength.label}</p>
+                <p className="text-[12px] leading-5 text-slate-500 dark:text-neutral-300">Password strength: {passwordStrength.label}</p>
               </div>
             </div>
 
             <Button
               type="submit"
-              className="w-full rounded-lg bg-emerald-600 text-white font-semibold hover:bg-emerald-700 active:scale-[0.99]"
+              className="w-full"
               disabled={submitting}
             >
               {submitting ? (
@@ -145,7 +145,7 @@ export default function ResetPasswordPage() {
               ) : "Reset password"}
             </Button>
 
-            <p className="text-xs text-slate-500 dark:text-neutral-300">We never share your data.</p>
+            <p className="text-[12px] leading-5 text-slate-500 dark:text-neutral-300">We never share your data.</p>
           </form>
           <p className="mt-4 text-center text-sm text-slate-600 dark:text-neutral-300">
             Back to <Link className="font-semibold text-emerald-600 hover:text-emerald-700 dark:text-emerald-300 dark:hover:text-emerald-200" href="/login">Sign in</Link>

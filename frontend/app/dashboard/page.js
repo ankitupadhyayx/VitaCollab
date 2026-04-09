@@ -92,7 +92,7 @@ export default function DashboardPage() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: index * 0.06 }}
           >
-            <Card>
+            <Card className="bg-gradient-to-br from-card/95 via-card/88 to-primary/5 ring-1 ring-white/25 dark:ring-emerald-300/10">
               <CardHeader className="flex flex-row items-start justify-between space-y-0 pb-2">
                 <CardDescription>{item.label}</CardDescription>
                 <Icon className="h-4 w-4 text-primary" />
@@ -219,16 +219,17 @@ export default function DashboardPage() {
 
   return (
     <ProtectedRoute>
-      <div className="min-h-screen">
+      <div className="min-h-screen main-shell">
         <Navbar />
         <div className="app-page-shell">
           <Sidebar />
-          <main className="w-full space-y-5 pb-28 sm:space-y-6 lg:pb-0">
-            <motion.section className="animate-rise" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}>
-              <h1 className="text-2xl font-bold tracking-tight sm:text-3xl">
+          <main className="w-full space-y-7 pb-28 sm:space-y-8 lg:pb-0">
+            <motion.section className="premium-surface animate-rise rounded-3xl border border-border/70 bg-card/80 p-5 shadow-[0_18px_44px_rgba(5,20,34,0.12)] ring-1 ring-white/40 dark:border-white/10 dark:bg-slate-900/55 dark:ring-emerald-300/10 sm:p-6" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}>
+              <p className="text-[12px] font-semibold uppercase leading-none tracking-[0.2em] text-primary">Secure workspace</p>
+              <h1 className="heading-font mt-2 text-2xl font-bold tracking-[-0.02em] text-slate-900 dark:text-white sm:text-3xl">
                 {role === "hospital" ? "Hospital Command Center" : role === "admin" ? "Admin Intelligence Board" : "Patient Dashboard"}
               </h1>
-              <p className="mt-1 text-sm leading-relaxed text-muted-foreground">
+              <p className="mt-2 max-w-3xl text-sm leading-relaxed text-muted-foreground dark:text-gray-300">
                 {role === "hospital"
                   ? "Manage uploads, track approvals, and optimize care workflows."
                   : role === "admin"
@@ -238,11 +239,11 @@ export default function DashboardPage() {
             </motion.section>
 
             {showOnboarding ? (
-              <Card className="bg-gradient-to-r from-primary/10 via-accent/10 to-success/10">
+              <Card className="bg-gradient-to-r from-primary/14 via-accent/10 to-cyan-500/12 ring-1 ring-white/35 dark:ring-emerald-300/12">
                 <CardContent className="flex flex-col gap-3 p-5 sm:flex-row sm:items-center sm:justify-between">
                   <div>
-                    <p className="text-sm font-semibold">Welcome to VitaCollab</p>
-                    <p className="text-xs text-muted-foreground">Your dashboard is ready. Complete your profile and upload your first record to unlock full collaboration.</p>
+                    <p className="text-sm font-semibold tracking-[-0.01em]">Welcome to VitaCollab</p>
+                    <p className="text-[12px] leading-5 text-muted-foreground dark:text-gray-300">Your dashboard is ready. Complete your profile and upload your first record to unlock full collaboration.</p>
                   </div>
                   <button type="button" onClick={completeOnboarding} className="w-full rounded-xl bg-primary px-4 py-2 text-xs font-semibold text-primary-foreground sm:w-auto">
                     Continue

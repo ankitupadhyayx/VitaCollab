@@ -16,7 +16,7 @@ const TimelineRecordRow = memo(function TimelineRecordRow({ item, onOpenRecord }
     <button
       type="button"
       onClick={() => onOpenRecord(item)}
-      className={`relative flex w-full items-center justify-between rounded-2xl border px-3 py-2 text-left ${isImportant ? "border-warning/40 bg-warning/10" : "border-border/70 bg-background/55 hover:border-primary/40 hover:bg-primary/5"}`}
+      className={`relative flex w-full items-center justify-between rounded-2xl border px-3 py-2 text-left shadow-[0_8px_20px_rgba(5,20,34,0.1)] ring-1 ring-white/20 transition ${isImportant ? "border-warning/40 bg-warning/10" : "border-border/70 bg-gradient-to-r from-background/74 to-primary/6 hover:border-primary/40 hover:bg-primary/8"}`}
     >
       <div className="flex items-center gap-3">
         <span className="grid h-8 w-8 place-items-center rounded-full bg-primary/15 text-primary">
@@ -47,7 +47,7 @@ export default function PatientTimelineGrouped({ recordsByMonth, records, heatma
   return (
     <>
       <section className="grid gap-4 lg:grid-cols-3">
-        <Card className="lg:col-span-2">
+        <Card className="lg:col-span-2 bg-gradient-to-br from-card/95 via-card/88 to-primary/5 ring-1 ring-white/25 dark:ring-emerald-300/10">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <CalendarClock className="h-5 w-5 text-primary" />
@@ -75,7 +75,7 @@ export default function PatientTimelineGrouped({ recordsByMonth, records, heatma
       </section>
 
       <section className="grid gap-4 lg:grid-cols-3">
-        <Card className="lg:col-span-2">
+        <Card className="lg:col-span-2 bg-gradient-to-br from-card/95 via-card/88 to-accent/6 ring-1 ring-white/25 dark:ring-emerald-300/10">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Sparkles className="h-5 w-5 text-primary" />
@@ -84,7 +84,7 @@ export default function PatientTimelineGrouped({ recordsByMonth, records, heatma
             <CardDescription>Your data update pattern over the last 10 weeks.</CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="grid grid-cols-14 gap-1 rounded-2xl bg-background/60 p-3">
+            <div className="grid grid-cols-14 gap-1 rounded-2xl border border-border/60 bg-gradient-to-br from-background/70 to-primary/6 p-3 shadow-inner">
               {heatmapDays.map((intensity, index) => (
                 <div
                   key={index}
@@ -94,12 +94,12 @@ export default function PatientTimelineGrouped({ recordsByMonth, records, heatma
                       intensity === 0
                         ? "hsl(var(--muted))"
                         : intensity === 1
-                          ? "rgba(37, 99, 235, 0.28)"
+                          ? "rgba(16, 185, 129, 0.24)"
                           : intensity === 2
-                            ? "rgba(37, 99, 235, 0.45)"
+                            ? "rgba(20, 184, 166, 0.42)"
                             : intensity === 3
-                              ? "rgba(37, 99, 235, 0.62)"
-                              : "rgba(37, 99, 235, 0.86)"
+                              ? "rgba(13, 148, 136, 0.62)"
+                              : "rgba(14, 116, 144, 0.84)"
                   }}
                 />
               ))}
@@ -107,7 +107,7 @@ export default function PatientTimelineGrouped({ recordsByMonth, records, heatma
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="bg-gradient-to-br from-card/95 via-card/88 to-primary/8 ring-1 ring-white/25 dark:ring-emerald-300/10">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <TrendingUp className="h-5 w-5 text-primary" />

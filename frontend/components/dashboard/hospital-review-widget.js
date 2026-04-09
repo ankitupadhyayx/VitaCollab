@@ -119,7 +119,7 @@ export default function HospitalReviewWidget({ hospitalId }) {
 
   return (
     <section className="grid gap-4 lg:grid-cols-3">
-      <Card>
+      <Card className="bg-gradient-to-br from-card/95 via-card/88 to-primary/6 ring-1 ring-white/25 dark:ring-emerald-300/10">
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <MessageSquareHeart className="h-5 w-5 text-primary" />
@@ -139,7 +139,7 @@ export default function HospitalReviewWidget({ hospitalId }) {
         </CardContent>
       </Card>
 
-      <Card>
+      <Card className="bg-gradient-to-br from-card/95 via-card/88 to-accent/6 ring-1 ring-white/25 dark:ring-emerald-300/10">
         <CardHeader>
           <CardTitle>Review Trend</CardTitle>
           <CardDescription>Public review volume over the last 6 months.</CardDescription>
@@ -164,7 +164,7 @@ export default function HospitalReviewWidget({ hospitalId }) {
         </CardContent>
       </Card>
 
-      <Card>
+      <Card className="bg-gradient-to-br from-card/95 via-card/88 to-primary/6 ring-1 ring-white/25 dark:ring-emerald-300/10">
         <CardHeader>
           <CardTitle>Recent Public Reviews</CardTitle>
           <CardDescription>Latest public feedback shown on your profile.</CardDescription>
@@ -179,7 +179,7 @@ export default function HospitalReviewWidget({ hospitalId }) {
           {!loading && !reviews.length ? <p className="text-sm text-muted-foreground">No public reviews yet.</p> : null}
           {!loading
             ? reviews.slice(0, 3).map((item) => (
-                <div key={item.id} className="rounded-xl border border-border/70 bg-background/55 p-3">
+                <div key={item.id} className="rounded-xl border border-border/70 bg-gradient-to-r from-background/72 to-primary/6 p-3 shadow-[0_8px_22px_rgba(5,20,34,0.12)]">
                   <div className="mb-2 flex items-center gap-2">
                     {item.userProfileImageUrl ? (
                       // eslint-disable-next-line @next/next/no-img-element
