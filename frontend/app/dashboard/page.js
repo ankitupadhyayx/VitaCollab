@@ -223,7 +223,7 @@ export default function DashboardPage() {
         <Navbar />
         <div className="app-page-shell">
           <Sidebar />
-          <main className="w-full space-y-8 pb-28 sm:space-y-9 lg:pb-0">
+          <main className="min-w-0 w-full space-y-8 pb-28 sm:space-y-9 lg:pb-0">
             <motion.section className="premium-surface animate-rise rounded-3xl border border-border/70 bg-card/82 p-5 shadow-[0_22px_52px_rgba(5,20,34,0.14)] ring-1 ring-white/45 dark:border-white/10 dark:bg-slate-900/55 dark:ring-emerald-300/10 sm:p-6" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}>
               <p className="text-[12px] font-semibold uppercase leading-none tracking-[0.2em] text-primary">Secure workspace</p>
               <h1 className="heading-font mt-2 text-2xl font-bold tracking-[-0.02em] text-slate-900 dark:text-white sm:text-3xl">

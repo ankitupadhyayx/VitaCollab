@@ -168,7 +168,7 @@ export default function TimelinePage() {
         <Navbar />
         <div className="app-page-shell">
           <Sidebar />
-          <main className="w-full space-y-4 pb-28 lg:pb-0">
+          <main className="min-w-0 w-full space-y-4 pb-28 lg:pb-0">
             <header className="animate-rise">
               <h1 className="heading-font text-2xl font-bold tracking-[-0.02em] sm:text-3xl">Health Timeline</h1>
               <p className="text-sm text-muted-foreground">A verified feed of your medical journey.</p>

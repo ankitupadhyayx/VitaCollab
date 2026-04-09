@@ -135,6 +135,10 @@ h6 {
   padding: 1rem;
 }
 
+.app-page-shell > * {
+  min-width: 0;
+}
+
 @media (min-width: 640px) {
   .app-page-shell {
     padding: 1.5rem;

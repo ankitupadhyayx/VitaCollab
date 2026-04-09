@@ -67,6 +67,30 @@ const trustProofMetrics = [
   { value: "24/7", label: "Threat monitoring" }
 ];
 
+const trustControlItems = [
+  {
+    icon: ShieldCheck,
+    title: "Consent verification",
+    description: "Every outbound share is blocked until patient approval is confirmed."
+  },
+  {
+    icon: FileCheck2,
+    title: "Record integrity checks",
+    description: "Uploaded files are validated before becoming part of the clinical timeline."
+  },
+  {
+    icon: Database,
+    title: "Audit evidence trail",
+    description: "All views, approvals, and updates are logged for governance review."
+  }
+];
+
+const systemActivityFeed = [
+  { label: "Hospital upload validated", time: "2 min ago" },
+  { label: "Patient consent granted", time: "5 min ago" },
+  { label: "Specialist access recorded", time: "9 min ago" }
+];
+
 const productMiniSnapshots = [
   {
     title: "Patient timeline",
@@ -195,13 +219,55 @@ export default async function LandingPage() {
 
         <section className="mt-10 sm:mt-12 grid gap-4 lg:grid-cols-[1.2fr_1fr]">
           <Card className="border-primary/20 bg-gradient-to-r from-primary/10 via-white/95 to-accent/10 dark:from-primary/18 dark:via-slate-900/75 dark:to-accent/16" hover={false}>
-            <CardContent className="grid gap-4 p-5 sm:grid-cols-2 lg:grid-cols-4">
-              {trustProofMetrics.map((item) => (
-                <div key={item.label} className="rounded-2xl border border-border/70 bg-background/75 p-3 text-center dark:bg-white/5">
-                  <p className="text-xl font-bold text-foreground">{item.value}</p>
-                  <p className="mt-1 text-[12px] leading-5 text-muted-foreground">{item.label}</p>
+            <CardContent className="space-y-4 p-5">
+              <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+                {trustProofMetrics.map((item) => (
+                  <div key={item.label} className="rounded-2xl border border-border/70 bg-background/75 p-3 text-center dark:bg-white/5">
+                    <p className="text-xl font-bold text-foreground">{item.value}</p>
+                    <p className="mt-1 text-[12px] leading-5 text-muted-foreground">{item.label}</p>
+                  </div>
+                ))}
+              </div>
+
+              <div className="grid gap-4 xl:grid-cols-2">
+                <div className="rounded-2xl border border-border/70 bg-background/75 p-4 dark:bg-white/5">
+                  <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-primary">Trust controls</p>
+                  <div className="mt-3 space-y-2.5">
+                    {trustControlItems.map((item) => {
+                      const Icon = item.icon;
+                      return (
+                        <div key={item.title} className="flex gap-3 rounded-xl border border-border/65 bg-background/80 p-2.5 dark:bg-slate-900/40">
+                          <span className="mt-0.5 grid h-8 w-8 place-items-center rounded-lg bg-primary/10 text-primary">
+                            <Icon className="h-4 w-4" />
+                          </span>
+                          <div className="space-y-0.5">
+                            <p className="text-xs font-semibold text-foreground">{item.title}</p>
+                            <p className="text-[12px] leading-5 text-muted-foreground">{item.description}</p>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
                 </div>
-              ))}
+
+                <div className="rounded-2xl border border-border/70 bg-background/75 p-4 dark:bg-white/5">
+                  <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-primary">System activity</p>
+                  <div className="mt-3 space-y-2.5">
+                    {systemActivityFeed.map((item) => (
+                      <div key={`${item.label}-${item.time}`} className="flex items-center gap-3 rounded-xl border border-border/65 bg-background/80 px-3 py-2.5 dark:bg-slate-900/40">
+                        <span className="h-2.5 w-2.5 rounded-full bg-emerald-500" />
+                        <div className="min-w-0 flex-1">
+                          <p className="truncate text-xs font-semibold text-foreground">{item.label}</p>
+                        </div>
+                        <span className="inline-flex items-center gap-1 text-[11px] leading-none text-muted-foreground">
+                          <Clock3 className="h-3.5 w-3.5" />
+                          {item.time}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
             </CardContent>
           </Card>
 
