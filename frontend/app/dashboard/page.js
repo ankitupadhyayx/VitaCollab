@@ -82,7 +82,7 @@ export default function DashboardPage() {
 
 
   const renderMetricCards = () => (
-    <section className="grid gap-3 sm:gap-4 sm:grid-cols-2 xl:grid-cols-4">
+    <section className="grid gap-4 sm:gap-5 sm:grid-cols-2 xl:grid-cols-4">
       {cards.map((item, index) => {
         const Icon = item.icon;
         return (
@@ -92,7 +92,7 @@ export default function DashboardPage() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: index * 0.06 }}
           >
-            <Card className="bg-gradient-to-br from-card/95 via-card/88 to-primary/5 ring-1 ring-white/25 dark:ring-emerald-300/10">
+            <Card className="bg-gradient-to-br from-card/96 via-card/90 to-primary/7 ring-1 ring-white/35 shadow-[0_22px_48px_rgba(5,20,34,0.16)] dark:ring-emerald-300/12">
               <CardHeader className="flex flex-row items-start justify-between space-y-0 pb-2">
                 <CardDescription>{item.label}</CardDescription>
                 <Icon className="h-4 w-4 text-primary" />
@@ -109,7 +109,7 @@ export default function DashboardPage() {
   );
 
   const renderSkeletonCards = () => (
-    <section className="grid gap-3 sm:gap-4 sm:grid-cols-2 xl:grid-cols-4">
+    <section className="grid gap-4 sm:gap-5 sm:grid-cols-2 xl:grid-cols-4">
       {Array.from({ length: 4 }).map((_, index) => (
         <Card key={index} hover={false}>
           <CardHeader>
@@ -223,8 +223,8 @@ export default function DashboardPage() {
         <Navbar />
         <div className="app-page-shell">
           <Sidebar />
-          <main className="w-full space-y-7 pb-28 sm:space-y-8 lg:pb-0">
-            <motion.section className="premium-surface animate-rise rounded-3xl border border-border/70 bg-card/80 p-5 shadow-[0_18px_44px_rgba(5,20,34,0.12)] ring-1 ring-white/40 dark:border-white/10 dark:bg-slate-900/55 dark:ring-emerald-300/10 sm:p-6" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}>
+          <main className="w-full space-y-8 pb-28 sm:space-y-9 lg:pb-0">
+            <motion.section className="premium-surface animate-rise rounded-3xl border border-border/70 bg-card/82 p-5 shadow-[0_22px_52px_rgba(5,20,34,0.14)] ring-1 ring-white/45 dark:border-white/10 dark:bg-slate-900/55 dark:ring-emerald-300/10 sm:p-6" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}>
               <p className="text-[12px] font-semibold uppercase leading-none tracking-[0.2em] text-primary">Secure workspace</p>
               <h1 className="heading-font mt-2 text-2xl font-bold tracking-[-0.02em] text-slate-900 dark:text-white sm:text-3xl">
                 {role === "hospital" ? "Hospital Command Center" : role === "admin" ? "Admin Intelligence Board" : "Patient Dashboard"}
@@ -239,7 +239,7 @@ export default function DashboardPage() {
             </motion.section>
 
             {showOnboarding ? (
-              <Card className="bg-gradient-to-r from-primary/14 via-accent/10 to-cyan-500/12 ring-1 ring-white/35 dark:ring-emerald-300/12">
+              <Card className="bg-gradient-to-r from-primary/14 via-accent/10 to-cyan-500/12 ring-1 ring-white/40 shadow-[0_20px_45px_rgba(5,20,34,0.14)] dark:ring-emerald-300/12">
                 <CardContent className="flex flex-col gap-3 p-5 sm:flex-row sm:items-center sm:justify-between">
                   <div>
                     <p className="text-sm font-semibold tracking-[-0.01em]">Welcome to VitaCollab</p>

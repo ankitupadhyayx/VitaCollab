@@ -104,7 +104,7 @@ h6 {
   height: 34vh;
   pointer-events: none;
   background: radial-gradient(circle at 50% 0%, rgba(16, 185, 129, 0.18), rgba(15, 118, 110, 0.08) 38%, transparent 72%);
-  filter: blur(28px);
+  filter: blur(34px);
   z-index: -1;
 }
 
@@ -118,7 +118,7 @@ h6 {
   position: absolute;
   inset: 0;
   pointer-events: none;
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0.34), transparent 35%);
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.42), transparent 38%);
   z-index: 0;
 }
 
@@ -149,12 +149,27 @@ h6 {
 }
 
 .premium-hover {
-  transition: transform 220ms ease, box-shadow 220ms ease, border-color 220ms ease;
+  transition: transform 220ms ease, box-shadow 220ms ease, border-color 220ms ease, filter 220ms ease;
 }
 
 .premium-hover:hover {
-  transform: translateY(-3px) scale(1.01);
-  box-shadow: 0 20px 46px rgba(5, 20, 34, 0.2), 0 0 0 1px rgba(16, 185, 129, 0.2);
+  transform: translateY(-4px) scale(1.01);
+  box-shadow: 0 24px 52px rgba(5, 20, 34, 0.22), 0 0 0 1px rgba(16, 185, 129, 0.24), 0 0 34px rgba(20, 184, 166, 0.2);
+  filter: saturate(1.03);
+}
+
+@keyframes ambient-float {
+  0%,
+  100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-6px);
+  }
+}
+
+.ambient-float {
+  animation: ambient-float 8s ease-in-out infinite;
 }
 
 .health-grid {

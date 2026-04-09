@@ -47,11 +47,11 @@ const socialLinks = [
 ];
 
 const trustBadges = [
-  "HIPAA Ready",
-  "End-to-End Encrypted",
-  "Patient Controlled",
+  "HIPAA-ready",
+  "Encrypted by default",
+  "Patient-controlled",
   "Access Anywhere",
-  "Paperless Healthcare"
+  "Digital-first healthcare"
 ];
 
 const navLinkClass =
@@ -82,15 +82,15 @@ export function Footer() {
             </Link>
 
             <p className="mt-3 text-sm leading-relaxed text-slate-600 dark:text-gray-400">
-              VitaCollab is a secure, patient-controlled healthcare data platform enabling seamless collaboration between hospitals and patients.
+              VitaCollab is a secure, patient-controlled health record platform for coordinated care between providers and patients.
             </p>
             <ul className="mt-4 space-y-1.5 text-[12px] leading-5 text-slate-600 dark:text-gray-300">
-              <li>Data encrypted end-to-end</li>
-              <li>No data shared without consent</li>
-              <li>Access anytime, anywhere</li>
+              <li>Data protected in transit and at rest</li>
+              <li>No sharing without patient consent</li>
+              <li>Secure access across devices</li>
             </ul>
             <p className="mt-4 inline-flex rounded-full border border-primary/25 bg-primary/10 px-3 py-1 text-[12px] font-semibold leading-none text-primary">
-              Trusted by hospitals & patients
+              Trusted by care teams and patients
             </p>
           </div>
 
@@ -136,7 +136,7 @@ export function Footer() {
               <a href="mailto:support@vitacollab.in" className="block transition-all duration-200 hover:text-primary">
                 support@vitacollab.in
               </a>
-              <p className="text-[12px] leading-5 text-slate-500 dark:text-gray-300">Response within 24 hours</p>
+              <p className="text-[12px] leading-5 text-slate-500 dark:text-gray-300">Response in under 24 hours</p>
             </div>
 
             <a

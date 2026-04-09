@@ -27,9 +27,9 @@ const bodyFont = Inter({
   weight: ["400", "500", "600", "700"]
 });
 
-const defaultMetaTitle = "VitaCollab – Transparent Digital Health Records Platform for Hospitals & Patients";
+const defaultMetaTitle = "VitaCollab - Secure, Patient-Controlled Health Records";
 const defaultMetaDescription =
-  "VitaCollab is a secure, patient-owned digital health record platform that offers a transparent and consent-driven workflow. Unlike traditional systems, patients have full control over their medical data, enabling seamless and trusted collaboration between hospitals, doctors, and patients.";
+  "VitaCollab gives patients and providers a secure, consent-driven system for sharing verified health records with full patient control.";
 const defaultSocialPreviewImage = "https://vitacollab.in/og-image.png";
 
 export const metadata = {

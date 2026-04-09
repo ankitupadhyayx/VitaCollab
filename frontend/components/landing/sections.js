@@ -36,18 +36,18 @@ export function TrustSecuritySection() {
   const trustItems = [
     {
       icon: FileLock2,
-      title: "End-to-end encryption (AES-256)",
-      description: "Data is encrypted in transit and at rest to protect every medical update."
+      title: "Encryption by default (AES-256)",
+      description: "Health data is protected in transit and at rest for every record update."
     },
     {
       icon: Fingerprint,
       title: "Patient-controlled access",
-      description: "Patients approve record visibility before cross-hospital sharing."
+      description: "Patients approve visibility before records are shared across providers."
     },
     {
       icon: ClipboardCheck,
-      title: "Audit-ready logs",
-      description: "Critical actions are traceable for compliance and governance workflows."
+      title: "Audit-ready activity logs",
+      description: "Key actions are traceable for compliance, governance, and accountability."
     }
   ];
 
@@ -55,7 +55,7 @@ export function TrustSecuritySection() {
     <SectionShell
       eyebrow="Trust Layer"
       title="Built for Security & Compliance"
-      description="Designed for modern healthcare teams that need speed without compromising privacy."
+      description="Built for healthcare teams that need speed without compromising privacy."
     >
       <div className="grid gap-4 md:grid-cols-3">
         {trustItems.map((item) => {
@@ -84,7 +84,7 @@ export function HospitalsSection() {
     <SectionShell
       eyebrow="Provider Workflow"
       title="For Hospitals & Clinics"
-      description="Streamline the operational path from submission to patient consent with healthcare-native collaboration."
+      description="Streamline operations from record submission to patient consent with a secure, healthcare-native workflow."
     >
       <Card className="animate-rise border-primary/20 bg-gradient-to-r from-primary/5 via-white to-primary/10 dark:border-white/10 dark:bg-gradient-to-r dark:from-slate-900 dark:to-slate-800 dark:shadow-lg dark:shadow-emerald-500/20">
         <CardContent className="grid gap-6 p-6 md:grid-cols-[1fr_auto] md:items-center">
@@ -92,11 +92,11 @@ export function HospitalsSection() {
             <div className="grid gap-3 sm:grid-cols-3">
               <div className="rounded-xl border border-border/80 bg-background/70 p-4 text-sm dark:border-white/10 dark:bg-white/5 dark:text-gray-200 dark:backdrop-blur-md">
                 <Building2 className="mb-2 h-5 w-5 text-primary" />
-                Seamless patient data access
+                Faster record access
               </div>
               <div className="rounded-xl border border-border/80 bg-background/70 p-4 text-sm dark:border-white/10 dark:bg-white/5 dark:text-gray-200 dark:backdrop-blur-md">
                 <Handshake className="mb-2 h-5 w-5 text-primary" />
-                Faster approvals
+                Clear approval flow
               </div>
               <div className="rounded-xl border border-border/80 bg-background/70 p-4 text-sm dark:border-white/10 dark:bg-white/5 dark:text-gray-200 dark:backdrop-blur-md">
                 <ShieldCheck className="mb-2 h-5 w-5 text-primary" />
@@ -106,7 +106,7 @@ export function HospitalsSection() {
           </div>
           <Link href="/contact">
             <Button size="lg" className="w-full md:w-auto dark:bg-emerald-600 dark:text-white dark:hover:bg-emerald-700 dark:shadow-lg dark:shadow-emerald-500/20">
-              Request Hospital Verification
+              Request provider verification
               <ArrowRight className="ml-2 h-4 w-4" />
             </Button>
           </Link>
@@ -118,16 +118,16 @@ export function HospitalsSection() {
 
 export function PatientsSection() {
   const patientPoints = [
-    "Own your medical records",
-    "Approve every update",
-    "Track your health timeline"
+    "Own your health records",
+    "Approve each share",
+    "Track your care timeline"
   ];
 
   return (
     <SectionShell
       eyebrow="Patient Control"
       title="For Patients"
-      description="VitaCollab gives you full visibility and decision power over your healthcare record flow."
+      description="VitaCollab gives you visibility and control over how your records move across care teams."
     >
       <div className="grid gap-4 md:grid-cols-3">
         {patientPoints.map((point) => (
@@ -140,7 +140,7 @@ export function PatientsSection() {
             </CardHeader>
             <CardContent>
                 <CardDescription className="dark:text-gray-400">
-                Clear activity history and secure consent checkpoints across your care journey.
+                Review activity history and manage consent checkpoints across your care journey.
               </CardDescription>
             </CardContent>
           </Card>
@@ -155,19 +155,19 @@ export function TestimonialsSection() {
     {
       name: "Dr. Aditi Sharma",
       role: "Consultant Physician, Jaitpur kalan",
-      feedback: "The approval workflow has reduced callback delays and gives our team high confidence in record authenticity.",
+      feedback: "The approval flow reduced callback delays and improved our confidence in record integrity.",
       icon: Stethoscope
     },
     {
       name: "Rohit Verma",
       role: "Patient, Ghaziabad",
-      feedback: "I can see every update and approve sharing instantly. It finally feels like my records belong to me.",
+      feedback: "I can review each update and approve sharing quickly. My records finally feel under my control.",
       icon: UserRound
     },
     {
       name: "Dr. Neha Iyer",
       role: "Cardiology Specialist, Noida",
-      feedback: "Cross-hospital collaboration is faster and much cleaner, especially when urgent treatment history is needed.",
+      feedback: "Cross-hospital collaboration is faster, especially when urgent treatment history is required.",
       icon: Stethoscope
     }
   ];
@@ -176,7 +176,7 @@ export function TestimonialsSection() {
     <SectionShell
       eyebrow="Proof of Impact"
       title="Trusted by Care Teams and Patients"
-      description="Early users report stronger coordination, better trust signals, and faster clinical handoffs."
+      description="Care teams report stronger coordination, clearer trust signals, and faster clinical handoffs."
     >
       <div className="grid gap-4 lg:grid-cols-3">
         {testimonials.map((item) => {
@@ -211,10 +211,10 @@ export function FinalCtaSection() {
       <Card className="animate-rise border-primary/20 bg-gradient-to-br from-primary/10 via-white to-primary/5 text-center dark:border-white/10 dark:bg-gradient-to-br dark:from-slate-900 dark:to-slate-800 dark:shadow-lg dark:shadow-emerald-500/20">
         <CardContent className="space-y-6 py-14">
           <h2 className="heading-font text-3xl font-bold tracking-tight text-slate-900 dark:text-white sm:text-4xl">
-            Start Your Secure Health Journey Today
+            Start with secure, patient-controlled records
           </h2>
           <p className="body-font mx-auto max-w-2xl text-muted-foreground dark:text-gray-400">
-            Join VitaCollab to simplify hospital collaboration while keeping patient trust and control at the center.
+            Use VitaCollab to simplify provider collaboration while keeping trust and control at the center.
           </p>
           <Link href="/signup">
             <Button size="lg" className="animate-pulseGlow dark:bg-emerald-600 dark:text-white dark:hover:bg-emerald-700 dark:shadow-lg dark:shadow-emerald-500/20">
@@ -231,8 +231,8 @@ export function FinalCtaSection() {
 export function QuickBenefitsBar() {
   const benefits = [
     "AES-256 protected",
-    "Consent workflow",
-    "Audit-ready architecture"
+    "Consent-gated workflow",
+    "Audit-ready controls"
   ];
 
   return (

@@ -7,9 +7,9 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 
 export function TestimonialsSection({
   testimonials = [],
-  badge = "Trusted by 1000+ users",
-  title = "What Patients Are Saying",
-  description = "Real feedback from people using VitaCollab for secure, transparent healthcare collaboration.",
+  badge = "Trusted by care teams and patients",
+  title = "What Users Report",
+  description = "Feedback from people using VitaCollab for secure, transparent healthcare collaboration.",
   autoScroll = true,
   infiniteLoop = true
 }) {
@@ -233,7 +233,7 @@ export function TestimonialsSection({
           <p className="mx-auto max-w-2xl text-muted-foreground dark:text-gray-400">{description}</p>
         </div>
         <Card className="mx-auto max-w-2xl border-dashed">
-          <CardContent className="py-8 text-center text-sm text-muted-foreground">No reviews yet</CardContent>
+          <CardContent className="py-8 text-center text-sm text-muted-foreground">No testimonials yet</CardContent>
         </Card>
       </section>
     );
@@ -280,7 +280,7 @@ export function TestimonialsSection({
                 )}
                 <div>
                   <CardTitle className="text-base dark:text-white">{item.name}</CardTitle>
-                  <CardDescription className="dark:text-gray-400">{item.location || "Verified VitaCollab user"}</CardDescription>
+                    <CardDescription className="dark:text-gray-400">{item.location || "Verified VitaCollab member"}</CardDescription>
                 </div>
               </div>
             </CardHeader>
@@ -304,7 +304,7 @@ export function TestimonialsSection({
           className="mt-2 text-center text-xs text-slate-500 opacity-0 transition-opacity duration-200 peer-focus:opacity-100 dark:text-gray-300"
           aria-hidden="true"
         >
-          Use left and right arrow keys to navigate testimonials.
+          Use left and right arrow keys to review testimonials.
         </p>
       ) : null}
 

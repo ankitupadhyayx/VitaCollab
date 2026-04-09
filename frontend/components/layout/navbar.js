@@ -183,7 +183,7 @@ export function Navbar() {
 
               {searchPanelOpen ? (
                 <div className="absolute right-0 top-11 z-40 w-[420px] rounded-2xl border border-border/80 bg-card/90 p-2 shadow-[0_20px_45px_rgba(5,20,34,0.2)] backdrop-blur-xl">
-                  <p className="px-2 pb-1 text-[12px] font-semibold uppercase leading-none tracking-[0.12em] text-muted-foreground">Global Search</p>
+                  <p className="px-2 pb-1 text-[12px] font-semibold uppercase leading-none tracking-[0.12em] text-muted-foreground">Record Search</p>
                   <div className="max-h-80 space-y-1 overflow-auto">
                     {searchResults.length ? (
                       searchResults.map((item) => (
@@ -203,7 +203,7 @@ export function Navbar() {
                         </button>
                       ))
                     ) : (
-                      <p className="px-2 py-3 text-xs text-muted-foreground">No records found for this query.</p>
+                      <p className="px-2 py-3 text-xs text-muted-foreground">No records match this search.</p>
                     )}
                   </div>
                 </div>
@@ -267,7 +267,7 @@ export function Navbar() {
           ) : (
             <>
               <Link href="/login"><Button variant="secondary" size="sm" className="hidden sm:inline-flex">Sign In</Button></Link>
-              <Link href="/signup"><Button size="sm">Get Started</Button></Link>
+              <Link href="/signup"><Button size="sm">Create Account</Button></Link>
             </>
           )}
           <Button variant="ghost" size="sm" className="md:hidden" aria-label={mobileOpen ? "Close menu" : "Open menu"} onClick={() => setMobileOpen((value) => !value)}>
@@ -279,7 +279,7 @@ export function Navbar() {
       {mobileOpen ? (
         <div className="border-t border-border/70 bg-background/95 p-3 backdrop-blur md:hidden">
           <div className="mb-3 flex items-center justify-between rounded-xl bg-card/60 p-2">
-            <span className="text-[12px] leading-none text-muted-foreground">Live sync</span>
+            <span className="text-[12px] leading-none text-muted-foreground">Secure sync</span>
             <span className="inline-flex items-center gap-1 text-xs font-semibold text-success">
               <CircleDot className="h-3 w-3" />
               connected
@@ -326,7 +326,7 @@ export function Navbar() {
             ) : (
               <>
                 <Link href="/login" className="flex-1"><Button variant="secondary" className="h-11 w-full">Sign In</Button></Link>
-                <Link href="/signup" className="flex-1"><Button className="h-11 w-full">Get Started</Button></Link>
+                <Link href="/signup" className="flex-1"><Button className="h-11 w-full">Create Account</Button></Link>
               </>
             )}
           </div>
