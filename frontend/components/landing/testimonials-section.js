@@ -266,7 +266,7 @@ export function TestimonialsSection({
           <Card
             key={`${item.name}-${item.location || "unknown"}-${index}`}
             data-testimonial-card
-            className="w-[260px] flex-none snap-start group transition-all duration-300 hover:scale-[1.02] hover:shadow-2xl hover:shadow-blue-500/20 sm:w-[320px] xl:w-[24%] dark:border-white/10 dark:bg-white/5 dark:backdrop-blur-md"
+            className="w-[260px] flex-none snap-start group transition-all duration-300 hover:scale-[1.02] hover:shadow-2xl hover:shadow-emerald-500/20 sm:w-[320px] xl:w-[24%] dark:border-white/10 dark:bg-white/5 dark:backdrop-blur-md"
           >
             <CardHeader>
               <div className="flex items-center gap-3">
@@ -274,7 +274,7 @@ export function TestimonialsSection({
                   // eslint-disable-next-line @next/next/no-img-element
                   <img src={item.photo} alt={item.name} className="h-11 w-11 rounded-full object-cover" />
                 ) : (
-                  <span className="grid h-11 w-11 place-items-center rounded-full bg-primary/15 text-sm font-bold text-primary dark:bg-blue-500/20 dark:text-blue-300">
+                  <span className="grid h-11 w-11 place-items-center rounded-full bg-primary/15 text-sm font-bold text-primary dark:bg-emerald-500/20 dark:text-emerald-300">
                     {item.name.charAt(0)}
                   </span>
                 )}
@@ -301,7 +301,7 @@ export function TestimonialsSection({
 
       {total > 1 ? (
         <p
-          className="mt-2 text-center text-xs text-slate-500 opacity-0 transition-opacity duration-200 peer-focus:opacity-100 dark:text-gray-400"
+          className="mt-2 text-center text-xs text-slate-500 opacity-0 transition-opacity duration-200 peer-focus:opacity-100 dark:text-gray-300"
           aria-hidden="true"
         >
           Use left and right arrow keys to navigate testimonials.

@@ -6,7 +6,7 @@ export function Card({ className, glass = true, hover = true, ...props }) {
       className={cn(
         "rounded-3xl border border-border text-card-foreground shadow-soft dark:border-white/10 dark:text-gray-200",
         glass ? "glass bg-card/85 dark:bg-white/5 dark:backdrop-blur-md" : "bg-card dark:bg-slate-800",
-        "dark:shadow-lg dark:shadow-blue-500/20",
+        "dark:shadow-lg dark:shadow-emerald-500/20",
         hover ? "premium-hover" : "",
         className
       )}

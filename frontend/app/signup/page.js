@@ -194,8 +194,8 @@ export default function SignupPage() {
                   onClick={() => update("role", "patient")}
                   className={`rounded-xl border px-4 py-3 text-sm font-medium transition ${
                     form.role === "patient"
-                      ? "border-blue-500 bg-blue-500/15 text-blue-700 dark:text-blue-300"
-                      : "border-slate-300 bg-white text-slate-700 hover:border-blue-400 dark:border-neutral-600 dark:bg-neutral-800 dark:text-neutral-100"
+                      ? "border-emerald-500 bg-emerald-500/15 text-emerald-700 dark:text-emerald-300"
+                      : "border-slate-300 bg-white text-slate-700 hover:border-emerald-400 dark:border-neutral-600 dark:bg-neutral-800 dark:text-neutral-100"
                   }`}
                 >
                   Patient
@@ -206,8 +206,8 @@ export default function SignupPage() {
                   onClick={() => update("role", "hospital")}
                   className={`rounded-xl border px-4 py-3 text-sm font-medium transition ${
                     form.role === "hospital"
-                      ? "border-blue-500 bg-blue-500/15 text-blue-700 dark:text-blue-300"
-                      : "border-slate-300 bg-white text-slate-700 hover:border-blue-400 dark:border-neutral-600 dark:bg-neutral-800 dark:text-neutral-100"
+                      ? "border-emerald-500 bg-emerald-500/15 text-emerald-700 dark:text-emerald-300"
+                      : "border-slate-300 bg-white text-slate-700 hover:border-emerald-400 dark:border-neutral-600 dark:bg-neutral-800 dark:text-neutral-100"
                   }`}
                 >
                   Hospital
@@ -226,7 +226,7 @@ export default function SignupPage() {
                     autoFocus
                     required
                     aria-required="true"
-                    className="h-11 bg-white/80 border-slate-300 text-slate-900 placeholder:text-slate-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-500 dark:bg-white/10 dark:border-neutral-600 dark:text-white dark:placeholder:text-neutral-400"
+                    className="h-11 bg-white/80 border-slate-300 text-slate-900 placeholder:text-slate-400 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500 dark:bg-white/10 dark:border-neutral-600 dark:text-white dark:placeholder:text-neutral-400"
                   />
                 </div>
 
@@ -243,11 +243,11 @@ export default function SignupPage() {
                       required
                       aria-required="true"
                       aria-invalid={!hasValidEmail && form.email.length > 0}
-                      className="h-11 pr-10 bg-white/80 border-slate-300 text-slate-900 placeholder:text-slate-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-500 dark:bg-white/10 dark:border-neutral-600 dark:text-white dark:placeholder:text-neutral-400"
+                      className="h-11 pr-10 bg-white/80 border-slate-300 text-slate-900 placeholder:text-slate-400 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500 dark:bg-white/10 dark:border-neutral-600 dark:text-white dark:placeholder:text-neutral-400"
                     />
                     {hasValidEmail ? <CheckCircle2 className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-emerald-500" /> : null}
                   </div>
-                  <p className="text-xs text-slate-500 dark:text-neutral-400">We never share your data.</p>
+                  <p className="text-xs text-slate-500 dark:text-neutral-300">We never share your data.</p>
                 </div>
 
                 <div className="space-y-2.5 md:col-span-2">
@@ -262,7 +262,7 @@ export default function SignupPage() {
                       autoComplete="new-password"
                       required
                       aria-required="true"
-                      className="h-11 pr-10 bg-white/80 border-slate-300 text-slate-900 placeholder:text-slate-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-500 dark:bg-white/10 dark:border-neutral-600 dark:text-white dark:placeholder:text-neutral-400"
+                      className="h-11 pr-10 bg-white/80 border-slate-300 text-slate-900 placeholder:text-slate-400 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500 dark:bg-white/10 dark:border-neutral-600 dark:text-white dark:placeholder:text-neutral-400"
                     />
                     <button
                       type="button"
@@ -286,8 +286,8 @@ export default function SignupPage() {
                         }`}
                       />
                     </div>
-                    <p className="text-xs text-slate-500 dark:text-neutral-400">Password strength: {passwordStrength.label}</p>
-                    <p className="text-xs text-slate-500 dark:text-neutral-400">Use 8+ characters with letters & numbers.</p>
+                    <p className="text-xs text-slate-500 dark:text-neutral-300">Password strength: {passwordStrength.label}</p>
+                    <p className="text-xs text-slate-500 dark:text-neutral-300">Use 8+ characters with letters & numbers.</p>
                   </div>
                 </div>
               </div>
@@ -295,7 +295,7 @@ export default function SignupPage() {
 
             <section className="rounded-xl border border-slate-200/80 bg-white/70 p-4 shadow-sm dark:border-white/10 dark:bg-white/5">
               <p className="mb-3 text-sm font-semibold text-slate-800 dark:text-neutral-100">Section 2: Profile</p>
-              <p className="mb-3 text-xs text-slate-500 dark:text-neutral-400">Optional (can be filled later)</p>
+              <p className="mb-3 text-xs text-slate-500 dark:text-neutral-300">Optional (can be filled later)</p>
 
               <div className="grid gap-4 md:grid-cols-2">
                 <div className="space-y-2.5 md:col-span-2">
@@ -307,7 +307,7 @@ export default function SignupPage() {
                         // eslint-disable-next-line @next/next/no-img-element
                         <img src={imagePreviewUrl} alt="Profile preview" className="h-full w-full object-cover" />
                       ) : (
-                        <UserRound className="h-8 w-8 text-slate-500 dark:text-neutral-400" />
+                        <UserRound className="h-8 w-8 text-slate-500 dark:text-neutral-300" />
                       )}
                     </div>
 
@@ -318,7 +318,7 @@ export default function SignupPage() {
                         type="file"
                         accept="image/*"
                         onChange={(event) => update("profileImage", event.target.files?.[0] || null)}
-                        className="h-11 bg-white/80 border-slate-300 text-slate-900 file:mr-3 file:rounded-md file:border-0 file:bg-blue-600 file:px-3 file:py-1 file:text-white file:cursor-pointer focus:border-blue-500 focus:ring-2 focus:ring-blue-500 dark:bg-white/10 dark:border-neutral-600 dark:text-white"
+                        className="h-11 bg-white/80 border-slate-300 text-slate-900 file:mr-3 file:rounded-md file:border-0 file:bg-emerald-600 file:px-3 file:py-1 file:text-white file:cursor-pointer focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500 dark:bg-white/10 dark:border-neutral-600 dark:text-white"
                       />
 
                       <div className="flex flex-wrap gap-2">
@@ -354,7 +354,7 @@ export default function SignupPage() {
                         placeholder="Enter age"
                         value={form.age}
                         onChange={(event) => update("age", event.target.value)}
-                        className="h-11 bg-white/80 border-slate-300 text-slate-900 placeholder:text-slate-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-500 dark:bg-white/10 dark:border-neutral-600 dark:text-white dark:placeholder:text-neutral-400"
+                        className="h-11 bg-white/80 border-slate-300 text-slate-900 placeholder:text-slate-400 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500 dark:bg-white/10 dark:border-neutral-600 dark:text-white dark:placeholder:text-neutral-400"
                       />
                     </div>
 
@@ -362,7 +362,7 @@ export default function SignupPage() {
                       <label htmlFor="gender" className="text-sm font-medium text-slate-700 dark:text-neutral-200">Gender</label>
                       <select
                         id="gender"
-                        className="h-11 w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:border-white/20 dark:bg-slate-800 dark:text-white"
+                        className="h-11 w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-emerald-500 dark:border-white/20 dark:bg-slate-800 dark:text-white"
                         value={form.gender}
                         onChange={(event) => update("gender", event.target.value)}
                       >
@@ -377,7 +377,7 @@ export default function SignupPage() {
                       <label htmlFor="bloodGroup" className="text-sm font-medium text-slate-700 dark:text-neutral-200">Blood group</label>
                       <select
                         id="bloodGroup"
-                        className="h-11 w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:border-white/20 dark:bg-slate-800 dark:text-white"
+                        className="h-11 w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-emerald-500 dark:border-white/20 dark:bg-slate-800 dark:text-white"
                         value={form.bloodGroup}
                         onChange={(event) => update("bloodGroup", event.target.value)}
                       >
@@ -397,7 +397,7 @@ export default function SignupPage() {
                         onChange={(event) => update("phone", event.target.value)}
                         required
                         aria-required="true"
-                        className="h-11 bg-white/80 border-slate-300 text-slate-900 placeholder:text-slate-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-500 dark:bg-white/10 dark:border-neutral-600 dark:text-white dark:placeholder:text-neutral-400"
+                        className="h-11 bg-white/80 border-slate-300 text-slate-900 placeholder:text-slate-400 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500 dark:bg-white/10 dark:border-neutral-600 dark:text-white dark:placeholder:text-neutral-400"
                       />
                     </div>
                   </>
@@ -412,7 +412,7 @@ export default function SignupPage() {
                         placeholder="Hospital name"
                         value={form.hospitalName}
                         onChange={(event) => update("hospitalName", event.target.value)}
-                        className="h-11 bg-white/80 border-slate-300 text-slate-900 placeholder:text-slate-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-500 dark:bg-white/10 dark:border-neutral-600 dark:text-white dark:placeholder:text-neutral-400"
+                        className="h-11 bg-white/80 border-slate-300 text-slate-900 placeholder:text-slate-400 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500 dark:bg-white/10 dark:border-neutral-600 dark:text-white dark:placeholder:text-neutral-400"
                       />
                     </div>
                     <div className="space-y-2.5">
@@ -422,7 +422,7 @@ export default function SignupPage() {
                         placeholder="License number"
                         value={form.licenseNumber}
                         onChange={(event) => update("licenseNumber", event.target.value)}
-                        className="h-11 bg-white/80 border-slate-300 text-slate-900 placeholder:text-slate-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-500 dark:bg-white/10 dark:border-neutral-600 dark:text-white dark:placeholder:text-neutral-400"
+                        className="h-11 bg-white/80 border-slate-300 text-slate-900 placeholder:text-slate-400 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500 dark:bg-white/10 dark:border-neutral-600 dark:text-white dark:placeholder:text-neutral-400"
                       />
                     </div>
                     <div className="space-y-2.5">
@@ -432,7 +432,7 @@ export default function SignupPage() {
                         placeholder="Specialization"
                         value={form.specialization}
                         onChange={(event) => update("specialization", event.target.value)}
-                        className="h-11 bg-white/80 border-slate-300 text-slate-900 placeholder:text-slate-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-500 dark:bg-white/10 dark:border-neutral-600 dark:text-white dark:placeholder:text-neutral-400"
+                        className="h-11 bg-white/80 border-slate-300 text-slate-900 placeholder:text-slate-400 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500 dark:bg-white/10 dark:border-neutral-600 dark:text-white dark:placeholder:text-neutral-400"
                       />
                     </div>
                     <div className="space-y-2.5">
@@ -442,7 +442,7 @@ export default function SignupPage() {
                         placeholder="Address"
                         value={form.address}
                         onChange={(event) => update("address", event.target.value)}
-                        className="h-11 bg-white/80 border-slate-300 text-slate-900 placeholder:text-slate-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-500 dark:bg-white/10 dark:border-neutral-600 dark:text-white dark:placeholder:text-neutral-400"
+                        className="h-11 bg-white/80 border-slate-300 text-slate-900 placeholder:text-slate-400 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500 dark:bg-white/10 dark:border-neutral-600 dark:text-white dark:placeholder:text-neutral-400"
                       />
                     </div>
                     <div className="space-y-2.5">
@@ -454,7 +454,7 @@ export default function SignupPage() {
                         onChange={(event) => update("phone", event.target.value)}
                         required
                         aria-required="true"
-                        className="h-11 bg-white/80 border-slate-300 text-slate-900 placeholder:text-slate-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-500 dark:bg-white/10 dark:border-neutral-600 dark:text-white dark:placeholder:text-neutral-400"
+                        className="h-11 bg-white/80 border-slate-300 text-slate-900 placeholder:text-slate-400 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500 dark:bg-white/10 dark:border-neutral-600 dark:text-white dark:placeholder:text-neutral-400"
                       />
                     </div>
                   </>
@@ -467,10 +467,10 @@ export default function SignupPage() {
                 type="checkbox"
                 checked={acceptedTerms}
                 onChange={(event) => setAcceptedTerms(event.target.checked)}
-                className="mt-0.5 h-4 w-4 rounded border border-slate-400 bg-white text-blue-600 focus:ring-2 focus:ring-blue-500 dark:border-neutral-500 dark:bg-neutral-800"
+                className="mt-0.5 h-4 w-4 rounded border border-slate-400 bg-white text-emerald-600 focus:ring-2 focus:ring-emerald-500 dark:border-neutral-500 dark:bg-neutral-800"
               />
               <span>
-                I agree to the <Link href="/terms" className="font-semibold text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300">Terms</Link> & <Link href="/privacy" className="font-semibold text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300">Privacy Policy</Link>.
+                I agree to the <Link href="/terms" className="font-semibold text-emerald-600 hover:text-emerald-700 dark:text-emerald-300 dark:hover:text-emerald-200">Terms</Link> & <Link href="/privacy" className="font-semibold text-emerald-600 hover:text-emerald-700 dark:text-emerald-300 dark:hover:text-emerald-200">Privacy Policy</Link>.
               </span>
             </label>
 
@@ -488,7 +488,7 @@ export default function SignupPage() {
 
             <Button
               type="submit"
-              className="w-full rounded-lg bg-blue-600 text-white font-semibold hover:bg-blue-700 active:scale-[0.99]"
+              className="w-full rounded-lg bg-emerald-600 text-white font-semibold hover:bg-emerald-700 active:scale-[0.99]"
               disabled={submitting || !canSubmit}
               aria-disabled={submitting || !canSubmit}
             >
@@ -500,12 +500,12 @@ export default function SignupPage() {
               ) : "Create Account"}
             </Button>
 
-            <p className="text-center text-xs text-slate-500 dark:text-neutral-400">
-              By continuing, you agree to our <Link href="/terms" className="font-medium text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300">Terms</Link>, <Link href="/privacy" className="font-medium text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300">Privacy Policy</Link>, and <Link href="/disclaimer" className="font-medium text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300">Medical Disclaimer</Link>.
+            <p className="text-center text-xs text-slate-500 dark:text-neutral-300">
+              By continuing, you agree to our <Link href="/terms" className="font-medium text-emerald-600 hover:text-emerald-700 dark:text-emerald-300 dark:hover:text-emerald-200">Terms</Link>, <Link href="/privacy" className="font-medium text-emerald-600 hover:text-emerald-700 dark:text-emerald-300 dark:hover:text-emerald-200">Privacy Policy</Link>, and <Link href="/disclaimer" className="font-medium text-emerald-600 hover:text-emerald-700 dark:text-emerald-300 dark:hover:text-emerald-200">Medical Disclaimer</Link>.
             </p>
           </form>
           <p className="mt-4 text-center text-sm text-slate-600 dark:text-neutral-300">
-            Already have an account? <Link className="font-semibold text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300" href="/login">Sign in</Link>
+            Already have an account? <Link className="font-semibold text-emerald-600 hover:text-emerald-700 dark:text-emerald-300 dark:hover:text-emerald-200" href="/login">Sign in</Link>
           </p>
         </CardContent>
       </Card>

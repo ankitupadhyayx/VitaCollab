@@ -61,7 +61,7 @@ export function TrustSecuritySection() {
         {trustItems.map((item) => {
           const Icon = item.icon;
           return (
-            <Card key={item.title} className="animate-rise transition-transform duration-300 hover:-translate-y-1 dark:border-white/10 dark:bg-slate-800 dark:backdrop-blur-md dark:shadow-lg dark:shadow-blue-500/20">
+            <Card key={item.title} className="animate-rise transition-transform duration-300 hover:-translate-y-1 dark:border-white/10 dark:bg-slate-800 dark:backdrop-blur-md dark:shadow-lg dark:shadow-emerald-500/20">
               <CardHeader>
                 <span className="grid h-10 w-10 place-items-center rounded-xl bg-primary/10 text-primary">
                   <Icon className="h-5 w-5" />
@@ -86,7 +86,7 @@ export function HospitalsSection() {
       title="For Hospitals & Clinics"
       description="Streamline the operational path from submission to patient consent with healthcare-native collaboration."
     >
-      <Card className="animate-rise border-primary/20 bg-gradient-to-r from-primary/5 via-white to-primary/10 dark:border-white/10 dark:bg-gradient-to-r dark:from-slate-900 dark:to-slate-800 dark:shadow-lg dark:shadow-blue-500/20">
+      <Card className="animate-rise border-primary/20 bg-gradient-to-r from-primary/5 via-white to-primary/10 dark:border-white/10 dark:bg-gradient-to-r dark:from-slate-900 dark:to-slate-800 dark:shadow-lg dark:shadow-emerald-500/20">
         <CardContent className="grid gap-6 p-6 md:grid-cols-[1fr_auto] md:items-center">
           <div className="space-y-4">
             <div className="grid gap-3 sm:grid-cols-3">
@@ -105,7 +105,7 @@ export function HospitalsSection() {
             </div>
           </div>
           <Link href="/contact">
-            <Button size="lg" className="w-full md:w-auto dark:bg-blue-600 dark:text-white dark:hover:bg-blue-700 dark:shadow-lg dark:shadow-blue-500/20">
+            <Button size="lg" className="w-full md:w-auto dark:bg-emerald-600 dark:text-white dark:hover:bg-emerald-700 dark:shadow-lg dark:shadow-emerald-500/20">
               Request Hospital Verification
               <ArrowRight className="ml-2 h-4 w-4" />
             </Button>
@@ -131,7 +131,7 @@ export function PatientsSection() {
     >
       <div className="grid gap-4 md:grid-cols-3">
         {patientPoints.map((point) => (
-            <Card key={point} className="animate-rise transition-transform duration-300 hover:-translate-y-1 dark:border-white/10 dark:bg-slate-800 dark:backdrop-blur-md dark:shadow-lg dark:shadow-blue-500/20">
+            <Card key={point} className="animate-rise transition-transform duration-300 hover:-translate-y-1 dark:border-white/10 dark:bg-slate-800 dark:backdrop-blur-md dark:shadow-lg dark:shadow-emerald-500/20">
             <CardHeader>
               <span className="grid h-10 w-10 place-items-center rounded-xl bg-success/15 text-success">
                 <HeartPulse className="h-5 w-5" />
@@ -182,7 +182,7 @@ export function TestimonialsSection() {
         {testimonials.map((item) => {
           const Icon = item.icon;
           return (
-            <Card key={item.name} className="animate-rise transition-transform duration-300 hover:-translate-y-1 dark:border-white/10 dark:bg-slate-800 dark:backdrop-blur-md dark:shadow-lg dark:shadow-blue-500/20">
+            <Card key={item.name} className="animate-rise transition-transform duration-300 hover:-translate-y-1 dark:border-white/10 dark:bg-slate-800 dark:backdrop-blur-md dark:shadow-lg dark:shadow-emerald-500/20">
               <CardHeader>
                 <div className="flex items-center gap-3">
                   <span className="grid h-10 w-10 place-items-center rounded-full bg-primary/10 text-primary">
@@ -208,7 +208,7 @@ export function TestimonialsSection() {
 export function FinalCtaSection() {
   return (
     <section className="mt-16">
-      <Card className="animate-rise border-primary/20 bg-gradient-to-br from-primary/10 via-white to-primary/5 text-center dark:border-white/10 dark:bg-gradient-to-br dark:from-slate-900 dark:to-slate-800 dark:shadow-lg dark:shadow-blue-500/20">
+      <Card className="animate-rise border-primary/20 bg-gradient-to-br from-primary/10 via-white to-primary/5 text-center dark:border-white/10 dark:bg-gradient-to-br dark:from-slate-900 dark:to-slate-800 dark:shadow-lg dark:shadow-emerald-500/20">
         <CardContent className="space-y-6 py-14">
           <h2 className="heading-font text-3xl font-bold tracking-tight text-slate-900 dark:text-white sm:text-4xl">
             Start Your Secure Health Journey Today
@@ -217,7 +217,7 @@ export function FinalCtaSection() {
             Join VitaCollab to simplify hospital collaboration while keeping patient trust and control at the center.
           </p>
           <Link href="/signup">
-            <Button size="lg" className="animate-pulseGlow dark:bg-blue-600 dark:text-white dark:hover:bg-blue-700 dark:shadow-lg dark:shadow-blue-500/20">
+            <Button size="lg" className="animate-pulseGlow dark:bg-emerald-600 dark:text-white dark:hover:bg-emerald-700 dark:shadow-lg dark:shadow-emerald-500/20">
               Get Started
               <ArrowRight className="ml-2 h-4 w-4" />
             </Button>

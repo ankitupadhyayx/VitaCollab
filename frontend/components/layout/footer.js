@@ -55,7 +55,7 @@ const trustBadges = [
 ];
 
 const navLinkClass =
-  "block text-sm text-slate-600 transition-all duration-200 hover:text-blue-500 dark:text-gray-400";
+  "block text-sm text-slate-600 transition-all duration-200 hover:text-primary dark:text-gray-400";
 
 export function Footer() {
   return (
@@ -65,7 +65,7 @@ export function Footer() {
           {trustBadges.map((badge) => (
             <span
               key={badge}
-              className="rounded-full border border-blue-500/20 bg-blue-500/10 px-3 py-1 text-xs font-semibold text-blue-400 shadow-[0_0_22px_rgba(59,130,246,0.12)] transition-transform duration-200 hover:scale-105"
+              className="rounded-full border border-primary/25 bg-primary/10 px-3 py-1 text-xs font-semibold text-primary shadow-[0_0_22px_rgba(16,185,129,0.15)] transition-transform duration-200 hover:scale-105"
             >
               {badge}
             </span>
@@ -84,12 +84,12 @@ export function Footer() {
             <p className="mt-3 text-sm leading-relaxed text-slate-600 dark:text-gray-400">
               VitaCollab is a secure, patient-controlled healthcare data platform enabling seamless collaboration between hospitals and patients.
             </p>
-            <ul className="mt-4 space-y-1 text-xs text-slate-600 dark:text-gray-400">
+            <ul className="mt-4 space-y-1 text-xs text-slate-600 dark:text-gray-300">
               <li>Data encrypted end-to-end</li>
               <li>No data shared without consent</li>
               <li>Access anytime, anywhere</li>
             </ul>
-            <p className="mt-4 inline-flex rounded-full border border-blue-500/20 bg-blue-500/10 px-3 py-1 text-xs font-semibold text-blue-400">
+            <p className="mt-4 inline-flex rounded-full border border-primary/25 bg-primary/10 px-3 py-1 text-xs font-semibold text-primary">
               Trusted by hospitals & patients
             </p>
           </div>
@@ -130,13 +130,13 @@ export function Footer() {
           <div className="rounded-2xl border border-slate-200 bg-white p-5 backdrop-blur-md dark:border-white/10 dark:bg-white/5">
             <h3 className="mb-3 text-sm font-semibold uppercase tracking-wide text-gray-900 dark:text-white">Contact</h3>
             <div className="space-y-2 text-sm text-slate-600 dark:text-gray-400">
-              <a href="mailto:contact@vitacollab.in" className="block transition-all duration-200 hover:text-blue-500">
+              <a href="mailto:contact@vitacollab.in" className="block transition-all duration-200 hover:text-primary">
                 contact@vitacollab.in
               </a>
-              <a href="mailto:support@vitacollab.in" className="block transition-all duration-200 hover:text-blue-500">
+              <a href="mailto:support@vitacollab.in" className="block transition-all duration-200 hover:text-primary">
                 support@vitacollab.in
               </a>
-              <p className="text-xs text-slate-500 dark:text-gray-500">Response within 24 hours</p>
+              <p className="text-xs text-slate-500 dark:text-gray-300">Response within 24 hours</p>
             </div>
 
             <a
@@ -159,11 +159,11 @@ export function Footer() {
                       href={link.href}
                       target="_blank"
                       rel="noreferrer"
-                      className="flex items-center gap-2 text-sm text-slate-600 transition-all duration-200 hover:scale-[1.03] hover:text-blue-500 dark:text-gray-400"
+                      className="flex items-center gap-2 text-sm text-slate-600 transition-all duration-200 hover:scale-[1.03] hover:text-primary dark:text-gray-400"
                     >
                       <Icon className="h-4 w-4" />
                       <span>{link.label}</span>
-                      <span className="text-xs text-slate-400 dark:text-gray-500">{link.subtitle}</span>
+                      <span className="text-xs text-slate-400 dark:text-gray-300">{link.subtitle}</span>
                     </a>
                   );
                 })}

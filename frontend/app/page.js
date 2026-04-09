@@ -95,9 +95,9 @@ export default async function LandingPage() {
       <Navbar />
 
       <main className="mx-auto max-w-7xl px-4 pb-16 pt-14 sm:px-6">
-        <section className="relative overflow-hidden rounded-3xl border border-primary/15 bg-gradient-to-br from-sky-50 via-white to-cyan-50 px-6 py-10 shadow-[0_24px_70px_rgba(16,72,131,0.12)] dark:border-white/10 dark:bg-gradient-to-br dark:from-slate-900 dark:to-slate-800 sm:px-10 lg:px-12 lg:py-14">
-          <div className="absolute -top-24 right-0 h-56 w-56 rounded-full bg-cyan-200/30 blur-3xl" />
-          <div className="absolute bottom-0 left-0 h-52 w-52 rounded-full bg-blue-200/30 blur-3xl" />
+        <section className="relative overflow-hidden rounded-3xl border border-primary/15 bg-gradient-to-br from-emerald-50 via-white to-teal-50 px-6 py-10 shadow-[0_24px_70px_rgba(6,95,70,0.12)] dark:border-white/10 dark:bg-gradient-to-br dark:from-slate-900 dark:to-slate-800 sm:px-10 lg:px-12 lg:py-14">
+          <div className="absolute -top-24 right-0 h-56 w-56 rounded-full bg-teal-200/30 blur-3xl" />
+          <div className="absolute bottom-0 left-0 h-52 w-52 rounded-full bg-emerald-200/30 blur-3xl" />
 
           <div className="relative grid items-center gap-10 lg:grid-cols-2">
             <div className="space-y-6 animate-rise">
@@ -112,7 +112,7 @@ export default async function LandingPage() {
               </p>
               <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center">
                 <Link href="/signup" className="w-full sm:w-auto">
-                  <Button size="lg" className="h-11 w-full min-w-[150px] dark:bg-blue-600 dark:text-white dark:hover:bg-blue-700 dark:shadow-lg dark:shadow-blue-500/20">
+                  <Button size="lg" className="h-11 w-full min-w-[150px] dark:bg-emerald-600 dark:text-white dark:hover:bg-emerald-700 dark:shadow-lg dark:shadow-emerald-500/20">
                     Get Started
                     <ArrowRight className="ml-2 h-4 w-4" />
                   </Button>
@@ -128,27 +128,27 @@ export default async function LandingPage() {
                   <CheckCircle2 className="h-4 w-4" />
                   Secure
                 </span>
-                <span className="inline-flex items-center gap-1 rounded-full border border-blue-200 bg-blue-50 px-3 py-1 text-blue-700">
+                <span className="inline-flex items-center gap-1 rounded-full border border-teal-200 bg-teal-50 px-3 py-1 text-teal-700">
                   <CheckCircle2 className="h-4 w-4" />
                   Patient Controlled
                 </span>
-                <span className="inline-flex items-center gap-1 rounded-full border border-cyan-200 bg-cyan-50 px-3 py-1 text-cyan-700">
+                <span className="inline-flex items-center gap-1 rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1 text-emerald-700">
                   <CheckCircle2 className="h-4 w-4" />
                   Encrypted
                 </span>
               </div>
             </div>
 
-            <Card className="animate-rise border-sky-100 bg-white/90 shadow-xl backdrop-blur-sm dark:border-white/10 dark:bg-slate-800/90 dark:backdrop-blur-md dark:shadow-lg dark:shadow-blue-500/20">
+            <Card className="animate-rise border-emerald-100 bg-white/90 shadow-xl backdrop-blur-sm dark:border-white/10 dark:bg-slate-800/90 dark:backdrop-blur-md dark:shadow-lg dark:shadow-emerald-500/20">
               <CardHeader>
                 <CardTitle className="dark:text-white">Secure Health Data Flow</CardTitle>
                 <CardDescription className="dark:text-gray-400">Live records move through encrypted checkpoints with explicit patient approval.</CardDescription>
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
-                  <div className="relative overflow-hidden rounded-2xl border border-sky-100 bg-sky-50/60 p-4 dark:border-white/10 dark:bg-white/5 dark:backdrop-blur-md">
-                    <div className="absolute -left-8 top-1/2 h-16 w-16 -translate-y-1/2 rounded-full bg-sky-300/30 blur-xl" />
-                    <div className="absolute -right-8 top-1/2 h-16 w-16 -translate-y-1/2 rounded-full bg-cyan-300/30 blur-xl" />
+                  <div className="relative overflow-hidden rounded-2xl border border-emerald-100 bg-emerald-50/60 p-4 dark:border-white/10 dark:bg-white/5 dark:backdrop-blur-md">
+                    <div className="absolute -left-8 top-1/2 h-16 w-16 -translate-y-1/2 rounded-full bg-emerald-300/30 blur-xl" />
+                    <div className="absolute -right-8 top-1/2 h-16 w-16 -translate-y-1/2 rounded-full bg-teal-300/30 blur-xl" />
                     <div className="space-y-3">
                       {["Hospital Upload", "Patient Approval", "Shared With Specialist"].map((item, index) => (
                         <div key={item} className="flex items-center gap-3 rounded-xl border border-white bg-white px-3 py-2 shadow-sm dark:border-white/10 dark:bg-slate-800">
@@ -161,7 +161,7 @@ export default async function LandingPage() {
                       ))}
                     </div>
                   </div>
-                  <p className="text-xs text-slate-500 dark:text-gray-400">Animated preview of record movement through secure and verified checkpoints.</p>
+                  <p className="text-xs text-slate-500 dark:text-gray-300">Animated preview of record movement through secure and verified checkpoints.</p>
                 </div>
               </CardContent>
             </Card>
@@ -226,9 +226,9 @@ export default async function LandingPage() {
           </div>
         </section>
 
-        <section className="mt-16 rounded-3xl border border-primary/15 bg-gradient-to-br from-slate-900 via-slate-800 to-blue-900 px-6 py-10 text-white shadow-xl sm:px-10">
+        <section className="mt-16 rounded-3xl border border-primary/15 bg-gradient-to-br from-slate-900 via-teal-900 to-emerald-900 px-6 py-10 text-white shadow-xl sm:px-10">
           <div className="mb-8 space-y-2">
-            <p className="text-sm font-semibold uppercase tracking-[0.14em] text-blue-200">Security</p>
+            <p className="text-sm font-semibold uppercase tracking-[0.14em] text-emerald-200">Security</p>
             <h2 className="heading-font text-3xl font-bold tracking-tight text-white sm:text-4xl">Healthcare Security You Can Trust</h2>
             <p className="max-w-2xl text-sm text-gray-200 sm:text-base">VitaCollab is designed to protect clinical integrity, patient rights, and regulatory compliance from day one.</p>
           </div>
@@ -236,8 +236,8 @@ export default async function LandingPage() {
             {securityHighlights.map((item) => {
               const Icon = item.icon;
               return (
-                <div key={item.title} className="rounded-2xl border border-white/15 bg-white/5 p-5 backdrop-blur-md shadow-lg shadow-blue-500/20">
-                  <span className="mb-3 grid h-10 w-10 place-items-center rounded-xl bg-white/10 text-blue-100">
+                <div key={item.title} className="rounded-2xl border border-white/15 bg-white/5 p-5 backdrop-blur-md shadow-lg shadow-emerald-500/20">
+                  <span className="mb-3 grid h-10 w-10 place-items-center rounded-xl bg-white/10 text-emerald-100">
                     <Icon className="h-5 w-5" />
                   </span>
                   <h3 className="text-lg font-semibold text-white">{item.title}</h3>

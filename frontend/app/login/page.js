@@ -115,7 +115,7 @@ export default function LoginPage() {
                   required
                   aria-required="true"
                   aria-invalid={!hasValidEmail && email.length > 0}
-                  className="h-11 pr-10 bg-white/80 border-slate-300 text-slate-900 placeholder:text-slate-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-500 dark:bg-white/10 dark:border-neutral-600 dark:text-white dark:placeholder:text-neutral-400"
+                  className="h-11 pr-10 bg-white/80 border-slate-300 text-slate-900 placeholder:text-slate-400 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500 dark:bg-white/10 dark:border-neutral-600 dark:text-white dark:placeholder:text-neutral-400"
                 />
                 {hasValidEmail ? <CheckCircle2 className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-emerald-500" /> : null}
               </div>
@@ -133,7 +133,7 @@ export default function LoginPage() {
                   autoComplete="current-password"
                   required
                   aria-required="true"
-                  className="h-11 pr-10 bg-white/80 border-slate-300 text-slate-900 placeholder:text-slate-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-500 dark:bg-white/10 dark:border-neutral-600 dark:text-white dark:placeholder:text-neutral-400"
+                  className="h-11 pr-10 bg-white/80 border-slate-300 text-slate-900 placeholder:text-slate-400 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500 dark:bg-white/10 dark:border-neutral-600 dark:text-white dark:placeholder:text-neutral-400"
                 />
                 <button
                   type="button"
@@ -158,16 +158,16 @@ export default function LoginPage() {
                   type="checkbox"
                   checked={rememberMe}
                   onChange={(event) => setRememberMe(event.target.checked)}
-                  className="h-4 w-4 rounded border border-slate-400 bg-white text-blue-600 focus:ring-2 focus:ring-blue-500 dark:border-neutral-500 dark:bg-neutral-800"
+                  className="h-4 w-4 rounded border border-slate-400 bg-white text-emerald-600 focus:ring-2 focus:ring-emerald-500 dark:border-neutral-500 dark:bg-neutral-800"
                 />
                 Remember me
               </label>
-              <Link className="font-semibold text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300" href="/forgot-password">Forgot password?</Link>
+              <Link className="font-semibold text-emerald-600 hover:text-emerald-700 dark:text-emerald-300 dark:hover:text-emerald-200" href="/forgot-password">Forgot password?</Link>
             </div>
 
             <Button
               type="submit"
-              className="w-full rounded-lg bg-blue-600 text-white font-semibold hover:bg-blue-700 active:scale-[0.99]"
+              className="w-full rounded-lg bg-emerald-600 text-white font-semibold hover:bg-emerald-700 active:scale-[0.99]"
               disabled={submitting}
             >
               {submitting ? (
@@ -182,14 +182,14 @@ export default function LoginPage() {
               Continue with Google
             </Button>
 
-            <p className="text-xs text-slate-500 dark:text-neutral-400">We never share your data.</p>
+            <p className="text-xs text-slate-500 dark:text-neutral-300">We never share your data.</p>
           </form>
 
           <p className="mt-3 text-center text-sm text-slate-600 dark:text-neutral-300">
             Didn&apos;t verify your email?{" "}
             <button
               type="button"
-              className="font-semibold text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300"
+              className="font-semibold text-emerald-600 hover:text-emerald-700 dark:text-emerald-300 dark:hover:text-emerald-200"
               onClick={onResendVerification}
               disabled={resending}
             >
@@ -197,10 +197,10 @@ export default function LoginPage() {
             </button>
           </p>
           <p className="mt-4 text-center text-sm text-slate-600 dark:text-neutral-300">
-            New to VitaCollab? <Link className="font-semibold text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300" href="/signup">Create account</Link>
+            New to VitaCollab? <Link className="font-semibold text-emerald-600 hover:text-emerald-700 dark:text-emerald-300 dark:hover:text-emerald-200" href="/signup">Create account</Link>
           </p>
-          <p className="mt-3 text-center text-xs text-slate-500 dark:text-neutral-400">
-            By continuing, you agree to our <Link href="/terms" className="font-medium text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300">Terms</Link>, <Link href="/privacy" className="font-medium text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300">Privacy Policy</Link>, and <Link href="/disclaimer" className="font-medium text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300">Medical Disclaimer</Link>.
+          <p className="mt-3 text-center text-xs text-slate-500 dark:text-neutral-300">
+            By continuing, you agree to our <Link href="/terms" className="font-medium text-emerald-600 hover:text-emerald-700 dark:text-emerald-300 dark:hover:text-emerald-200">Terms</Link>, <Link href="/privacy" className="font-medium text-emerald-600 hover:text-emerald-700 dark:text-emerald-300 dark:hover:text-emerald-200">Privacy Policy</Link>, and <Link href="/disclaimer" className="font-medium text-emerald-600 hover:text-emerald-700 dark:text-emerald-300 dark:hover:text-emerald-200">Medical Disclaimer</Link>.
           </p>
         </CardContent>
       </Card>

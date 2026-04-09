@@ -91,7 +91,7 @@ export default function ResetPasswordPage() {
                 placeholder="Reset token"
                 value={token}
                 onChange={(event) => setToken(event.target.value)}
-                className="bg-white/80 border-slate-300 text-slate-900 placeholder:text-slate-400 focus:ring-2 focus:ring-blue-500 dark:bg-white/10 dark:border-neutral-600 dark:text-white dark:placeholder:text-neutral-400"
+                className="bg-white/80 border-slate-300 text-slate-900 placeholder:text-slate-400 focus:ring-2 focus:ring-emerald-500 dark:bg-white/10 dark:border-neutral-600 dark:text-white dark:placeholder:text-neutral-400"
               />
             </div>
 
@@ -104,7 +104,7 @@ export default function ResetPasswordPage() {
                   placeholder="New password"
                   value={newPassword}
                   onChange={(event) => setNewPassword(event.target.value)}
-                  className="pr-10 bg-white/80 border-slate-300 text-slate-900 placeholder:text-slate-400 focus:ring-2 focus:ring-blue-500 dark:bg-white/10 dark:border-neutral-600 dark:text-white dark:placeholder:text-neutral-400"
+                  className="pr-10 bg-white/80 border-slate-300 text-slate-900 placeholder:text-slate-400 focus:ring-2 focus:ring-emerald-500 dark:bg-white/10 dark:border-neutral-600 dark:text-white dark:placeholder:text-neutral-400"
                 />
                 <button
                   type="button"
@@ -128,13 +128,13 @@ export default function ResetPasswordPage() {
                     }`}
                   />
                 </div>
-                <p className="text-xs text-slate-500 dark:text-neutral-400">Password strength: {passwordStrength.label}</p>
+                <p className="text-xs text-slate-500 dark:text-neutral-300">Password strength: {passwordStrength.label}</p>
               </div>
             </div>
 
             <Button
               type="submit"
-              className="w-full rounded-lg bg-blue-600 text-white font-semibold hover:bg-blue-700 active:scale-[0.99]"
+              className="w-full rounded-lg bg-emerald-600 text-white font-semibold hover:bg-emerald-700 active:scale-[0.99]"
               disabled={submitting}
             >
               {submitting ? (
@@ -145,10 +145,10 @@ export default function ResetPasswordPage() {
               ) : "Reset password"}
             </Button>
 
-            <p className="text-xs text-slate-500 dark:text-neutral-400">We never share your data.</p>
+            <p className="text-xs text-slate-500 dark:text-neutral-300">We never share your data.</p>
           </form>
           <p className="mt-4 text-center text-sm text-slate-600 dark:text-neutral-300">
-            Back to <Link className="font-semibold text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300" href="/login">Sign in</Link>
+            Back to <Link className="font-semibold text-emerald-600 hover:text-emerald-700 dark:text-emerald-300 dark:hover:text-emerald-200" href="/login">Sign in</Link>
           </p>
         </CardContent>
       </Card>

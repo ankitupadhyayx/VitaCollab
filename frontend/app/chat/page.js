@@ -105,7 +105,7 @@ export default function ChatPage() {
                     <div key={message.id} className={`flex ${message.from === "me" ? "justify-end" : "justify-start"}`}>
                       <div className={`max-w-[88%] rounded-2xl px-3 py-2 text-sm sm:max-w-[75%] ${message.from === "me" ? "bg-primary text-primary-foreground" : "bg-muted text-foreground"}`}>
                         <p>{message.text}</p>
-                        <p className={`mt-1 text-[11px] ${message.from === "me" ? "text-primary-foreground/80" : "text-muted-foreground"}`}>
+                        <p className={`mt-1 text-[11px] ${message.from === "me" ? "text-primary-foreground" : "text-muted-foreground"}`}>
                           {new Date(message.at).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
                           {message.from === "me" ? ` • ${message.deliveryStatus || "sent"}` : ""}
                         </p>
